@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">RemoteControlClient</string>
+    <string name="connecting_fab_text">Connect</string>
+    <string name="connecting_fab_connected_text">Disconnect</string>
+    <string name="connecting_ip_entry_text">IP address</string>
+    <string name="connecting_port_entry_text">Port</string>
+    <string name="commanding_toolbar_text">Choose a command.</string>
+    <string name="noticeToComplete">Please complete all of them!</string>
+    <string name="search_fab_text">Search local ip</string>
+    <string name="searchingNoResult">Sorry, I can\'t find a local server.</string>
+    <string name="no_command_fragment_notice">Please choose a command.</string>
+    <string name="address_notice_text_no_address">IP: None\nPort: None</string>
+    <string name="connect_fail">Connect Failed.</string>
+    <string name="noticeConnectingRunning">Connect still running, please wait.</string>
+    <string name="verifyTerminate">Terminate</string>
+    <string name="verifyConnectFailed">OK</string>
+    <string name="notice_type_command">Type command here.</string>
+    <string name="notice_command_output">Command result will be shown here.</string>
+    <string name="send_command_button_text">Send</string>
+    <string name="command_line_fragment_title">Command Line</string>
+    <string name="notice_still_sending">Sending action still running.</string>
+    <string name="address_notice_text_holder">IP: %s Port: %d State: %s</string>
+    <string name="connect_state_connected">Connected</string>
+    <string name="connect_state_disconnected">Disconnected</string>
+    <string name="notice_disconnected">Server disconnected.</string>
+    <string name="verify_connection_lost">QUIT</string>
+    <string name="verify_reconnect">Reconnect</string>
+</resources>

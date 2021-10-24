@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".fragment.CommandLineFragment">
+
+    <EditText
+        android:id="@+id/command_output_entry"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:autofillHints=""
+        android:gravity="start|top"
+        android:hint="@string/notice_command_output"
+        android:scrollHorizontally="false"
+        android:inputType="textMultiLine" />
+
+    <EditText
+        android:id="@+id/command_input_entry"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:autofillHints=""
+        android:gravity="start|top"
+        android:hint="@string/notice_type_command"
+        android:scrollHorizontally="false"
+        android:inputType="textMultiLine" />
+
+
+    <Button
+        android:id="@+id/send_command_button"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="30dp"
+        android:text="@string/send_command_button_text" />
+
+    <ProgressBar
+        android:id="@+id/getting_command_result_progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:visibility="invisible" />
+</LinearLayout>
