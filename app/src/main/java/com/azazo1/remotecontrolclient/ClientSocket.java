@@ -13,15 +13,12 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Vector;
 
 import static com.azazo1.remotecontrolclient.Encryptor.AESBase64Encode;
 import static com.azazo1.remotecontrolclient.Encryptor.Base64AESDecode;
 
 
 class MBufferedReader extends BufferedReader {
-    private StringBuilder lineBuf = new StringBuilder();
-    private Vector<String> bufLines = new Vector<>();
     private boolean alive = true;
 
     public MBufferedReader(Reader in) {
@@ -66,7 +63,7 @@ public class ClientSocket {
     private Socket client;
     private MBufferedReader input;
     private PrintWriter output;
-    private Boolean verified = null;
+    private Boolean authenticated = null;
     private boolean alive = true;
 
     public ClientSocket() throws IOException {
@@ -74,10 +71,10 @@ public class ClientSocket {
     }
 
     public boolean isAvailable() {
-        if (verified == null) {
+        if (authenticated == null) {
             return false;
         }
-        return alive && verified && !client.isClosed();
+        return alive && authenticated && !client.isClosed();
     }
 
     public void init() throws IOException {
@@ -87,8 +84,8 @@ public class ClientSocket {
         client = new Socket();
     }
 
-    public boolean verify() { // 服务端不响应
-        if (verified == null) {
+    public boolean authenticate() {
+        if (authenticated == null) {
             long stamp = Tools.getTimeInMilli();
             String concat = Config.name + Config.version + Config.key + stamp;
             String encoded = Encryptor.md5(concat.getBytes(Config.charset));
@@ -102,22 +99,22 @@ public class ClientSocket {
             String response = readLine();
             if (response != null) {
                 int responseCode = JSON.parseObject(response, int.class);
-                verified = responseCode == 1;
-                Log.i("Verify", "Verify " + (verified ? "Succeed" : "Lost"));
+                authenticated = responseCode == 1;
+                Log.i("Authenticate", "Authentication " + (authenticated ? "Succeed" : "Lost"));
             } else {
-                Log.i("Verify", "Verify Lost");
-                verified = false;
+                Log.i("Authenticate", "Authentication Lost");
+                authenticated = false;
             }
-            return verified;
+            return authenticated;
         }
-        return verified; // verified 此处已不为null
+        return authenticated; // authenticated 此处已不为null
     }
 
     public boolean connect(InetSocketAddress address) throws IOException {
         client.connect(address, Config.timeout);
         input = new MBufferedReader(new InputStreamReader(client.getInputStream(), Config.charset));
         output = new PrintWriter(client.getOutputStream());
-        return verify();
+        return authenticate();
     }
 
     public void sendRaw(String content) {
