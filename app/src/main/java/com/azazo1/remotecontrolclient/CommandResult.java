@@ -5,11 +5,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class CommandResult {
-    private final ResultType type;
+    public final ResultType type;
     private String string;
     private JSONArray jsonArray;
     private JSONObject jsonObject;
-    private int anInt;
+    private Integer anInt;
 
     public CommandResult() {
         type = ResultType.NULL;
@@ -59,7 +59,7 @@ public class CommandResult {
         return jsonArray;
     }
 
-    public int getResultInt() {
+    public Integer getResultInt() {
         return anInt;
     }
 

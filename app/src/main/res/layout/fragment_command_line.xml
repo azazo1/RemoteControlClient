@@ -11,22 +11,20 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.5"
-        android:autofillHints=""
         android:gravity="start|top"
-        android:hint="@string/notice_command_output"
-        android:scrollHorizontally="false"
-        android:inputType="textMultiLine" />
+        android:hint="@string/hint_for_command_result"
+        android:inputType="textMultiLine"
+        android:scrollHorizontally="false" />
 
     <EditText
         android:id="@+id/command_input_entry"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.5"
-        android:autofillHints=""
         android:gravity="start|top"
-        android:hint="@string/notice_type_command"
-        android:scrollHorizontally="false"
-        android:inputType="textMultiLine" />
+        android:hint="@string/hint_for_command_line_input"
+        android:inputType="textMultiLine"
+        android:scrollHorizontally="false" />
 
 
     <Button
@@ -41,7 +39,8 @@
         android:id="@+id/getting_command_result_progress_bar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="15dp"
+        android:layout_marginBottom="20dp"
         android:max="100"
         android:visibility="invisible" />
 </LinearLayout>

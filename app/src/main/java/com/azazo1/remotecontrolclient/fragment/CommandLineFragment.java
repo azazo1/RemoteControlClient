@@ -58,8 +58,8 @@ public class CommandLineFragment extends Fragment {
         commandInputEntry = view.findViewById(R.id.command_input_entry);
         commandOutputEntry = view.findViewById(R.id.command_output_entry);
         sendCommandButton = view.findViewById(R.id.send_command_button);
-        sendCommandButton.setOnClickListener((view1) -> sendCommand());
         progressBar = view.findViewById(R.id.getting_command_result_progress_bar);
+        initView();
         return view;
     }
 
@@ -71,17 +71,21 @@ public class CommandLineFragment extends Fragment {
             String command = (commandInputEntry.getText() + "").replace('\n', ' ');
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommand();
-                String show = "null";
-                if (result.getResult() != null) {
-                    show = result.getResult().toString();
-                }
-                String finalShow = show;
-                activity.handler.post(() -> commandOutputEntry.setText(finalShow));
+                resultAppearancePost(result);
             }
             sending.set(false);
         });
         sendingThread.setDaemon(true);
         sendingThread.start();
+    }
+
+    private void resultAppearancePost(CommandResult result) {
+        String show = "null";
+        if (result != null && result.getResult() != null) {
+            show = result.getResult().toString();
+        }
+        String finalShow = show;
+        activity.handler.post(() -> commandOutputEntry.setText(finalShow));
     }
 
     private void whileSending() {
@@ -96,7 +100,7 @@ public class CommandLineFragment extends Fragment {
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
                     sendCommandButton.setOnClickListener((view) -> {
                         Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
-                        s.setAction(R.string.verifyTerminate, (view1) -> {
+                        s.setAction(R.string.verify_terminate, (view1) -> {
                             sending.set(false);
                             if (sendingThread != null && !sendingThread.isInterrupted()) {
                                 sendingThread.interrupt();
@@ -105,10 +109,14 @@ public class CommandLineFragment extends Fragment {
                         s.show();
                     });
                 } else {
-                    sendCommandButton.setOnClickListener((view) -> sendCommand());
-                    progressBar.setVisibility(View.INVISIBLE);
+                    initView();
                 }
             }
         }, (long) (1.0 / Config.loopingRate * 1000));
+    }
+
+    private void initView() {
+        sendCommandButton.setOnClickListener((view) -> sendCommand());
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }
