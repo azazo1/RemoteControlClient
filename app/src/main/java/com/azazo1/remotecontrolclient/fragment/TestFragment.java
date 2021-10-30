@@ -45,8 +45,8 @@ public class TestFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        ((CommandingActivity) context).fragment = this;
         activity = (CommandingActivity) context;
+        activity.fragment = this;
         activity.handler.post(
                 () -> activity.getToolbar().setTitle(R.string.test_fragment_title)
         );
@@ -84,7 +84,7 @@ public class TestFragment extends Fragment {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = String.format(getString(R.string.test_format_string), text);
+            String command = String.format(getString(R.string.command_test_format_string), text);
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);

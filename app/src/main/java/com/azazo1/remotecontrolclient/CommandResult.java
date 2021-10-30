@@ -6,18 +6,12 @@ import com.alibaba.fastjson.JSONObject;
 
 public class CommandResult {
     public final ResultType type;
-    private String string;
     private JSONArray jsonArray;
     private JSONObject jsonObject;
     private Integer anInt;
 
     public CommandResult() {
         type = ResultType.NULL;
-    }
-
-    public CommandResult(String string) {
-        this.string = string;
-        type = ResultType.STRING;
     }
 
     public CommandResult(JSONArray jsonArray) {
@@ -43,17 +37,12 @@ public class CommandResult {
                 return getResultJsonObject();
             case ARRAY:
                 return getResultJsonArray();
-            case STRING:
-                return getResultString();
             case NULL:
             default:
                 return null;
         }
     }
 
-    public String getResultString() {
-        return string;
-    }
 
     public JSONArray getResultJsonArray() {
         return jsonArray;
@@ -68,6 +57,6 @@ public class CommandResult {
     }
 
     public enum ResultType {
-        JSON_OBJECT, INT, ARRAY, STRING, NULL
+        JSON_OBJECT, INT, ARRAY, NULL
     }
 }

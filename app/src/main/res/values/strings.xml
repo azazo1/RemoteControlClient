@@ -34,4 +34,7 @@
     <string name="choose_command_button_text">Choose Command</string>
     <string name="nav_header_author">Author: azazo1</string>
     <string name="nav_header_email">Email: azazo1@qq.com</string>
+    <string name="notice_searching_running">Searching still running, please wait.</string>
+    <string name="nav_dir_title">Dir</string>
+    <string name="dir_fragment_title">Dir</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.azazo1.remotecontrolclient;
 
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -12,6 +13,7 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.Vector;
 
 public class IPSearcher {
@@ -214,7 +216,16 @@ class IpGenerator {
             host_int >>= (length / part);
             parts[(part - i - 1)] = String.valueOf(single);
         }
-        return String.join(".", parts);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return String.join(".", parts);
+        } else {
+            StringJoiner joiner = new StringJoiner(".");
+            for (String p : parts) {
+                joiner.add(p);
+            }
+            return joiner.toString();
+        }
     }
 
     public static long convertMaskToBits(int mask) {

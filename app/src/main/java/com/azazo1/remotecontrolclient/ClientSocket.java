@@ -164,7 +164,7 @@ public class ClientSocket {
                         try {
                             return new CommandResult(JSON.parseArray(command)); // 尝试解码为JSON列表
                         } catch (JSONException exception) {
-                            return new CommandResult(command); // 尝试解码为普通字符串
+                            return new CommandResult();
                         }
                     }
                 }

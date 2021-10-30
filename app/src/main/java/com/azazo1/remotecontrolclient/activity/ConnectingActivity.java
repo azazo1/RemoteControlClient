@@ -34,10 +34,18 @@ public class ConnectingActivity extends AppCompatActivity {
     protected EditText portEntry;
     protected ProgressBar searchingProgressBar;
     protected Handler handler = new Handler();
+    private final IPSearcher searcher = new IPSearcher((now, total, end) -> handler.post(() -> {
+        searchingProgressBar.setMax(total);
+        searchingProgressBar.setProgress(now);
+        if (end) {
+            searchingProgressBar.setVisibility(View.INVISIBLE);
+        }
+    }));
     protected AtomicBoolean connectingRunning = new AtomicBoolean(false);
+    private AtomicBoolean searchingRunning = new AtomicBoolean(false);
     private ProgressBar connectingProgressBar;
-    private Thread connectingThread;
     private Thread searchingThread;
+    private Thread connectingThread;
 
     @Override
     protected void onDestroy() {
@@ -154,21 +162,23 @@ public class ConnectingActivity extends AppCompatActivity {
     }
 
     protected void search() {
-        if (searchingThread != null && searchingThread.isAlive()) {
-            searchingThread.interrupt();
+        // 询问是否中断
+        if (searchingRunning.get()) {
+            Snackbar s = Snackbar.make(ipEntry, R.string.notice_searching_running, Snackbar.LENGTH_SHORT);
+            s.setAction(R.string.verify_terminate, (view) -> {
+                if (searchingThread != null && searchingThread.isAlive()) {
+                    if (searcher != null) {
+                        searcher.stop();
+                    }
+                    searchingThread.interrupt();
+                }
+            });
+            s.show();
         }
         searchingThread = new Thread(() -> { // 寻找局域网可用地址
             try {
+                searchingRunning.set(true);
                 handler.post(() -> searchingProgressBar.setVisibility(View.VISIBLE));
-                IPSearcher searcher = new IPSearcher((now, total, end) -> {
-                    handler.post(() -> {
-                        searchingProgressBar.setMax(total);
-                        searchingProgressBar.setProgress(now);
-                        if (end) {
-                            searchingProgressBar.setVisibility(View.INVISIBLE);
-                        }
-                    });
-                });
                 Vector<String> result = searcher.searchAndReport();
                 Log.e("Search", "Result: " + result);
                 handler.post(() -> {
@@ -179,8 +189,11 @@ public class ConnectingActivity extends AppCompatActivity {
                         Toast.makeText(ConnectingActivity.this, R.string.searchingNoResult, Toast.LENGTH_SHORT).show();
                     }
                 });
+
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                searchingRunning.set(false);
             }
         });
         searchingThread.setDaemon(true);

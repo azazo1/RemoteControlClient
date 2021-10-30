@@ -22,6 +22,7 @@ import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.fragment.CommandLineFragment;
+import com.azazo1.remotecontrolclient.fragment.DirFragment;
 import com.azazo1.remotecontrolclient.fragment.TestFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -171,6 +172,8 @@ public class CommandingActivity extends AppCompatActivity {
                 fragmentSelected = new TestFragment();
             } else if (id == R.id.nav_command_line) {
                 fragmentSelected = new CommandLineFragment();
+            } else if (id == R.id.nav_dir) {
+                fragmentSelected = new DirFragment();
             } else {
                 fragmentSelected = new CommandLineFragment();
             }

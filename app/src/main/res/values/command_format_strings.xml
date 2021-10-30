@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="test_format_string">{\"type\":\"test\",\"content\":\"%s\"}</string>
+    <string name="command_test_format_string">{\"type\":\"test\",\"content\":\"%s\"}</string>
+    <string name="command_dir_format_string">{\"type\":\"dir\", \"path\":\"%s\"}</string>
+    <string name="command_get_disks_string">{\"type\":\"getDisks\"}</string>
 </resources>
