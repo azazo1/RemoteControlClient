@@ -7,5 +7,13 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="test_output_failed_bg">#FFF44336</color>
+    <color name="test_output_succeed_bg">#FF4CAF50</color>
+    <color name="nav_header_text_color">#4ACCED</color>
+    <color name="nav_header_text_color_sub">#8F4ACCED</color>
     <color name="toolbar_bg" >#FF03DAA5</color>
+    <color name="toolbar_commanding_bg">#2196F3</color>
+    <color name="commanding_button_bg" >#673AB7</color>
+    <color name="progress_bar_commanding_color_b">#7DA6B8</color>
+    <color name="progress_bar_commanding_color_f">#00BCD4</color>
 </resources>

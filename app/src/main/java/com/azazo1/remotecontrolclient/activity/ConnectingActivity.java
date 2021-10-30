@@ -42,13 +42,15 @@ public class ConnectingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Global.client.close();
+        if (Global.client != null) {
+            Global.client.close();
+        }
     }
 
     protected void connect() {
         if (connectingRunning.get()) {
-            Snackbar s = Snackbar.make(connectingFAB, R.string.noticeConnectingRunning, Snackbar.LENGTH_SHORT);
-            s.setAction(R.string.verifyTerminate, (view1) -> {
+            Snackbar s = Snackbar.make(connectingFAB, R.string.notice_connecting_running, Snackbar.LENGTH_SHORT);
+            s.setAction(R.string.verify_terminate, (view1) -> {
                 connectingRunning.set(false);
                 if (connectingThread != null && connectingThread.isAlive()) {
                     connectingThread.interrupt();

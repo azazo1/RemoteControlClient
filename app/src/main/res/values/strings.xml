@@ -9,13 +9,11 @@
     <string name="search_fab_text">Search local ip</string>
     <string name="searchingNoResult">Sorry, I can\'t find a local server.</string>
     <string name="no_command_fragment_notice">Please choose a command.</string>
-    <string name="address_notice_text_no_address">IP: None\nPort: None</string>
+    <string name="address_notice_text_no_address">IP: None Port: None State: None</string>
     <string name="connect_fail">Connect Failed.</string>
-    <string name="noticeConnectingRunning">Connect still running, please wait.</string>
-    <string name="verifyTerminate">Terminate</string>
-    <string name="verifyConnectFailed">OK</string>
-    <string name="notice_type_command">Type command here.</string>
-    <string name="notice_command_output">Command result will be shown here.</string>
+    <string name="notice_connecting_running">Connect still running, please wait.</string>
+    <string name="verify_terminate">Terminate</string>
+    <string name="verify_connect_failed">OK</string>
     <string name="send_command_button_text">Send</string>
     <string name="command_line_fragment_title">Command Line</string>
     <string name="notice_still_sending">Sending action still running.</string>
@@ -25,4 +23,15 @@
     <string name="notice_disconnected">Server disconnected.</string>
     <string name="verify_connection_lost">QUIT</string>
     <string name="verify_reconnect">Reconnect</string>
+    <string name="test_fragment_title">Test</string>
+    <string name="hint_for_command_line_input">Type command here.</string>
+    <string name="hint_for_command_result">Command result will be shown here.</string>
+    <string name="hint_for_test_text">Write some message to test</string>
+    <string name="nav_test_title">Test</string>
+    <string name="nav_command_line_title">Command Line</string>
+    <string name="nav_open_drawer">Open navigation drawer</string>
+    <string name="nav_close_drawer">Close navigation drawer</string>
+    <string name="choose_command_button_text">Choose Command</string>
+    <string name="nav_header_author">Author: azazo1</string>
+    <string name="nav_header_email">Email: azazo1@qq.com</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.azazo1.remotecontrolclient.fragment;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,27 +23,18 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CommandLineFragment extends Fragment {
-    public EditText commandInputEntry;
-    public Button sendCommandButton;
-    private EditText commandOutputEntry;
+public class TestFragment extends Fragment {
     private CommandingActivity activity;
-    private ProgressBar progressBar;
+    private Button sendButton;
+    private EditText testText;
+    private EditText testOutput;
     private AtomicBoolean sending = new AtomicBoolean(false);
     private Thread sendingThread;
+    private ProgressBar progressBar;
+    private Drawable originOutputDrawable;
 
-    public CommandLineFragment() {
+    public TestFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        ((CommandingActivity) context).fragment = this;
-        activity = (CommandingActivity) context;
-        activity.handler.post(
-                () -> activity.getToolbar().setTitle(R.string.command_line_fragment_title)
-        );
     }
 
     @Override
@@ -51,24 +43,48 @@ public class CommandLineFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        ((CommandingActivity) context).fragment = this;
+        activity = (CommandingActivity) context;
+        activity.handler.post(
+                () -> activity.getToolbar().setTitle(R.string.test_fragment_title)
+        );
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_command_line, container, false);
-        commandInputEntry = view.findViewById(R.id.command_input_entry);
-        commandOutputEntry = view.findViewById(R.id.command_output_entry);
-        sendCommandButton = view.findViewById(R.id.send_command_button);
-        progressBar = view.findViewById(R.id.getting_command_result_progress_bar);
+        View get = inflater.inflate(R.layout.fragment_test, container, false);
+        sendButton = get.findViewById(R.id.send_command_button);
+        testOutput = get.findViewById(R.id.test_output);
+        testText = get.findViewById(R.id.test_text);
+        progressBar = get.findViewById(R.id.getting_command_result_progress_bar);
         initView();
-        return view;
+        return get;
     }
 
+    private void initView() {
+        sendButton.setOnClickListener((view) -> sendCommand());
+        progressBar.setVisibility(View.INVISIBLE);
+        originOutputDrawable = testOutput.getBackground();
+    }
+
+    private void resetView() {
+        sendButton.setOnClickListener((view) -> sendCommand());
+        progressBar.setVisibility(View.INVISIBLE);
+    }
 
     public void sendCommand() {
+        String text = testText.getText() + "";
+        if (text.isEmpty()) {
+            return;
+        }
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = (commandInputEntry.getText() + "").replace('\n', ' ');
+            String command = String.format(getString(R.string.test_format_string), text);
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);
@@ -77,15 +93,6 @@ public class CommandLineFragment extends Fragment {
         });
         sendingThread.setDaemon(true);
         sendingThread.start();
-    }
-
-    private void resultAppearancePost(CommandResult result) {
-        String show = "null";
-        if (result != null && result.getResult() != null) {
-            show = result.getResult().toString();
-        }
-        String finalShow = show;
-        activity.handler.post(() -> commandOutputEntry.setText(finalShow));
     }
 
     private void whileSending() {
@@ -98,7 +105,7 @@ public class CommandLineFragment extends Fragment {
                     progressBar.setProgress(progress.getAndIncrement());
                     progress.compareAndSet(100, 0);
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                    sendCommandButton.setOnClickListener((view) -> {
+                    sendButton.setOnClickListener((view) -> {
                         Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
                         s.setAction(R.string.verify_terminate, (view1) -> {
                             sending.set(false);
@@ -109,14 +116,23 @@ public class CommandLineFragment extends Fragment {
                         s.show();
                     });
                 } else {
-                    initView();
+                    resetView();
                 }
             }
         }, (long) (1.0 / Config.loopingRate * 1000));
     }
 
-    private void initView() {
-        sendCommandButton.setOnClickListener((view) -> sendCommand());
-        progressBar.setVisibility(View.INVISIBLE);
+    private void resultAppearancePost(CommandResult result) {
+        activity.handler.post(() -> {
+            String show = "failed";
+            boolean succeed = false;
+            if (result != null && result.type == CommandResult.ResultType.INT) {
+                succeed = result.getResultInt() == 1;
+                show = succeed ? "succeed" : "failed";
+            }
+            testOutput.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
+            testOutput.setText(show);
+            activity.handler.postDelayed(() -> testOutput.setBackground(originOutputDrawable), 3000);
+        });
     }
 }
