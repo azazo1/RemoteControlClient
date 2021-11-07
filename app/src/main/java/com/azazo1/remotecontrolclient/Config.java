@@ -15,4 +15,6 @@ public class Config {
     public static final int serverPort = 2004; // 局域网服务器端口
     public static final int timeout = 1500; // 套接字超时时间
     public static final int ipSearchingThread = 260; // IP搜索线程数
+    public static long waitingTimeForTermination = 3000; // 中断提醒时间间隔（距离按钮被点击）
+    public static long defaultShowTextTime = 3000; // showText命令默认时间长度
 }

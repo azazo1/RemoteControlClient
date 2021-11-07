@@ -23,6 +23,7 @@ import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.fragment.CommandLineFragment;
 import com.azazo1.remotecontrolclient.fragment.DirFragment;
+import com.azazo1.remotecontrolclient.fragment.ShowTextFragment;
 import com.azazo1.remotecontrolclient.fragment.TestFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -161,6 +162,7 @@ public class CommandingActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            // 添加命令操作： 1.修改menu 2.在下面添加 elif 分支创建 fragment
             Fragment fragmentSelected;
             int id = item.getItemId();
 
@@ -174,6 +176,8 @@ public class CommandingActivity extends AppCompatActivity {
                 fragmentSelected = new CommandLineFragment();
             } else if (id == R.id.nav_dir) {
                 fragmentSelected = new DirFragment();
+            } else if (id == R.id.nav_show_text) {
+                fragmentSelected = new ShowTextFragment();
             } else {
                 fragmentSelected = new CommandLineFragment();
             }

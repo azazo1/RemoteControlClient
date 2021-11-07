@@ -37,4 +37,9 @@
     <string name="notice_searching_running">Searching still running, please wait.</string>
     <string name="nav_dir_title">Dir</string>
     <string name="dir_fragment_title">Dir</string>
+    <string name="authenticate_failed">Invalid session, authenticate failed.</string>
+    <string name="show_text_fragment_title">ShowText</string>
+    <string name="hint_for_show_time">Show time(milli), don\'t be too long.</string>
+    <string name="nav_show_text_title">Show Text</string>
+    <string name="hint_for_show_text_input">Write some message to show</string>
 </resources>

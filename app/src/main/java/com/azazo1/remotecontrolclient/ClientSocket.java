@@ -105,7 +105,6 @@ public class ClientSocket {
                 Log.i("Authenticate", "Authentication Lost");
                 authenticated = false;
             }
-            return authenticated;
         }
         return authenticated; // authenticated 此处已不为null
     }

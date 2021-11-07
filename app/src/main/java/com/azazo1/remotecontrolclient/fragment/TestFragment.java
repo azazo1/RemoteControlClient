@@ -17,6 +17,7 @@ import com.azazo1.remotecontrolclient.CommandResult;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
+import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -24,11 +25,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestFragment extends Fragment {
+    private final AtomicBoolean sending = new AtomicBoolean(false);
     private CommandingActivity activity;
     private Button sendButton;
     private EditText testText;
     private EditText testOutput;
-    private AtomicBoolean sending = new AtomicBoolean(false);
     private Thread sendingThread;
     private ProgressBar progressBar;
     private Drawable originOutputDrawable;
@@ -96,6 +97,7 @@ public class TestFragment extends Fragment {
     }
 
     private void whileSending() {
+        long startTime = Tools.getTimeInMilli();
         AtomicInteger progress = new AtomicInteger();
         activity.handler.postDelayed(new Runnable() {
             @Override
@@ -106,14 +108,17 @@ public class TestFragment extends Fragment {
                     progress.compareAndSet(100, 0);
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
                     sendButton.setOnClickListener((view) -> {
-                        Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
-                        s.setAction(R.string.verify_terminate, (view1) -> {
-                            sending.set(false);
-                            if (sendingThread != null && !sendingThread.isInterrupted()) {
-                                sendingThread.interrupt();
-                            }
-                        });
-                        s.show();
+                        if (Tools.getTimeInMilli() - startTime > Config.waitingTimeForTermination) { // 防止连点触发
+
+                            Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
+                            s.setAction(R.string.verify_terminate, (view1) -> {
+                                sending.set(false);
+                                if (sendingThread != null && !sendingThread.isInterrupted()) {
+                                    sendingThread.interrupt();
+                                }
+                            });
+                            s.show();
+                        }
                     });
                 } else {
                     resetView();

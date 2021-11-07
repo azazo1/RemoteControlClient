@@ -43,8 +43,8 @@ public class IPSearcher {
     public Vector<String> searchAndReport() throws IOException {
         Vector<String> result;
         result = searchForIP(); // search ip try
-        if (tpd.isStopped()) {
-            reporter.report(0, 0, true); // this means being stopped
+        if (result == null || tpd == null || tpd.isStopped()) {
+            reporter.report(0, 0, true); // this means being stopped or invalid web
             return new Vector<>();
         }
         reporter.report(1, 1, true);

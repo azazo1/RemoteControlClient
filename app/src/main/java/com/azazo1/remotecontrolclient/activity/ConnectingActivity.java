@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectingActivity extends AppCompatActivity {
+    private final AtomicBoolean connectingRunning = new AtomicBoolean(false);
+    private final AtomicBoolean searchingRunning = new AtomicBoolean(false);
     protected Toolbar toolbar;
     protected FloatingActionButton connectingFAB;
     protected FloatingActionButton searchFAB;
@@ -41,8 +43,6 @@ public class ConnectingActivity extends AppCompatActivity {
             searchingProgressBar.setVisibility(View.INVISIBLE);
         }
     }));
-    protected AtomicBoolean connectingRunning = new AtomicBoolean(false);
-    private AtomicBoolean searchingRunning = new AtomicBoolean(false);
     private ProgressBar connectingProgressBar;
     private Thread searchingThread;
     private Thread connectingThread;
@@ -84,6 +84,7 @@ public class ConnectingActivity extends AppCompatActivity {
                         onConnected(ip, portInt);
                     } else {
                         onConnectFailed(ip, portInt);
+                        onAuthenticateFailed();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -116,6 +117,18 @@ public class ConnectingActivity extends AppCompatActivity {
         }, (long) (1.0 / Config.loopingRate * 1000));
     }
 
+    private void onAuthenticateFailed() {
+        handler.post(() -> {
+            try {
+                Global.client.close();
+            } catch (NullPointerException ignore) {
+            }
+            Global.client = null;
+            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.authenticate_failed), Snackbar.LENGTH_SHORT);
+            s.show();
+        });
+    }
+
     protected void onConnected(String ip, int port) {
         if (!connectingRunning.get()) { // 被中断
             return;
@@ -138,7 +151,7 @@ public class ConnectingActivity extends AppCompatActivity {
                     } catch (NullPointerException ignore) {
                     }
                     Global.client = null;
-                    Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connect_fail) + " " + ip + ":" + port, Snackbar.LENGTH_INDEFINITE);
+                    Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connect_fail) + " " + ip + ":" + port, Snackbar.LENGTH_LONG);
                     s.show();
                 }
         );
