@@ -42,4 +42,8 @@
     <string name="hint_for_show_time">Show time(milli), don\'t be too long.</string>
     <string name="nav_show_text_title">Show Text</string>
     <string name="hint_for_show_text_input">Write some message to show</string>
+    <string name="file_subtitle_format">Size:%d Path:\"%s\"</string>
+    <string name="hint_for_path_selector">Type path to explorer.</string>
+    <string name="notice_invalid_path">Invalid path.</string>
+    <string name="select_path_button_text"><![CDATA[->]]></string>
 </resources>

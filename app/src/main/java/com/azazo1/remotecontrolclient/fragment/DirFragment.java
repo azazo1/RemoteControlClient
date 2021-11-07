@@ -6,10 +6,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSONArray;
@@ -27,16 +33,18 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// todo 优化显示：显示当前路径 优化文件与文件夹名称显示 失败提醒 路径中途被删的解决
+// todo "下载"功能
 public class DirFragment extends Fragment {
+    private final AtomicBoolean sending = new AtomicBoolean(false);
+    private final List<FileObj> dirList = new Vector<>();
     private CommandingActivity activity;
-    private AtomicBoolean sending = new AtomicBoolean(false);
     private Thread sendingThread;
     private ProgressBar progressBar;
     private ListView dirShower;
     private ArrayAdapter<FileObj> adapter;
-    private List<FileObj> dirList = new Vector<>();
     private String nowPath = "";
+    private EditText pathSelector;
+    private Button selectButton;
 
     public DirFragment() {
     }
@@ -73,7 +81,9 @@ public class DirFragment extends Fragment {
         View get = inflater.inflate(R.layout.fragment_dir, container, false);
         progressBar = get.findViewById(R.id.getting_command_result_progress_bar);
         dirShower = get.findViewById(R.id.dir_show_list_view);
-        adapter = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, dirList);
+        pathSelector = get.findViewById(R.id.path_selector);
+        selectButton = get.findViewById(R.id.select_path_button);
+        adapter = new DirAdapter(dirList);
         initList();
         initView();
         return get;
@@ -86,10 +96,16 @@ public class DirFragment extends Fragment {
     }
 
     private void initView() {
+        pathSelector.setText(nowPath);
         dirShower.setAdapter(adapter);
         dirShower.setOnItemClickListener((listView, itemView, position, id) -> {
             FileObj obj = dirList.get((int) id);
             sendCommand(obj);
+        });
+        selectButton.setOnClickListener((view) -> {
+            if (!(pathSelector.getText() + "").isEmpty()) {
+                sendCommand(pathSelector.getText() + "");
+            }
         });
         progressBar.setVisibility(View.INVISIBLE);
     }
@@ -102,12 +118,24 @@ public class DirFragment extends Fragment {
         }
     }
 
+    public void explorePath(String path) {
+        String command = String.format(getString(R.string.command_dir_format_string), path);
+        if (Global.client.sendCommand(command)) {
+            CommandResult result = Global.client.readCommand();
+            resultAppearancePost(result);
+        }
+    }
+
     public void sendCommand(FileObj obj) {
+        sendCommand(obj.getTotalPath());
+    }
+
+    public void sendCommand(String path) {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
 
-            nowPath = obj.getTotalPath(); // 迭代
+            nowPath = path; // 迭代
 
             if (nowPath.equals("..") || nowPath.isEmpty()) { // 退出到了根目录
                 nowPath = "";
@@ -116,11 +144,7 @@ public class DirFragment extends Fragment {
                 if (!nowPath.endsWith("/")) {
                     nowPath += "/";
                 }
-                String command = String.format(getString(R.string.command_dir_format_string), nowPath);
-                if (Global.client.sendCommand(command)) {
-                    CommandResult result = Global.client.readCommand();
-                    resultAppearancePost(result);
-                }
+                explorePath(nowPath);
             }
             sending.set(false);
         });
@@ -174,6 +198,9 @@ public class DirFragment extends Fragment {
                     }
                 }
                 adapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
+                sendCommand(new FileObj(nowPath, "..")); // 防止父目录丢失->递归退出
             }
         });
     }
@@ -251,6 +278,43 @@ public class DirFragment extends Fragment {
 
         public enum FileType {
             FILE, FOLDER, DISK
+        }
+    }
+
+    class DirAdapter extends ArrayAdapter<FileObj> {
+        List<FileObj> fileObjs;
+
+        public DirAdapter(List<FileObj> objs) {
+            super(activity, R.layout.view_list_dir, objs);
+            fileObjs = objs;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            LayoutInflater inflater = activity.getLayoutInflater();
+            View view = inflater.inflate(R.layout.view_list_dir, parent, false);
+            if (convertView != null) {
+                FileObj obj = fileObjs.get(position);
+                ImageView icon = view.findViewById(R.id.file_icon);
+                TextView title = view.findViewById(R.id.file_title);
+                TextView subtitle = view.findViewById(R.id.file_subtitle);
+                switch (obj.type) {
+                    case DISK:
+                        icon.setImageDrawable(activity.getDrawable(R.drawable.disk));
+                        break;
+                    case FILE:
+                        icon.setImageDrawable(activity.getDrawable(R.drawable.file));
+                        break;
+                    case FOLDER:
+                        icon.setImageDrawable(activity.getDrawable(R.drawable.folder));
+                        break;
+                    default:
+                }
+                title.setText(obj.name);
+                subtitle.setText(String.format(getString(R.string.file_subtitle_format), obj.size, obj.path));
+            }
+            return view;
         }
     }
 }

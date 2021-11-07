@@ -6,6 +6,25 @@
     android:orientation="vertical"
     tools:context=".fragment.DirFragment">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/path_selector"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autofillHints="null"
+            android:hint="@string/hint_for_path_selector"
+            android:inputType="text" />
+        <Button
+            android:id="@+id/select_path_button"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="@string/select_path_button_text" />
+    </LinearLayout>
+
     <ListView
         android:id="@+id/dir_show_list_view"
         android:layout_width="match_parent"
