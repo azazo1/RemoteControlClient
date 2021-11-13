@@ -21,6 +21,7 @@ import com.azazo1.remotecontrolclient.ClientSocket;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
+import com.azazo1.remotecontrolclient.fragment.ClipboardFragment;
 import com.azazo1.remotecontrolclient.fragment.CommandLineFragment;
 import com.azazo1.remotecontrolclient.fragment.DirFragment;
 import com.azazo1.remotecontrolclient.fragment.ShowTextFragment;
@@ -178,6 +179,8 @@ public class CommandingActivity extends AppCompatActivity {
                 fragmentSelected = new DirFragment();
             } else if (id == R.id.nav_show_text) {
                 fragmentSelected = new ShowTextFragment();
+            } else if (id == R.id.nav_clipboard) {
+                fragmentSelected = new ClipboardFragment();
             } else {
                 fragmentSelected = new CommandLineFragment();
             }

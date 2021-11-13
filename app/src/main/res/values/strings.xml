@@ -42,8 +42,20 @@
     <string name="hint_for_show_time">Show time(milli), don\'t be too long.</string>
     <string name="nav_show_text_title">Show Text</string>
     <string name="hint_for_show_text_input">Write some message to show</string>
-    <string name="file_subtitle_format">Size:%d Path:\"%s\"</string>
+    <string name="file_subtitle_format">Size:%,d B  Path:\"%s\"</string>
+    <string name="folder_subtitle_format">Path:\"%s\"</string>
+    <string name="disk_subtitle_format"> </string>
     <string name="hint_for_path_selector">Type path to explorer.</string>
     <string name="notice_invalid_path">Invalid path.</string>
     <string name="select_path_button_text"><![CDATA[->]]></string>
+    <string-array name="clipboard_action_spinner_array">
+        <!--按字母"顺"序, 在 ClipboardFragment 类中用到 (clear get set)-->
+        <item name='clear'>clear</item>
+        <item name='get'>get</item>
+        <item name='set'>set</item>
+    </string-array>
+    <string name="command_clipboard_format_string">{\"type\":\"clipboard\",\"action\":\"%s\",\"content\":\"%s\"}</string>
+    <string name="nav_clipboard_title">Clipboard</string>
+    <string name="hint_for_clipboard_text">edit(set) or result will be here(get).</string>
+    <string name="clipboard_send_command_button_text">Do</string>
 </resources>

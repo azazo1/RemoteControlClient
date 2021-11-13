@@ -5,40 +5,23 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/fragment_padding"
-    tools:context=".fragment.ShowTextFragment">
+    tools:context=".fragment.ClipboardFragment">
 
-    <EditText
-        android:id="@+id/test_output"
+    <Spinner
+        android:id="@+id/clipboard_action_spinner"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="30dp"
-        android:layout_weight="0.2"
-        android:autofillHints="@string/hint_for_command_result"
-        android:gravity="start|top"
-        android:hint="@string/hint_for_command_result"
-        android:inputType="text" />
+        android:layout_height="50dp"
+        android:entries="@array/clipboard_action_spinner_array" />
 
     <EditText
-        android:id="@+id/show_time_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:ems="10"
-        android:gravity="center"
-        android:hint="@string/hint_for_show_time"
-        android:importantForAutofill="no"
-        android:inputType="numberDecimal" />
-
-    <EditText
-        android:id="@+id/test_text"
+        android:id="@+id/clipboard_text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:autofillHints="@string/hint_for_test_text"
+        android:autofillHints="@string/hint_for_clipboard_text"
         android:gravity="start|top"
-        android:hint="@string/hint_for_show_text_input"
+        android:hint="@string/hint_for_clipboard_text"
         android:inputType="textMultiLine" />
-
 
     <Button
         android:id="@+id/send_command_button"
@@ -46,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="20dp"
-        android:text="@string/send_command_button_text" />
+        android:text="@string/clipboard_send_command_button_text" />
 
     <ProgressBar
         android:id="@+id/getting_command_result_progress_bar"

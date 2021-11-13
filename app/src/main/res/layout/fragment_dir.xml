@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="@dimen/fragment_padding"
     tools:context=".fragment.DirFragment">
 
     <LinearLayout
@@ -36,8 +37,6 @@
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="20dp"
         android:max="100"
         android:visibility="invisible" />
 

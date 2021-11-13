@@ -3,17 +3,20 @@
     <!-- TODO: icon -->
     <item
         android:id="@+id/nav_command_line"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:icon="@drawable/command_line"
         android:title="@string/nav_command_line_title" />
     <item
         android:id="@+id/nav_dir"
-        android:icon="@android:drawable/stat_notify_sdcard"
+        android:icon="@drawable/dir"
         android:title="@string/nav_dir_title" />
     <item
         android:id="@+id/nav_show_text"
-        android:icon="@android:drawable/stat_notify_chat"
+        android:icon="@drawable/show_text"
         android:title="@string/nav_show_text_title" />
-
+    <item
+        android:id="@+id/nav_clipboard"
+        android:icon="@drawable/clipboard"
+        android:title="@string/nav_clipboard_title" />
     <item
         android:id="@+id/nav_test"
         android:title="@string/nav_test_title" />

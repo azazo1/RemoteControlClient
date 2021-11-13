@@ -33,7 +33,7 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// todo "下载"功能
+// todo "下载" "启动" "复制路径" "同机文件复制与移动" 功能
 public class DirFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
     private final List<FileObj> dirList = new Vector<>();
@@ -69,10 +69,6 @@ public class DirFragment extends Fragment {
         );
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,6 +82,7 @@ public class DirFragment extends Fragment {
         adapter = new DirAdapter(dirList);
         initList();
         initView();
+        sendCommand(""); // 自动在创建时获取磁盘
         return get;
     }
 
@@ -302,17 +299,21 @@ public class DirFragment extends Fragment {
                 switch (obj.type) {
                     case DISK:
                         icon.setImageDrawable(activity.getDrawable(R.drawable.disk));
+                        title.setText(obj.name);
+                        subtitle.setText(getString(R.string.disk_subtitle_format));
                         break;
                     case FILE:
                         icon.setImageDrawable(activity.getDrawable(R.drawable.file));
+                        title.setText(obj.name);
+                        subtitle.setText(String.format(getString(R.string.file_subtitle_format), obj.size, obj.path));
                         break;
                     case FOLDER:
                         icon.setImageDrawable(activity.getDrawable(R.drawable.folder));
+                        title.setText(obj.name);
+                        subtitle.setText(String.format(getString(R.string.folder_subtitle_format), obj.path));
                         break;
                     default:
                 }
-                title.setText(obj.name);
-                subtitle.setText(String.format(getString(R.string.file_subtitle_format), obj.size, obj.path));
             }
             return view;
         }

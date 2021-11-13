@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -20,13 +21,20 @@ import com.azazo1.remotecontrolclient.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// todo 自动填充上次使用的地址
 public class ConnectingActivity extends AppCompatActivity {
+    private static final String cacheName = "IpCache";
     private final AtomicBoolean connectingRunning = new AtomicBoolean(false);
     private final AtomicBoolean searchingRunning = new AtomicBoolean(false);
     protected Toolbar toolbar;
@@ -133,6 +141,7 @@ public class ConnectingActivity extends AppCompatActivity {
         if (!connectingRunning.get()) { // 被中断
             return;
         }
+        saveAddress(ip, port);
         handler.post(() -> {
             Intent intent = new Intent(ConnectingActivity.this, CommandingActivity.class);
             intent.putExtra("ip", ip);
@@ -172,6 +181,9 @@ public class ConnectingActivity extends AppCompatActivity {
         connectingProgressBar = findViewById(R.id.connecting_progress_bar);
         searchFAB = findViewById(R.id.search_fab);
         searchFAB.setOnClickListener((view) -> search());
+        Pair<String, Integer> address = readAddress();
+        ipEntry.setText(address.first);
+        portEntry.setText(String.valueOf(address.second));
     }
 
     protected void search() {
@@ -211,5 +223,51 @@ public class ConnectingActivity extends AppCompatActivity {
         });
         searchingThread.setDaemon(true);
         searchingThread.start();
+    }
+
+    /**
+     * 保存最近使用的IP地址
+     */
+    private void saveAddress(String ip, int port) {
+        File cache = getExternalCacheDir();
+        File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
+        try {
+            if (!cacheFile.exists()) {
+                //noinspection unused
+                boolean ignore = cacheFile.createNewFile();
+            }
+            if (cacheFile.canWrite()) {
+                PrintWriter printer = new PrintWriter(new FileOutputStream(cacheFile));
+                printer.println(ip);
+                printer.println(port);
+                printer.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 读取最近使用的IP地址
+     */
+    private Pair<String, Integer> readAddress() {
+        File cache = getExternalCacheDir();
+        File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
+        String ip = null;
+        int port = -1;
+        try {
+            if (!cacheFile.exists()) {
+                //noinspection unused
+                boolean ignore = cacheFile.createNewFile();
+            }
+            if (cacheFile.canRead()) {
+                BufferedReader reader = new BufferedReader(new FileReader(cacheFile));
+                ip = reader.readLine();
+                port = Integer.parseInt(reader.readLine());
+            }
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return new Pair<>(ip, port);
     }
 }
