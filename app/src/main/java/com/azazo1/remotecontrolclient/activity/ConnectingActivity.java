@@ -32,7 +32,7 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// todo 自动填充上次使用的地址
+
 public class ConnectingActivity extends AppCompatActivity {
     private static final String cacheName = "IpCache";
     private final AtomicBoolean connectingRunning = new AtomicBoolean(false);
@@ -254,7 +254,7 @@ public class ConnectingActivity extends AppCompatActivity {
         File cache = getExternalCacheDir();
         File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
         String ip = null;
-        int port = -1;
+        int port = 2004;
         try {
             if (!cacheFile.exists()) {
                 //noinspection unused

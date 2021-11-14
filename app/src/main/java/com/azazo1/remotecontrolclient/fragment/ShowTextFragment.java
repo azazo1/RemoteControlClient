@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.alibaba.fastjson.JSON;
 import com.azazo1.remotecontrolclient.CommandResult;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
@@ -92,7 +93,7 @@ public class ShowTextFragment extends Fragment {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = String.format(getString(R.string.command_show_text_format_string), text, showTime);
+            String command = String.format(getString(R.string.command_show_text_format_string), JSON.toJSONString(text), showTime);
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);

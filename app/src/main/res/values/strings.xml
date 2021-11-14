@@ -54,7 +54,6 @@
         <item name='get'>get</item>
         <item name='set'>set</item>
     </string-array>
-    <string name="command_clipboard_format_string">{\"type\":\"clipboard\",\"action\":\"%s\",\"content\":\"%s\"}</string>
     <string name="nav_clipboard_title">Clipboard</string>
     <string name="hint_for_clipboard_text">edit(set) or result will be here(get).</string>
     <string name="clipboard_send_command_button_text">Do</string>

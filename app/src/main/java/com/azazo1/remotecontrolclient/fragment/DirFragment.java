@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.azazo1.remotecontrolclient.CommandResult;
 import com.azazo1.remotecontrolclient.Config;
@@ -116,7 +117,7 @@ public class DirFragment extends Fragment {
     }
 
     public void explorePath(String path) {
-        String command = String.format(getString(R.string.command_dir_format_string), path);
+        String command = String.format(getString(R.string.command_dir_format_string), JSON.toJSONString(path));
         if (Global.client.sendCommand(command)) {
             CommandResult result = Global.client.readCommand();
             resultAppearancePost(result);

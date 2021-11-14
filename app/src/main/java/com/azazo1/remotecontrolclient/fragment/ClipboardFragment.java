@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.azazo1.remotecontrolclient.CommandResult;
 import com.azazo1.remotecontrolclient.Config;
@@ -92,7 +93,7 @@ public class ClipboardFragment extends Fragment {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = String.format(getString(R.string.command_clipboard_format_string), action, content);
+            String command = String.format(getString(R.string.command_clipboard_format_string), JSON.toJSONString(action), JSON.toJSONString(content));
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);
