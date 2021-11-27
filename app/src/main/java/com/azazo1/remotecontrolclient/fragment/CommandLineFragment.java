@@ -24,12 +24,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CommandLineFragment extends Fragment {
+    private final AtomicBoolean sending = new AtomicBoolean(false);
     public EditText commandInputEntry;
     public Button sendCommandButton;
     private EditText commandOutputEntry;
     private CommandingActivity activity;
     private ProgressBar progressBar;
-    private AtomicBoolean sending = new AtomicBoolean(false);
     private Thread sendingThread;
 
     public CommandLineFragment() {
@@ -66,11 +66,15 @@ public class CommandLineFragment extends Fragment {
 
 
     public void sendCommand() {
+        sendCommand(commandInputEntry.getText() + "");
+    }
+
+    public void sendCommand(String command) {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = (commandInputEntry.getText() + "").replace('\n', ' ');
-            if (Global.client.sendCommand(command)) {
+            String commandFinal = (command).replace('\n', ' ');
+            if (Global.client.sendCommand(commandFinal)) {
                 CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);
             }
@@ -100,7 +104,7 @@ public class CommandLineFragment extends Fragment {
                     progressBar.setProgress(progress.getAndIncrement());
                     progress.compareAndSet(100, 0);
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                    sendCommandButton.setOnClickListener((view) -> {
+                    View.OnClickListener tempListener = (view) -> {
                         if (Tools.getTimeInMilli() - startTime > Config.waitingTimeForTermination) { // 防止连点触发
                             Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
                             s.setAction(R.string.verify_terminate, (view1) -> {
@@ -111,7 +115,8 @@ public class CommandLineFragment extends Fragment {
                             });
                             s.show();
                         }
-                    });
+                    };
+                    sendCommandButton.setOnClickListener(tempListener);
                 } else {
                     initView();
                 }

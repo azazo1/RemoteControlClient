@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_item_lock_screen"
+        android:icon="@drawable/lock"
+        android:title="@string/lock_screen_title" />
+    <item
+        android:id="@+id/menu_item_unlock_screen"
+        android:icon="@drawable/unlock"
+        android:title="@string/unlock_screen_title" />
+</menu>

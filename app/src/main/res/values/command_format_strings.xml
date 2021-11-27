@@ -5,4 +5,6 @@
     <string name="command_get_disks_string">{\"type\":\"getDisks\"}</string>
     <string name="command_show_text_format_string">{\"type\":\"showText\",\"content\":%s,\"showTime\":%f}</string>
     <string name="command_clipboard_format_string">{\"type\":\"clipboard\",\"action\":%s,\"content\":%s}</string>
+    <string name="command_unlock_screen_string">{\"type\":\"unlockScreen\"}</string>
+    <string name="command_lock_screen_format_string">{\"type\":\"lockScreen\",\"password\":%s,\"maxWrongTimes\":%d}</string>
 </resources>

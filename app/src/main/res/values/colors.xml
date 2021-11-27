@@ -16,4 +16,6 @@
     <color name="commanding_button_bg" >#673AB7</color>
     <color name="progress_bar_commanding_color_b">#7DA6B8</color>
     <color name="progress_bar_commanding_color_f">#00BCD4</color>
+    <color name="lock_screen_bottom_selector_bg">#FF2196F3</color>
+    <color name="lock_screen_button_bg">#FF673AB7</color>
 </resources>
