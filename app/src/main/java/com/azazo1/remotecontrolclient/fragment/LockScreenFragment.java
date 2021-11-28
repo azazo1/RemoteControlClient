@@ -125,10 +125,11 @@ public class LockScreenFragment extends Fragment {
     private String getLockCommand() {
         String password = lockPasswordInput.getText() + "";
         String maxWrongTimes = lockMaxWrongTimesInput.getText() + "";
-        if (password.isEmpty() || maxWrongTimes.isEmpty() || !maxWrongTimes.matches("^[0-9]+$")) {
-            return "";
+        int maxWrongTimesInt = 0;
+        if (maxWrongTimes.matches("^[0-9]+$")) {
+            maxWrongTimesInt = Integer.parseInt(maxWrongTimes);
         }
-        return String.format(getString(R.string.command_lock_screen_format_string), JSON.toJSONString(password), Integer.valueOf(maxWrongTimes));
+        return String.format(getString(R.string.command_lock_screen_format_string), JSON.toJSONString(password), maxWrongTimesInt);
     }
 
     private String getUnlockCommand() {

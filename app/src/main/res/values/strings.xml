@@ -57,9 +57,9 @@
     <string name="nav_clipboard_title">Clipboard</string>
     <string name="hint_for_clipboard_text">edit(set) or result will be here(get).</string>
     <string name="clipboard_send_command_button_text">Do</string>
-    <string name="hint_for_input_lock_screen_password">Lock screen password</string>
     <string name="unlock_screen_title">Unlock</string>
     <string name="lock_screen_title">Lock</string>
     <string name="nav_lock_screen_title">Lock Screen</string>
-    <string name="hint_for_input_lock_screen_max_wrong_times">Max wrong times</string>
+    <string name="hint_for_input_lock_screen_password">Lock screen password, default if empty</string>
+    <string name="hint_for_input_lock_screen_max_wrong_times">Max wrong times, default if empty</string>
 </resources>
