@@ -60,7 +60,7 @@ public class LockScreenFragment extends Fragment {
         activity = (CommandingActivity) context;
         activity.fragment = this;
         activity.handler.post(
-                () -> activity.getToolbar().setTitle(R.string.test_fragment_title)
+                () -> activity.getToolbar().setTitle(R.string.lock_screen_fragment_title)
         );
     }
 

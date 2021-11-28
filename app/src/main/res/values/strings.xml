@@ -62,4 +62,5 @@
     <string name="nav_lock_screen_title">Lock Screen</string>
     <string name="hint_for_input_lock_screen_password">Lock screen password, default if empty</string>
     <string name="hint_for_input_lock_screen_max_wrong_times">Max wrong times, default if empty</string>
+    <string name="lock_screen_fragment_title">Lock Screen</string>
 </resources>
