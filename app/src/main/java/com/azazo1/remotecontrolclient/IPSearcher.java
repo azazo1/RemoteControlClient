@@ -137,15 +137,13 @@ class ThreadIPDetector implements Runnable {
     public boolean tryAddress(String host) { // 判断地址是否有效
         try {
             InetAddress address = InetAddress.getByName(host);
-            if (address.isReachable(Config.timeout)) {
-                Log.e("Search", "Reached: " + address.getHostAddress());
-                String ip = address.getHostAddress();
-                InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, IPSearcher.targetPort);
-                Socket socket = new Socket();
-                socket.connect(targetAddressWithPort, Config.timeout);
-                socket.close();
-                return true;
-            }
+            String ip = address.getHostAddress();
+            InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, IPSearcher.targetPort);
+            Socket socket = new Socket();
+            socket.connect(targetAddressWithPort, Config.timeout);
+            socket.close();
+            Log.e("Search", "Reached: " + address.getHostAddress());
+            return true;
         } catch (IOException ignore) {
         }
         return false;

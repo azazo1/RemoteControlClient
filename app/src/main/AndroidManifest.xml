@@ -5,11 +5,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/remote_control"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/remote_control"
         android:supportsRtl="true"
         android:theme="@style/Theme.RemoteControlClient">
+        <!--                android:icon="@mipmap/ic_launcher"-->
+        <!--        android:roundIcon="@mipmap/ic_launcher_round"-->
         <activity
             android:name=".activity.CommandingActivity"
             android:screenOrientation="portrait" />
