@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.azazo1.remotecontrolclient.Encryptor.AESBase64Encode;
 import static com.azazo1.remotecontrolclient.Encryptor.Base64AESDecode;
@@ -60,6 +61,7 @@ class MBufferedReader extends BufferedReader {
 }
 
 public class ClientSocket {
+    private final AtomicInteger waitCount = new AtomicInteger(0); // 用来记录发送但为接收结果的命令
     private Socket client;
     private MBufferedReader input;
     private PrintWriter output;
@@ -68,6 +70,10 @@ public class ClientSocket {
 
     public ClientSocket() throws IOException {
         init();
+    }
+
+    public int getWaitCount() {
+        return waitCount.intValue();
     }
 
     public boolean isAvailable() {
@@ -121,11 +127,11 @@ public class ClientSocket {
         output.flush();
     }
 
-    public void sendLine(String content) {
+    public synchronized void sendLine(String content) {
         sendRaw(content + "\n");
     }
 
-    public String readLine() {
+    public synchronized String readLine() {
         try {
             if (!input.isAlive()) {
                 close();
@@ -153,6 +159,7 @@ public class ClientSocket {
         if (line != null) {
             String command = Base64AESDecode(Config.key, line);
             if (command != null) {
+                waitCount.set(waitCount.intValue() - 1);
                 Log.i("Command get", "Decoded: " + command);
                 if (command.matches("^-?[0-9]+$")) {
                     return new CommandResult(Integer.parseInt(command));
@@ -190,6 +197,7 @@ public class ClientSocket {
                 return false;
             }
             sendLine(get);
+            waitCount.set(waitCount.intValue() + 1);
             Log.i("Command Send", jsonString + " sent successfully.");
             return true;
         }

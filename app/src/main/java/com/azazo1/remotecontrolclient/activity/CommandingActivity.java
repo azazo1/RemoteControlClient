@@ -52,6 +52,7 @@ public class CommandingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
+        Global.activity = this;
         addressNotice = findViewById(R.id.address_notice);
         Intent intent = getIntent();
         ip = intent.getStringExtra("ip");

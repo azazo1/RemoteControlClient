@@ -170,6 +170,7 @@ public class ConnectingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connecting);
+        Global.activity = this;
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getTitle());
 
