@@ -1,7 +1,9 @@
 package com.azazo1.remotecontrolclient.fragment;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSON;
@@ -23,18 +27,22 @@ import com.alibaba.fastjson.JSONArray;
 import com.azazo1.remotecontrolclient.CommandResult;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
+import com.azazo1.remotecontrolclient.MyReporter;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
+import com.azazo1.remotecontrolclient.downloadhelper.Downloader;
+import com.azazo1.remotecontrolclient.downloadhelper.FileDetail;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.File;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// todo "下载" "启动" "复制路径" "同机文件复制与移动" 功能
+// todo "下载" "启动" "远程文件复制与移动" 功能
 public class DirFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
     private final List<FileObj> dirList = new Vector<>();
@@ -97,8 +105,32 @@ public class DirFragment extends Fragment {
         pathSelector.setText(nowPath);
         dirShower.setAdapter(adapter);
         dirShower.setOnItemClickListener((listView, itemView, position, id) -> {
-            FileObj obj = dirList.get((int) id);
+            FileObj obj = dirList.get(position);
             sendCommand(obj);
+        });
+        // Long click -> alert infomation
+        dirShower.setOnItemLongClickListener((listView, itemView, position, id) -> {
+            ViewGroup layout = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.alert_file_info, dirShower, false);
+            if (layout != null) {
+                FileObj fileObj = dirList.get(position);
+                // get icon
+                ImageView imageView = itemView.findViewById(R.id.file_icon_view);
+                Drawable image = null;
+                if (imageView != null) {
+                    image = imageView.getDrawable();
+                }
+                // fill information
+                EditText name = layout.findViewById(R.id.filename_edittext);
+                EditText path = layout.findViewById(R.id.filepath_edittext);
+                EditText size = layout.findViewById(R.id.file_size_edittext);
+                name.setText(fileObj.name);
+                path.setText(fileObj.getTotalPath());
+                size.setText(String.valueOf(fileObj.size));
+                // create alert
+                new AlertDialog.Builder(activity).setTitle(getString(R.string.file_info_alert_title))
+                        .setView(layout).setIcon(image).setPositiveButton("OK", null).show();
+            }
+            return true;
         });
         selectButton.setOnClickListener((view) -> {
             if (!(pathSelector.getText() + "").isEmpty()) {
@@ -111,7 +143,7 @@ public class DirFragment extends Fragment {
     private void fetchDisks() {
         String command = getString(R.string.command_get_disks_string);
         if (Global.client.sendCommand(command)) {
-            CommandResult result = Global.client.readCommand();
+            CommandResult result = Global.client.readCommandUntilGet();
             resultAppearancePostOfDisks(result);
         }
     }
@@ -119,7 +151,7 @@ public class DirFragment extends Fragment {
     public void explorePath(String path) {
         String command = String.format(getString(R.string.command_dir_format_string), JSON.toJSONString(path));
         if (Global.client.sendCommand(command)) {
-            CommandResult result = Global.client.readCommand();
+            CommandResult result = Global.client.readCommandUntilGet();
             resultAppearancePost(result);
         }
     }
@@ -182,7 +214,7 @@ public class DirFragment extends Fragment {
 
     private void resultAppearancePost(CommandResult result) {
         activity.handler.post(() -> {
-            if (result != null && result.type == CommandResult.ResultType.ARRAY) {
+            if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
                 initList();
                 for (int i = 0; i < result.getResultJsonArray().size(); i++) {
                     JSONArray subArray = result.getResultJsonArray().getJSONArray(i);
@@ -205,7 +237,7 @@ public class DirFragment extends Fragment {
 
     private void resultAppearancePostOfDisks(CommandResult result) {
         activity.handler.post(() -> {
-            if (result != null && result.type == CommandResult.ResultType.ARRAY) {
+            if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
                 initList();
                 for (String disk : result.getResultJsonArray().toJavaList(String.class)) {
                     dirList.add(new FileObj(disk));
@@ -294,25 +326,89 @@ public class DirFragment extends Fragment {
             View view = inflater.inflate(R.layout.view_list_dir, parent, false);
             if (convertView != null) {
                 FileObj obj = fileObjs.get(position);
-                ImageView icon = view.findViewById(R.id.file_icon);
-                TextView title = view.findViewById(R.id.file_title);
-                TextView subtitle = view.findViewById(R.id.file_subtitle);
+                ImageView icon = view.findViewById(R.id.file_icon_view);
+                TextView title = view.findViewById(R.id.file_title_view);
+                TextView subtitle = view.findViewById(R.id.file_subtitle_view);
+                // TODO: 2021/12/19 download action
+                ImageView downloadButton = view.findViewById(R.id.download_button);
                 switch (obj.type) {
-                    case DISK:
-                        icon.setImageDrawable(activity.getDrawable(R.drawable.disk));
+                    case DISK: {
+                        icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.disk));
                         title.setText(obj.name);
                         subtitle.setText(getString(R.string.disk_subtitle_format));
                         break;
-                    case FILE:
-                        icon.setImageDrawable(activity.getDrawable(R.drawable.file));
+                    }
+                    case FILE: {
+                        icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.file));
                         title.setText(obj.name);
-                        subtitle.setText(String.format(getString(R.string.file_subtitle_format), obj.size, obj.path));
+                        subtitle.setText(String.format(getString(R.string.file_subtitle_format), obj.size));
+                        downloadButton.setVisibility(View.VISIBLE);
+                        // download action
+                        downloadButton.setOnClickListener((view1) -> {
+                            // ask store path
+                            EditText storePathText = new EditText(activity);
+                            storePathText.setText(activity.getExternalCacheDir().toString().concat(File.separator).concat(obj.name));
+                            new AlertDialog.Builder(activity).setTitle("Store Path").setCancelable(false).setView(storePathText).setNegativeButton(R.string.verify_cancel_download, null).setCancelable(false).setPositiveButton(R.string.verify_ok, (dialog, which) -> {
+                                // get path
+                                String storePath = "" + storePathText.getText();
+                                if (storePath.isEmpty()) {
+                                    Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                // create layout
+                                ViewGroup layout = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.alert_downloading, dirShower, false);
+                                ProgressBar progressBar = layout.findViewById(R.id.download_progress_bar);
+                                TextView progressStateOutput = layout.findViewById(R.id.download_text_view);
+                                // define reporter
+                                MyReporter mReporter = (now, total, end) -> {
+                                    if (now == total && total == -1 && end) {
+                                        // failed
+                                        activity.handler.post(() -> progressStateOutput.setText(R.string.download_failed));
+                                    } else if (!end) {
+                                        // report process
+                                        activity.handler.post(() -> {
+                                            double progress = now * 100.0 / total;
+                                            progressStateOutput.setText(
+                                                    String.format(getString(R.string.download_progress_format), progress, now, total)
+                                            );
+                                            progressBar.setProgress((int) progress, true);
+                                        });
+                                    } else {
+                                        // successful end
+                                        activity.handler.post(() -> progressStateOutput.setText(
+                                                getString(R.string.download_successfully)
+                                        ));
+                                    }
+                                };
+                                // download thread create
+                                sendingThread = new Thread(() -> {
+                                    sending.set(true);
+                                    whileSending();
+
+                                    FileDetail fileDetail = Downloader.getFileDetail(obj.getTotalPath());
+                                    if (fileDetail != null && fileDetail.available) {
+                                        boolean ignored = Downloader.plainDownloadFile(fileDetail, storePath, mReporter);
+                                    } else {
+                                        Log.e("download", "no remote file.");
+                                    }
+                                    sending.set(false);
+                                });
+                                sendingThread.setDaemon(true);
+                                sendingThread.start();
+                                // show downloading alert
+                                new AlertDialog.Builder(activity).setTitle(R.string.alert_downloading_title)
+                                        .setView(layout).setNegativeButton(R.string.verify_terminate_or_ok, (dialog1, which1) -> Downloader.stopDownloading())
+                                        .setCancelable(false).show();
+                            }).show();
+                        });
                         break;
-                    case FOLDER:
-                        icon.setImageDrawable(activity.getDrawable(R.drawable.folder));
+                    }
+                    case FOLDER: {
+                        icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.folder));
                         title.setText(obj.name);
-                        subtitle.setText(String.format(getString(R.string.folder_subtitle_format), obj.path));
+                        subtitle.setText(String.format(getString(R.string.folder_subtitle_format)));
                         break;
+                    }
                     default:
                 }
             }

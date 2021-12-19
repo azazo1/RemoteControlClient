@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 public class CommandResult {
-    public final ResultType type;
+    private final ResultType type;
     private JSONArray jsonArray;
     private JSONObject jsonObject;
     private Integer anInt;
@@ -56,7 +56,27 @@ public class CommandResult {
         return jsonObject;
     }
 
+    public ResultType getType() {
+        return type;
+    }
+
+    public boolean checkType(ResultType targetType) {
+        return type == targetType;
+    }
+
+    public boolean checkType(ResultType targetType, boolean _throw) {
+        boolean same = checkType(targetType);
+        if (_throw && !same) {
+            throw new ResultTypeError();
+        }
+        return same;
+    }
+
     public enum ResultType {
         JSON_OBJECT, INT, ARRAY, NULL
     }
+
+    static class ResultTypeError extends RuntimeException {
+    }
 }
+

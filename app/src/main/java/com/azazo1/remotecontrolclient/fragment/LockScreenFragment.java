@@ -156,7 +156,7 @@ public class LockScreenFragment extends Fragment {
             sending.set(true);
             whileSending();
             if (Global.client.sendCommand(finalCommand)) {
-                CommandResult result = Global.client.readCommand();
+                CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);
             }
             sending.set(false);
@@ -199,7 +199,7 @@ public class LockScreenFragment extends Fragment {
         activity.handler.post(() -> {
             String show = "failed";
             boolean succeed = false;
-            if (result != null && result.type == CommandResult.ResultType.INT) {
+            if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? "succeed" : "failed";
             }

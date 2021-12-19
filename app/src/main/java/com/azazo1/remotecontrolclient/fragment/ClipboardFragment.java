@@ -56,7 +56,7 @@ public class ClipboardFragment extends Fragment {
         activity = (CommandingActivity) context;
         activity.fragment = this;
         activity.handler.post(
-                () -> activity.getToolbar().setTitle(R.string.test_fragment_title)
+                () -> activity.getToolbar().setTitle(R.string.clipboard_fragment_title)
         );
     }
 
@@ -95,7 +95,7 @@ public class ClipboardFragment extends Fragment {
             whileSending();
             String command = String.format(getString(R.string.command_clipboard_format_string), JSON.toJSONString(action), JSON.toJSONString(content));
             if (Global.client.sendCommand(command)) {
-                CommandResult result = Global.client.readCommand();
+                CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);
             }
             sending.set(false);
@@ -138,7 +138,7 @@ public class ClipboardFragment extends Fragment {
         activity.handler.post(() -> {
             boolean succeed = false;
             if (result != null) {
-                switch (result.type) {
+                switch (result.getType()) {
                     case INT:
                         succeed = result.getResultInt() == 1;
                         break;

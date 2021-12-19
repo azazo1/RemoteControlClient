@@ -82,10 +82,15 @@ public class CommandingActivity extends AppCompatActivity {
 
     private void initDrawerAndNavigation() {
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                drawer, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer);
+                drawer, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                navigation.requestFocus(); // 消去输入法
+            }
+        };
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
         navigation.setNavigationItemSelectedListener(new NavSelected());
     }
 

@@ -2,6 +2,9 @@ package com.azazo1.remotecontrolclient;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -132,15 +135,16 @@ public class ClientSocket {
     }
 
     public synchronized String readLine() {
+        // it blocks
         try {
             if (!input.isAlive()) {
                 close();
                 return null;
             }
             String line = input.readLine();
-            if (line.equals("end")) { // 忽略end
-                return readLine();
-            }
+//            if (line.equals("end")) { // ignore end
+//                return readLine();
+//            }
             return line;
         } catch (IOException e) {
             e.printStackTrace();
@@ -154,13 +158,20 @@ public class ClientSocket {
         return sendCommand(get);
     }
 
-    public CommandResult readCommand() {
+    public @Nullable
+    CommandResult readCommand() {
         String line = readLine();
         if (line != null) {
             String command = Base64AESDecode(Config.key, line);
             if (command != null) {
                 waitCount.set(waitCount.intValue() - 1);
-                Log.i("Command get", "Decoded: " + command);
+
+                Log.i("Command get", "Decoded: " +
+                        (command.length() > Config.commandInfoMaxLength ?
+                                command.substring(0, Config.commandInfoMaxLength / 2) + "..." +
+                                        command.substring(Math.max(Config.commandInfoMaxLength / 2, command.length() - Config.commandInfoMaxLength / 2))
+                                : command)
+                );
                 if (command.matches("^-?[0-9]+$")) {
                     return new CommandResult(Integer.parseInt(command));
                 } else {
@@ -179,6 +190,15 @@ public class ClientSocket {
             }
         }
         return new CommandResult();
+    }
+
+    @NonNull
+    public CommandResult readCommandUntilGet() {
+        CommandResult result = readCommand();
+        if (result == null) {
+            return readCommandUntilGet();
+        }
+        return result;
     }
 
     public boolean sendCommand(String jsonString) {

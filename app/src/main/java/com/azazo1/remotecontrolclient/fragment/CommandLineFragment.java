@@ -2,6 +2,7 @@ package com.azazo1.remotecontrolclient.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +15,22 @@ import androidx.fragment.app.Fragment;
 
 import com.azazo1.remotecontrolclient.CommandResult;
 import com.azazo1.remotecontrolclient.Config;
+import com.azazo1.remotecontrolclient.Encryptor;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
+import com.azazo1.remotecontrolclient.downloadhelper.Downloader;
+import com.azazo1.remotecontrolclient.downloadhelper.FileDetail;
+import com.azazo1.remotecontrolclient.downloadhelper.PartsManager;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -75,7 +86,7 @@ public class CommandLineFragment extends Fragment {
             whileSending();
             String commandFinal = (command).replace('\n', ' ');
             if (Global.client.sendCommand(commandFinal)) {
-                CommandResult result = Global.client.readCommand();
+                CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);
             }
             sending.set(false);

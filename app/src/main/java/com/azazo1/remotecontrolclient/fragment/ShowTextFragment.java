@@ -76,6 +76,7 @@ public class ShowTextFragment extends Fragment {
         sendButton.setOnClickListener((view) -> sendCommand());
         progressBar.setVisibility(View.INVISIBLE);
         originOutputDrawable = showTextOutput.getBackground();
+        showTimeInput.requestFocus();
     }
 
     private void resetView() {
@@ -95,7 +96,7 @@ public class ShowTextFragment extends Fragment {
             whileSending();
             String command = String.format(getString(R.string.command_show_text_format_string), JSON.toJSONString(text), showTime);
             if (Global.client.sendCommand(command)) {
-                CommandResult result = Global.client.readCommand();
+                CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);
             }
             sending.set(false);
@@ -139,7 +140,7 @@ public class ShowTextFragment extends Fragment {
         activity.handler.post(() -> {
             String show = "failed";
             boolean succeed = false;
-            if (result != null && result.type == CommandResult.ResultType.INT) {
+            if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? "succeed" : "failed";
             }

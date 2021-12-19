@@ -172,7 +172,7 @@ public class ConnectingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connecting);
         Global.activity = this;
         toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(getTitle());
+        toolbar.setTitle(Config.title);
 
         ipEntry = findViewById(R.id.ip_entry);
         portEntry = findViewById(R.id.port_entry);

@@ -3,6 +3,7 @@ package com.azazo1.remotecontrolclient.fragment;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
+import com.azazo1.remotecontrolclient.downloadhelper.Downloader;
+import com.azazo1.remotecontrolclient.downloadhelper.FileDetail;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -71,6 +74,7 @@ public class TestFragment extends Fragment {
         sendButton.setOnClickListener((view) -> sendCommand());
         progressBar.setVisibility(View.INVISIBLE);
         originOutputDrawable = testOutput.getBackground();
+        testText.requestFocus();
     }
 
     private void resetView() {
@@ -88,7 +92,7 @@ public class TestFragment extends Fragment {
             whileSending();
             String command = String.format(getString(R.string.command_test_format_string), JSON.toJSONString(text));
             if (Global.client.sendCommand(command)) {
-                CommandResult result = Global.client.readCommand();
+                CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);
             }
             sending.set(false);
@@ -132,7 +136,7 @@ public class TestFragment extends Fragment {
         activity.handler.post(() -> {
             String show = "failed";
             boolean succeed = false;
-            if (result != null && result.type == CommandResult.ResultType.INT) {
+            if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? "succeed" : "failed";
             }

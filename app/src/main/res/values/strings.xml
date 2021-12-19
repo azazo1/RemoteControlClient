@@ -42,8 +42,9 @@
     <string name="hint_for_show_time">Show time(milli), don\'t be too long.</string>
     <string name="nav_show_text_title">Show Text</string>
     <string name="hint_for_show_text_input">Write some message to show</string>
-    <string name="file_subtitle_format">Size:%,d B  Path:\"%s\"</string>
-    <string name="folder_subtitle_format">Path:\"%s\"</string>
+    <string name="file_subtitle_format">Size:%,d B</string>
+    <!--暂时不需要-->
+    <string name="folder_subtitle_format"> </string>
     <string name="disk_subtitle_format"> </string>
     <string name="hint_for_path_selector">Type path to explorer.</string>
     <string name="notice_invalid_path">Invalid path.</string>
@@ -63,4 +64,21 @@
     <string name="hint_for_input_lock_screen_password">Lock screen password, default if empty</string>
     <string name="hint_for_input_lock_screen_max_wrong_times">Max wrong times, default if empty</string>
     <string name="lock_screen_fragment_title">Lock Screen</string>
+    <string name="clipboard_fragment_title">Clipboard</string>
+    <string name="download_button_text">Download</string>
+    <string name="file_info_alert_title">Infomation</string>
+    <string name="hint_for_info_filename">filename</string>
+    <string name="hint_for_info_filepath">filepath</string>
+    <string name="hint_for_info_file_size">filesize</string>
+    <string name="filename_text">Filename</string>
+    <string name="filepath_text">File Abspath</string>
+    <string name="file_size_text">File Size (Bytes)</string>
+    <string name="launch_button_text">Launch</string>
+    <string name="alert_downloading_title">Downloading</string>
+    <string name="download_progress_format">Progress:%.2f%%, Now:%d, Total:%d</string>
+    <string name="download_failed">Download Failed!</string>
+    <string name="verify_terminate_or_ok">Cancel or Finish</string>
+    <string name="download_successfully">Download Successfully!</string>
+    <string name="verify_cancel_download">Cancel</string>
+    <string name="verify_ok">OK</string>
 </resources>
