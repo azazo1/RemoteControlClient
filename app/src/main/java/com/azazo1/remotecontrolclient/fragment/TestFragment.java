@@ -3,7 +3,6 @@ package com.azazo1.remotecontrolclient.fragment;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +20,6 @@ import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
-import com.azazo1.remotecontrolclient.downloadhelper.Downloader;
-import com.azazo1.remotecontrolclient.downloadhelper.FileDetail;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -90,7 +87,7 @@ public class TestFragment extends Fragment {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = String.format(getString(R.string.command_test_format_string), JSON.toJSONString(text));
+            String command = String.format(getString(R.string.command_test_format), JSON.toJSONString(text));
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);

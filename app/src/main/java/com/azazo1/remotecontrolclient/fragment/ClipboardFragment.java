@@ -93,7 +93,7 @@ public class ClipboardFragment extends Fragment {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = String.format(getString(R.string.command_clipboard_format_string), JSON.toJSONString(action), JSON.toJSONString(content));
+            String command = String.format(getString(R.string.command_clipboard_format), JSON.toJSONString(action), JSON.toJSONString(content));
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);

@@ -36,7 +36,7 @@ public class Downloader {
         FileDetail detail = null;
         boolean sent = Global.client.sendCommand(
                 String.format(
-                        Global.activity.getString(R.string.command_file_detail_format_string),
+                        Global.activity.getString(R.string.command_file_detail_format),
                         JSON.toJSONString(targetFile)
                 )
         );
@@ -59,7 +59,7 @@ public class Downloader {
      */
     @Nullable
     public static CommandResult downloadPart(String path, long part) {
-        String command = Global.activity.getString(R.string.command_file_transport_get_format_string, JSON.toJSONString(path), part);
+        String command = Global.activity.getString(R.string.command_file_transport_get_format, JSON.toJSONString(path), part);
         boolean sent = Global.client.sendCommand(command);
         if (sent) {
             return Global.client.readCommandUntilGet();

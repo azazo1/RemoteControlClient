@@ -129,7 +129,7 @@ public class LockScreenFragment extends Fragment {
         if (maxWrongTimes.matches("^[0-9]+$")) {
             maxWrongTimesInt = Integer.parseInt(maxWrongTimes);
         }
-        return String.format(getString(R.string.command_lock_screen_format_string), JSON.toJSONString(password), maxWrongTimesInt);
+        return String.format(getString(R.string.command_lock_screen_format), JSON.toJSONString(password), maxWrongTimesInt);
     }
 
     private String getUnlockCommand() {

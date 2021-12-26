@@ -66,7 +66,7 @@
     <string name="lock_screen_fragment_title">Lock Screen</string>
     <string name="clipboard_fragment_title">Clipboard</string>
     <string name="download_button_text">Download</string>
-    <string name="file_info_alert_title">Infomation</string>
+    <string name="file_info_alert_title">Information</string>
     <string name="hint_for_info_filename">filename</string>
     <string name="hint_for_info_filepath">filepath</string>
     <string name="hint_for_info_file_size">filesize</string>
@@ -81,4 +81,14 @@
     <string name="download_successfully">Download Successfully!</string>
     <string name="verify_cancel_download">Cancel</string>
     <string name="verify_ok">OK</string>
+    <string name="surf_website_fragment_title">Surf Website</string>
+    <string name="surf_website_mode_toggle_default_text">Mode: Null</string>
+    <string name="surf_website_mode_toggle_search_text">Mode: Search</string>
+    <string name="surf_website_mode_toggle_url_text">Mode: Url</string>
+    <string name="nav_surf_website_title">Surf Website</string>
+    <string name="notice_invalid_browser_chosen">Chosen the invalid browser.\nWe used default.</string>
+    <string name="notice_get_browsers_retry">Retry to get browsers.</string>
+    <string name="hint_for_surf_website_url">Type url to surf here.</string>
+    <string name="hint_for_surf_website_default">Loading mode, please wait.</string>
+    <string name="hint_for_surf_website_search">Type the content to search here.</string>
 </resources>

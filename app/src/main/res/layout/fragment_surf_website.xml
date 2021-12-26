@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/fragment_padding"
+    tools:context=".fragment.SurfWebsiteFragment">
+
+    <CheckBox
+        android:id="@+id/surf_website_mode_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/surf_website_mode_toggle_default_text" />
+
+    <Spinner
+        android:id="@+id/browser_chooser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/content_input"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:autofillHints="content"
+        android:gravity="start|top"
+        android:hint="@string/hint_for_surf_website_default"
+        android:inputType="textUri" />
+
+    <Button
+        android:id="@+id/send_command_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:text="@string/send_command_button_text" />
+
+    <ProgressBar
+        android:id="@+id/getting_command_result_progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:max="100"
+        android:visibility="invisible" />
+</LinearLayout>

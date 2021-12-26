@@ -26,6 +26,7 @@ import com.azazo1.remotecontrolclient.fragment.CommandLineFragment;
 import com.azazo1.remotecontrolclient.fragment.DirFragment;
 import com.azazo1.remotecontrolclient.fragment.LockScreenFragment;
 import com.azazo1.remotecontrolclient.fragment.ShowTextFragment;
+import com.azazo1.remotecontrolclient.fragment.SurfWebsiteFragment;
 import com.azazo1.remotecontrolclient.fragment.TestFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -190,6 +191,8 @@ public class CommandingActivity extends AppCompatActivity {
                 fragmentSelected = new ClipboardFragment();
             } else if (id == R.id.nav_lock_screen) {
                 fragmentSelected = new LockScreenFragment();
+            } else if (id == R.id.nav_surf_website) {
+                fragmentSelected = new SurfWebsiteFragment();
             } else {
                 fragmentSelected = new CommandLineFragment();
             }

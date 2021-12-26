@@ -149,7 +149,7 @@ public class DirFragment extends Fragment {
     }
 
     public void explorePath(String path) {
-        String command = String.format(getString(R.string.command_dir_format_string), JSON.toJSONString(path));
+        String command = String.format(getString(R.string.command_dir_format), JSON.toJSONString(path));
         if (Global.client.sendCommand(command)) {
             CommandResult result = Global.client.readCommandUntilGet();
             resultAppearancePost(result);

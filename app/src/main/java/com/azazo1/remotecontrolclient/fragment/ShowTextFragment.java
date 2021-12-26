@@ -94,7 +94,7 @@ public class ShowTextFragment extends Fragment {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-            String command = String.format(getString(R.string.command_show_text_format_string), JSON.toJSONString(text), showTime);
+            String command = String.format(getString(R.string.command_show_text_format), JSON.toJSONString(text), showTime);
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommandUntilGet();
                 resultAppearancePost(result);

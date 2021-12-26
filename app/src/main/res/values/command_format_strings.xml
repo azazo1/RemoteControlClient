@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="command_test_format_string">{\"type\":\"test\",\"content\":%s}</string>
-    <string name="command_dir_format_string">{\"type\":\"dir\", \"path\":%s}</string>
+    <string name="command_test_format">{\"type\":\"test\",\"content\":%s}</string>
+    <string name="command_dir_format">{\"type\":\"dir\", \"path\":%s}</string>
     <string name="command_get_disks_string">{\"type\":\"getDisks\"}</string>
-    <string name="command_show_text_format_string">{\"type\":\"showText\",\"content\":%s,\"showTime\":%f}</string>
-    <string name="command_clipboard_format_string">{\"type\":\"clipboard\",\"action\":%s,\"content\":%s}</string>
+    <string name="command_show_text_format">{\"type\":\"showText\",\"content\":%s,\"showTime\":%f}</string>
+    <string name="command_clipboard_format">{\"type\":\"clipboard\",\"action\":%s,\"content\":%s}</string>
     <string name="command_unlock_screen_string">{\"type\":\"unlockScreen\"}</string>
-    <string name="command_lock_screen_format_string">{\"type\":\"lockScreen\",\"password\":%s,\"maxWrongTimes\":%d}</string>
-    <string name="command_file_detail_format_string">{\"type\":\"fileDetail\", \"path\":%s}</string>
-    <string name="command_file_transport_get_format_string">{\"type\":\"fileTransport\",\"action\":\"get\",\"path\":%s,\"part\":%d}</string>
+    <string name="command_lock_screen_format">{\"type\":\"lockScreen\",\"password\":%s,\"maxWrongTimes\":%d}</string>
+    <string name="command_file_detail_format">{\"type\":\"fileDetail\", \"path\":%s}</string>
+    <string name="command_file_transport_get_format">{\"type\":\"fileTransport\",\"action\":\"get\",\"path\":%s,\"part\":%d}</string>
+    <string name="command_surf_website_url_format">{\"type\":\"surfWebsite\",\"url\":%s,\"using\":%s}</string>
+    <string name="command_surf_website_search_format">{\"type\":\"surfWebsite\",\"search\":%s,\"using\":%s}</string>
+    <string name="command_get_browsers_string">{\"type\":\"getBrowsers\"}</string>
 </resources>
