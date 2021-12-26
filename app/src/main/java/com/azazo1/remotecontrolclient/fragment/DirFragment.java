@@ -42,7 +42,7 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// todo "下载" "启动" "远程文件复制与移动" 功能
+// todo "远程文件复制与移动" 功能
 public class DirFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
     private final List<FileObj> dirList = new Vector<>();
@@ -126,6 +126,13 @@ public class DirFragment extends Fragment {
                 name.setText(fileObj.name);
                 path.setText(fileObj.getTotalPath());
                 size.setText(String.valueOf(fileObj.size));
+                // prepare launch action
+                Button launchButton = layout.findViewById(R.id.launch_button);
+                EditText launchInput = layout.findViewById(R.id.launch_args_edit_text);
+                if (fileObj.type == FileObj.FileType.FILE) {
+                    launchButton.setVisibility(View.VISIBLE);
+                    launchButton.setOnClickListener((view) -> sendCommand(fileObj.getTotalPath(), launchInput.getText() + "", true));
+                }
                 // create alert
                 new AlertDialog.Builder(activity).setTitle(getString(R.string.file_info_alert_title))
                         .setView(layout).setIcon(image).setPositiveButton("OK", null).show();
@@ -138,6 +145,18 @@ public class DirFragment extends Fragment {
             }
         });
         progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void startProgram(@NonNull String path, @Nullable String args) {
+        if (args == null) {
+            args = "";
+        }
+        String command = String.format(getString(R.string.command_start_program_string),
+                JSON.toJSONString(path), JSON.toJSONString(args));
+        if (Global.client.sendCommand(command)) {
+            CommandResult result = Global.client.readCommandUntilGet();
+            resultAppearancePostOfLaunch(result);
+        }
     }
 
     private void fetchDisks() {
@@ -156,25 +175,35 @@ public class DirFragment extends Fragment {
         }
     }
 
-    public void sendCommand(FileObj obj) {
-        sendCommand(obj.getTotalPath());
+    public void sendCommand(@NonNull FileObj obj) {
+        sendCommand(obj.getTotalPath(), null, false);
     }
 
-    public void sendCommand(String path) {
+    public void sendCommand(@NonNull String path) {
+        sendCommand(path, null, false);
+    }
+
+    /**
+     * 担当浏览磁盘，浏览文件夹和启动程序的作用
+     * 当doStartProgram为真时，args才会起作用
+     */
+    public void sendCommand(@NonNull String path, @Nullable String args, boolean doStartProgram) {
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
-
-            nowPath = path; // 迭代
-
-            if (nowPath.equals("..") || nowPath.isEmpty()) { // 退出到了根目录
-                nowPath = "";
-                fetchDisks();
-            } else {
-                if (!nowPath.endsWith("/")) {
-                    nowPath += "/";
+            if (!doStartProgram) {
+                nowPath = path; // 迭代
+                if (nowPath.equals("..") || nowPath.isEmpty()) { // 退出到了根目录
+                    nowPath = "";
+                    fetchDisks();
+                } else {
+                    if (!nowPath.endsWith("/")) {
+                        nowPath += "/";
+                    }
+                    explorePath(nowPath);
                 }
-                explorePath(nowPath);
+            } else {
+                startProgram(path, args);
             }
             sending.set(false);
         });
@@ -232,6 +261,16 @@ public class DirFragment extends Fragment {
                 Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
                 sendCommand(new FileObj(nowPath, "..")); // 防止父目录丢失->递归退出
             }
+        });
+    }
+
+    private void resultAppearancePostOfLaunch(CommandResult result) {
+        activity.handler.post(() -> {
+            boolean succeed = false;
+            if (result != null && result.checkType(CommandResult.ResultType.INT)) {
+                succeed = result.getResultInt() == 1;
+            }
+            Toast.makeText(activity, succeed ? getString(R.string.succeed) : getString(R.string.failed), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -329,7 +368,6 @@ public class DirFragment extends Fragment {
                 ImageView icon = view.findViewById(R.id.file_icon_view);
                 TextView title = view.findViewById(R.id.file_title_view);
                 TextView subtitle = view.findViewById(R.id.file_subtitle_view);
-                // TODO: 2021/12/19 download action
                 ImageView downloadButton = view.findViewById(R.id.download_button);
                 switch (obj.type) {
                     case DISK: {

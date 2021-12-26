@@ -139,9 +139,7 @@ public class SurfWebsiteFragment extends Fragment {
             boolean succeed = false;
             if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
                 browsers.clear();
-                for (Object browser : result.getResultJsonArray().toArray()) {
-                    browsers.add((String) browser);
-                }
+                browsers.addAll(result.getResultJsonArray().toJavaList(String.class));
                 adapter.notifyDataSetChanged();
                 if (browsers.isEmpty()) {
                     Snackbar s = Snackbar.make(activity.findViewById(android.R.id.content), R.string.notice_get_browsers_retry, Snackbar.LENGTH_INDEFINITE);
@@ -151,7 +149,7 @@ public class SurfWebsiteFragment extends Fragment {
                     succeed = true;
                 }
             }
-            Toast.makeText(activity, "Get browsers " + (succeed ? "succeed" : "failed") + ".", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, String.format(getString(R.string.get_browsers_bool_format), (succeed ? getString(R.string.succeed) : getString(R.string.failed))), Toast.LENGTH_SHORT).show();
         });
     }
 

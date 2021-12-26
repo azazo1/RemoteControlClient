@@ -197,11 +197,11 @@ public class LockScreenFragment extends Fragment {
 
     private void resultAppearancePost(CommandResult result) {
         activity.handler.post(() -> {
-            String show = "failed";
+            String show = getString(R.string.failed);
             boolean succeed = false;
             if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
-                show = succeed ? "succeed" : "failed";
+                show = succeed ? getString(R.string.succeed) : show;
             }
             sendButton.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);

@@ -91,4 +91,8 @@
     <string name="hint_for_surf_website_url">Type url to surf here.</string>
     <string name="hint_for_surf_website_default">Loading mode, please wait.</string>
     <string name="hint_for_surf_website_search">Type the content to search here.</string>
+    <string name="succeed">Succeed</string>
+    <string name="failed">Failed</string>
+    <string name="get_browsers_bool_format">\"Get browsers %s\"</string>
+    <string name="hint_for_launch_args">Launch args (can empty).</string>
 </resources>

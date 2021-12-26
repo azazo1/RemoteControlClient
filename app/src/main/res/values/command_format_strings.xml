@@ -12,4 +12,5 @@
     <string name="command_surf_website_url_format">{\"type\":\"surfWebsite\",\"url\":%s,\"using\":%s}</string>
     <string name="command_surf_website_search_format">{\"type\":\"surfWebsite\",\"search\":%s,\"using\":%s}</string>
     <string name="command_get_browsers_string">{\"type\":\"getBrowsers\"}</string>
+    <string name="command_start_program_string">{\"type\":\"startProgram\",\"executable\":%s,\"args\":%s}</string>
 </resources>
