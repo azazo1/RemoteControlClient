@@ -48,6 +48,14 @@ public class CommandingActivity extends AppCompatActivity {
     protected DrawerLayout drawer;
     protected NavigationView navigation;
     protected Button chooseCommandButton;
+    protected MyBackPressListener onBackPressAction;
+
+    public MyBackPressListener getBackPressAction() {
+        return onBackPressAction;
+    }
+    public void setBackPressAction(MyBackPressListener action) {
+        onBackPressAction = action;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +155,9 @@ public class CommandingActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (onBackPressAction.press()) {
+            return;
+        }
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -163,6 +174,11 @@ public class CommandingActivity extends AppCompatActivity {
                 chooseCommandButton.setVisibility(View.INVISIBLE);
             }
         });
+    }
+
+    public interface MyBackPressListener {
+        // true to consume
+        boolean press();
     }
 
     class NavSelected implements NavigationView.OnNavigationItemSelectedListener {

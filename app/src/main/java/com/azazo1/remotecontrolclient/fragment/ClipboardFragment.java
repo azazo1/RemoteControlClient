@@ -1,7 +1,6 @@
 package com.azazo1.remotecontrolclient.fragment;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,13 +28,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClipboardFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
+    private long sendingStartTime;
     private CommandingActivity activity;
     private Button sendButton;
     private EditText clipboardText;
     private Thread sendingThread;
     private ProgressBar progressBar;
     private Spinner spinner;
-    private Drawable originOutputDrawable;
+    private int originButtonColor;
     private final View.OnClickListener sendListener = (View view) -> {
         String action = (String) spinner.getSelectedItem();
         String[] array = activity.getResources().getStringArray(R.array.clipboard_action_spinner_array);
@@ -81,15 +81,28 @@ public class ClipboardFragment extends Fragment {
     private void initView() {
         progressBar.setVisibility(View.INVISIBLE);
         sendButton.setOnClickListener(sendListener);
-        originOutputDrawable = clipboardText.getBackground();
+        originButtonColor = activity.getColor(R.color.generic_sending_button_bg);
+        sendButton.setBackgroundColor(originButtonColor);
     }
 
     private void resetView() {
-        sendButton.setOnClickListener(sendListener);
         progressBar.setVisibility(View.INVISIBLE);
     }
 
     public void sendCommand(String action, String content) {
+        if (sending.get()) {
+            if (Tools.getTimeInMilli() - sendingStartTime > Config.waitingTimeForTermination) { // 防止连点触发
+                Snackbar s = Snackbar.make(progressBar, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
+                s.setAction(R.string.verify_terminate, (view1) -> {
+                    sending.set(false);
+                    if (sendingThread != null && !sendingThread.isInterrupted()) {
+                        sendingThread.interrupt();
+                    }
+                });
+                s.show();
+            }
+            return;
+        }
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
@@ -105,7 +118,7 @@ public class ClipboardFragment extends Fragment {
     }
 
     private void whileSending() {
-        long startTime = Tools.getTimeInMilli();
+        sendingStartTime = Tools.getTimeInMilli();
         AtomicInteger progress = new AtomicInteger();
         activity.handler.postDelayed(new Runnable() {
             @Override
@@ -115,18 +128,6 @@ public class ClipboardFragment extends Fragment {
                     progressBar.setProgress(progress.getAndIncrement());
                     progress.compareAndSet(100, 0);
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                    sendButton.setOnClickListener((view) -> {
-                        if (Tools.getTimeInMilli() - startTime > Config.waitingTimeForTermination) { // 防止连点触发
-                            Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
-                            s.setAction(R.string.verify_terminate, (view1) -> {
-                                sending.set(false);
-                                if (sendingThread != null && !sendingThread.isInterrupted()) {
-                                    sendingThread.interrupt();
-                                }
-                            });
-                            s.show();
-                        }
-                    });
                 } else {
                     resetView();
                 }
@@ -135,6 +136,9 @@ public class ClipboardFragment extends Fragment {
     }
 
     private void resultAppearancePost(CommandResult result) {
+        if (!sending.get()) {
+            return;
+        }
         activity.handler.post(() -> {
             boolean succeed = false;
             if (result != null) {
@@ -154,8 +158,8 @@ public class ClipboardFragment extends Fragment {
                 }
 
             }
-            clipboardText.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
-            activity.handler.postDelayed(() -> clipboardText.setBackground(originOutputDrawable), 3000);
+            sendButton.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
+            activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originButtonColor), 3000);
         });
     }
 }
