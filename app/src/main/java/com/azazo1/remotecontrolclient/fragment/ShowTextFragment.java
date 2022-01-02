@@ -1,7 +1,6 @@
 package com.azazo1.remotecontrolclient.fragment;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,8 +34,9 @@ public class ShowTextFragment extends Fragment {
     private EditText showTextOutput;
     private Thread sendingThread;
     private ProgressBar progressBar;
-    private Drawable originOutputDrawable;
+    private int originOutputColor;
     private EditText showTimeInput;
+    private long sendingStartTime;
 
     public ShowTextFragment() {
         // Required empty public constructor
@@ -75,7 +75,7 @@ public class ShowTextFragment extends Fragment {
         showTimeInput.setText(String.valueOf(Config.defaultShowTextTime)); // 设置默认时间值
         sendButton.setOnClickListener((view) -> sendCommand());
         progressBar.setVisibility(View.INVISIBLE);
-        originOutputDrawable = showTextOutput.getBackground();
+        originOutputColor = activity.getColor(R.color.generic_sending_button_bg);
         showTimeInput.requestFocus();
     }
 
@@ -85,6 +85,20 @@ public class ShowTextFragment extends Fragment {
     }
 
     public void sendCommand() {
+        if (sending.get()) {
+            if (Tools.getTimeInMilli() - sendingStartTime > Config.waitingTimeForTermination) { // 防止连点触发
+
+                Snackbar s = Snackbar.make(progressBar, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
+                s.setAction(R.string.verify_terminate, (view1) -> {
+                    sending.set(false);
+                    if (sendingThread != null && !sendingThread.isInterrupted()) {
+                        sendingThread.interrupt();
+                    }
+                });
+                s.show();
+            }
+            return;
+        }
         String text = showTextInput.getText() + "";
         String timeText = showTimeInput.getText() + "";
         if (text.isEmpty() || timeText.isEmpty()) {
@@ -106,7 +120,7 @@ public class ShowTextFragment extends Fragment {
     }
 
     private void whileSending() {
-        long startTime = Tools.getTimeInMilli();
+        sendingStartTime = Tools.getTimeInMilli();
         AtomicInteger progress = new AtomicInteger();
         activity.handler.postDelayed(new Runnable() {
             @Override
@@ -116,19 +130,6 @@ public class ShowTextFragment extends Fragment {
                     progressBar.setProgress(progress.getAndIncrement());
                     progress.compareAndSet(100, 0);
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                    sendButton.setOnClickListener((view) -> {
-                        if (Tools.getTimeInMilli() - startTime > Config.waitingTimeForTermination) { // 防止连点触发
-
-                            Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
-                            s.setAction(R.string.verify_terminate, (view1) -> {
-                                sending.set(false);
-                                if (sendingThread != null && !sendingThread.isInterrupted()) {
-                                    sendingThread.interrupt();
-                                }
-                            });
-                            s.show();
-                        }
-                    });
                 } else {
                     resetView();
                 }
@@ -137,6 +138,9 @@ public class ShowTextFragment extends Fragment {
     }
 
     private void resultAppearancePost(CommandResult result) {
+        if (!sending.get()) {
+            return;
+        }
         activity.handler.post(() -> {
             String show = getString(R.string.failed);
             boolean succeed = false;
@@ -144,9 +148,9 @@ public class ShowTextFragment extends Fragment {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? getString(R.string.succeed) : show;
             }
-            showTextOutput.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
+            sendButton.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
             showTextOutput.setText(show);
-            activity.handler.postDelayed(() -> showTextOutput.setBackground(originOutputDrawable), 3000);
+            activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
         });
     }
 }

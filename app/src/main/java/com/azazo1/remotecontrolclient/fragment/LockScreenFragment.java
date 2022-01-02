@@ -44,6 +44,7 @@ public class LockScreenFragment extends Fragment {
     private Thread sendingThread;
     private State nowState = State.lock;
     private int originOutputColor;
+    private long sendingStartTime;
 
     public LockScreenFragment() {
         // Required empty public constructor
@@ -81,7 +82,7 @@ public class LockScreenFragment extends Fragment {
     }
 
     private void initView() {
-        originOutputColor = activity.getColor(R.color.lock_screen_button_bg);
+        originOutputColor = activity.getColor(R.color.generic_sending_button_bg);
         sendButton.setOnClickListener((view) -> this.sendCommand());
         sendButton.setBackgroundColor(originOutputColor);
         lockPasswordInput.setText("");
@@ -137,6 +138,19 @@ public class LockScreenFragment extends Fragment {
     }
 
     public void sendCommand() {
+        if (sending.get()) {
+            if (Tools.getTimeInMilli() - sendingStartTime > Config.waitingTimeForTermination) { // 防止连点触发
+                Snackbar s = Snackbar.make(progressBar, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
+                s.setAction(R.string.verify_terminate, (view1) -> {
+                    sending.set(false);
+                    if (sendingThread != null && !sendingThread.isInterrupted()) {
+                        sendingThread.interrupt();
+                    }
+                });
+                s.show();
+            }
+            return;
+        }
         // evaluate command
         String command = "";
         switch (nowState) {
@@ -166,7 +180,7 @@ public class LockScreenFragment extends Fragment {
     }
 
     private void whileSending() {
-        long startTime = Tools.getTimeInMilli();
+        sendingStartTime = Tools.getTimeInMilli();
         AtomicInteger progress = new AtomicInteger();
         activity.handler.postDelayed(new Runnable() {
             @Override
@@ -176,18 +190,7 @@ public class LockScreenFragment extends Fragment {
                     progressBar.setProgress(progress.getAndIncrement());
                     progress.compareAndSet(100, 0);
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                    sendButton.setOnClickListener((view) -> {
-                        if (Tools.getTimeInMilli() - startTime > Config.waitingTimeForTermination) { // 防止连点触发
-                            Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
-                            s.setAction(R.string.verify_terminate, (view1) -> {
-                                sending.set(false);
-                                if (sendingThread != null && !sendingThread.isInterrupted()) {
-                                    sendingThread.interrupt();
-                                }
-                            });
-                            s.show();
-                        }
-                    });
+
                 } else {
                     resetView();
                 }
@@ -196,6 +199,9 @@ public class LockScreenFragment extends Fragment {
     }
 
     private void resultAppearancePost(CommandResult result) {
+        if (!sending.get()) {
+            return;
+        }
         activity.handler.post(() -> {
             String show = getString(R.string.failed);
             boolean succeed = false;

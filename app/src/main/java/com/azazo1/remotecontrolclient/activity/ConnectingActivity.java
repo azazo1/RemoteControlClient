@@ -200,6 +200,7 @@ public class ConnectingActivity extends AppCompatActivity {
                 }
             });
             s.show();
+            return;
         }
         searchingThread = new Thread(() -> { // 寻找局域网可用地址
             try {

@@ -43,6 +43,7 @@ public class SurfWebsiteFragment extends Fragment {
     private Thread sendingThread;
     private boolean searchMode = false; // true to "search"; false to "url"
     private ProgressBar progressBar;
+    private long sendingStartTime;
 
     public SurfWebsiteFragment() {
         // Required empty public constructor
@@ -61,7 +62,7 @@ public class SurfWebsiteFragment extends Fragment {
         activity.handler.post(
                 () -> activity.getToolbar().setTitle(R.string.surf_website_fragment_title)
         );
-        originOutputColor = activity.getColor(R.color.surf_website_button_bg);
+        originOutputColor = activity.getColor(R.color.generic_sending_button_bg);
     }
 
     @Override
@@ -117,6 +118,19 @@ public class SurfWebsiteFragment extends Fragment {
     }
 
     public void sendCommand(String command, boolean isGetBrowsers) {
+        if (sending.get()) {
+            if (Tools.getTimeInMilli() - sendingStartTime > Config.waitingTimeForTermination) { // 防止连点触发
+                Snackbar s = Snackbar.make(progressBar, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
+                s.setAction(R.string.verify_terminate, (view1) -> {
+                    sending.set(false);
+                    if (sendingThread != null && !sendingThread.isInterrupted()) {
+                        sendingThread.interrupt();
+                    }
+                });
+                s.show();
+            }
+            return;
+        }
         sendingThread = new Thread(() -> {
             sending.set(true);
             whileSending();
@@ -132,25 +146,6 @@ public class SurfWebsiteFragment extends Fragment {
         });
         sendingThread.setDaemon(true);
         sendingThread.start();
-    }
-
-    private void resultAppearancePostOnBrowsers(CommandResult result) {
-        activity.handler.post(() -> {
-            boolean succeed = false;
-            if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
-                browsers.clear();
-                browsers.addAll(result.getResultJsonArray().toJavaList(String.class));
-                adapter.notifyDataSetChanged();
-                if (browsers.isEmpty()) {
-                    Snackbar s = Snackbar.make(activity.findViewById(android.R.id.content), R.string.notice_get_browsers_retry, Snackbar.LENGTH_INDEFINITE);
-                    s.setAction(R.string.verify_ok, (view) -> initBrowsers());
-                    s.show();
-                } else {
-                    succeed = true;
-                }
-            }
-            Toast.makeText(activity, String.format(getString(R.string.get_browsers_bool_format), (succeed ? getString(R.string.succeed) : getString(R.string.failed))), Toast.LENGTH_SHORT).show();
-        });
     }
 
     public void sendCommand() {
@@ -175,7 +170,7 @@ public class SurfWebsiteFragment extends Fragment {
     }
 
     private void whileSending() {
-        long startTime = Tools.getTimeInMilli();
+        sendingStartTime = Tools.getTimeInMilli();
         AtomicInteger progress = new AtomicInteger();
         activity.handler.postDelayed(new Runnable() {
             @Override
@@ -185,19 +180,6 @@ public class SurfWebsiteFragment extends Fragment {
                     progressBar.setProgress(progress.getAndIncrement());
                     progress.compareAndSet(100, 0);
                     activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                    sendButton.setOnClickListener((view) -> {
-                        if (Tools.getTimeInMilli() - startTime > Config.waitingTimeForTermination) { // 防止连点触发
-
-                            Snackbar s = Snackbar.make(view, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
-                            s.setAction(R.string.verify_terminate, (view1) -> {
-                                sending.set(false);
-                                if (sendingThread != null && !sendingThread.isInterrupted()) {
-                                    sendingThread.interrupt();
-                                }
-                            });
-                            s.show();
-                        }
-                    });
                 } else {
                     resetView();
                 }
@@ -205,7 +187,32 @@ public class SurfWebsiteFragment extends Fragment {
         }, (long) (1.0 / Config.loopingRate * 1000));
     }
 
+    private void resultAppearancePostOnBrowsers(CommandResult result) {
+        if (!sending.get()) {
+            return;
+        }
+        activity.handler.post(() -> {
+            boolean succeed = false;
+            if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
+                browsers.clear();
+                browsers.addAll(result.getResultJsonArray().toJavaList(String.class));
+                adapter.notifyDataSetChanged();
+                if (browsers.isEmpty()) {
+                    Snackbar s = Snackbar.make(activity.findViewById(android.R.id.content), R.string.notice_get_browsers_retry, Snackbar.LENGTH_INDEFINITE);
+                    s.setAction(R.string.verify_ok, (view) -> initBrowsers());
+                    s.show();
+                } else {
+                    succeed = true;
+                }
+            }
+            Toast.makeText(activity, String.format(getString(R.string.get_browsers_bool_format), (succeed ? getString(R.string.succeed) : getString(R.string.failed))), Toast.LENGTH_SHORT).show();
+        });
+    }
+
     private void resultAppearancePost(CommandResult result) {
+        if (!sending.get()) {
+            return;
+        }
         activity.handler.post(() -> {
             boolean succeed = false;
             if (result != null && result.checkType(CommandResult.ResultType.INT)) {
