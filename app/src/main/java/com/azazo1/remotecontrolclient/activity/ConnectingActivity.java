@@ -54,6 +54,7 @@ public class ConnectingActivity extends AppCompatActivity {
     private ProgressBar connectingProgressBar;
     private Thread searchingThread;
     private Thread connectingThread;
+    private EditText passwordEntry;
 
     @Override
     protected void onDestroy() {
@@ -77,8 +78,13 @@ public class ConnectingActivity extends AppCompatActivity {
         }
         String ip = ipEntry.getText().toString();
         String port = portEntry.getText().toString();
+        String password = passwordEntry.getText().toString();
+        if (password.isEmpty()) {
+            password = Config.key;
+        }
         if (!ip.isEmpty() && !port.isEmpty()) {
             int portInt = Integer.parseInt(port);
+            final String finalPassword = password;
             connectingThread = new Thread(() -> {
                 connectingRunning.set(true);
                 connectingProgressBarShow();
@@ -87,9 +93,9 @@ public class ConnectingActivity extends AppCompatActivity {
                         Global.client.close();
                     }
                     Global.client = new ClientSocket();
-                    Global.client.connect(new InetSocketAddress(ip, portInt));
+                    Global.client.connect(new InetSocketAddress(ip, portInt), finalPassword);
                     if (Global.client.isAvailable()) {
-                        onConnected(ip, portInt);
+                        onConnected(ip, portInt, finalPassword);
                     } else {
                         onConnectFailed(ip, portInt);
                         onAuthenticateFailed();
@@ -137,11 +143,11 @@ public class ConnectingActivity extends AppCompatActivity {
         });
     }
 
-    protected void onConnected(String ip, int port) {
+    protected void onConnected(String ip, int port, String password) {
         if (!connectingRunning.get()) { // 被中断
             return;
         }
-        saveAddress(ip, port);
+        saveAddress(ip, port, password);
         handler.post(() -> {
             Intent intent = new Intent(ConnectingActivity.this, CommandingActivity.class);
             intent.putExtra("ip", ip);
@@ -176,15 +182,17 @@ public class ConnectingActivity extends AppCompatActivity {
 
         ipEntry = findViewById(R.id.ip_entry);
         portEntry = findViewById(R.id.port_entry);
+        passwordEntry = findViewById(R.id.password_entry);
+        searchFAB = findViewById(R.id.search_fab);
         connectingFAB = findViewById(R.id.connecting_fab);
         connectingFAB.setOnClickListener((view) -> connect());
         searchingProgressBar = findViewById(R.id.searching_progress_bar);
         connectingProgressBar = findViewById(R.id.connecting_progress_bar);
-        searchFAB = findViewById(R.id.search_fab);
         searchFAB.setOnClickListener((view) -> search());
-        Pair<String, Integer> address = readAddress();
-        ipEntry.setText(address.first);
-        portEntry.setText(String.valueOf(address.second));
+        Pair<Pair<String, Integer>, String> lastUsed = readAddress();
+        ipEntry.setText(lastUsed.first.first);
+        portEntry.setText(String.valueOf(lastUsed.first.second));
+        passwordEntry.setText(lastUsed.second);
     }
 
     protected void search() {
@@ -230,7 +238,7 @@ public class ConnectingActivity extends AppCompatActivity {
     /**
      * 保存最近使用的IP地址
      */
-    private void saveAddress(String ip, int port) {
+    private void saveAddress(String ip, int port, String password) {
         File cache = getExternalCacheDir();
         File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
         try {
@@ -242,6 +250,7 @@ public class ConnectingActivity extends AppCompatActivity {
                 PrintWriter printer = new PrintWriter(new FileOutputStream(cacheFile));
                 printer.println(ip);
                 printer.println(port);
+                printer.println(password);
                 printer.close();
             }
         } catch (IOException e) {
@@ -250,13 +259,14 @@ public class ConnectingActivity extends AppCompatActivity {
     }
 
     /**
-     * 读取最近使用的IP地址
+     * 读取最近使用的IP地址与密码
      */
-    private Pair<String, Integer> readAddress() {
+    private Pair<Pair<String, Integer>, String> readAddress() {
         File cache = getExternalCacheDir();
         File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
         String ip = null;
-        int port = 2004;
+        String password = null;
+        int port = Config.serverPort;
         try {
             if (!cacheFile.exists()) {
                 //noinspection unused
@@ -266,10 +276,11 @@ public class ConnectingActivity extends AppCompatActivity {
                 BufferedReader reader = new BufferedReader(new FileReader(cacheFile));
                 ip = reader.readLine();
                 port = Integer.parseInt(reader.readLine());
+                password = reader.readLine();
             }
         } catch (IOException | NumberFormatException e) {
             e.printStackTrace();
         }
-        return new Pair<>(ip, port);
+        return new Pair<>(new Pair<>(ip, port), password);
     }
 }

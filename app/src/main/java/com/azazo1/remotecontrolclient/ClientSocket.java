@@ -94,9 +94,13 @@ public class ClientSocket {
     }
 
     public boolean authenticate() {
+        return authenticate(Config.key);
+    }
+
+    public boolean authenticate(String key) {
         if (authenticated == null) {
             long stamp = Tools.getTimeInMilli();
-            String concat = Config.name + Config.version + Config.key + stamp;
+            String concat = Config.name + Config.version + key + stamp;
             String encoded = Encryptor.md5(concat.getBytes(Config.charset));
             JSONObject obj = new JSONObject();
             obj.put("name", Config.name);
@@ -107,7 +111,11 @@ public class ClientSocket {
 
             String response = readLine();
             if (response != null) {
-                int responseCode = JSON.parseObject(response, int.class);
+                int responseCode = 0;
+                try {
+                    responseCode = JSON.parseObject(response, int.class);
+                } catch (Exception ignored) {
+                }
                 authenticated = responseCode == 1;
                 Log.i("Authenticate", "Authentication " + (authenticated ? "Succeed" : "Lost"));
             } else {
@@ -119,10 +127,14 @@ public class ClientSocket {
     }
 
     public boolean connect(InetSocketAddress address) throws IOException {
+        return connect(address, Config.key);
+    }
+
+    public boolean connect(InetSocketAddress address, String password) throws IOException {
         client.connect(address, Config.timeout);
         input = new MBufferedReader(new InputStreamReader(client.getInputStream(), Config.charset));
         output = new PrintWriter(client.getOutputStream());
-        return authenticate();
+        return authenticate(password);
     }
 
     public void sendRaw(String content) {

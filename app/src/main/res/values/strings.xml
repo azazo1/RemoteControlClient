@@ -95,4 +95,5 @@
     <string name="failed">Failed</string>
     <string name="get_browsers_bool_format">Get browsers %s</string>
     <string name="hint_for_launch_args">Launch args (can empty).</string>
+    <string name="connecting_password_entry_text">Password (default if empty).</string>
 </resources>
