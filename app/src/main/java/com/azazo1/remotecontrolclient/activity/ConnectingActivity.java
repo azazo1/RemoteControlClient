@@ -28,7 +28,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.util.Vector;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -97,12 +99,13 @@ public class ConnectingActivity extends AppCompatActivity {
                     if (Global.client.isAvailable()) {
                         onConnected(ip, portInt, finalPassword);
                     } else {
-                        onConnectFailed(ip, portInt);
                         onAuthenticateFailed();
                     }
+                } catch (SocketTimeoutException e) {
+                    onAuthenticateTimeOut();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    onConnectFailed(ip, portInt);
+                    onConnectFailed(ip, portInt, e.getMessage());
                 }
                 connectingRunning.set(false);
             });
@@ -111,6 +114,18 @@ public class ConnectingActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, R.string.noticeToComplete, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void onAuthenticateTimeOut() {
+        handler.post(() -> {
+            try {
+                Global.client.close();
+            } catch (NullPointerException ignore) {
+            }
+            Global.client = null;
+            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.authenticate_timeout), Snackbar.LENGTH_SHORT);
+            s.show();
+        });
     }
 
     private void connectingProgressBarShow() {
@@ -156,7 +171,7 @@ public class ConnectingActivity extends AppCompatActivity {
         });
     }
 
-    protected void onConnectFailed(String ip, int port) {
+    protected void onConnectFailed(String ip, int port, String message) {
         if (!connectingRunning.get()) { // 被中断
             return;
         }
@@ -166,7 +181,7 @@ public class ConnectingActivity extends AppCompatActivity {
                     } catch (NullPointerException ignore) {
                     }
                     Global.client = null;
-                    Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connect_fail) + " " + ip + ":" + port, Snackbar.LENGTH_LONG);
+                    Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connect_fail) + " [" + ip + "]:" + port + "\n" + message, Snackbar.LENGTH_LONG);
                     s.show();
                 }
         );

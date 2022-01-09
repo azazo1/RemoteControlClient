@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSON;
@@ -82,7 +83,7 @@ public class LockScreenFragment extends Fragment {
     }
 
     private void initView() {
-        originOutputColor = activity.getColor(R.color.generic_sending_button_bg);
+        originOutputColor = ContextCompat.getColor(activity, R.color.generic_sending_button_bg);
         sendButton.setOnClickListener((view) -> this.sendCommand());
         sendButton.setBackgroundColor(originOutputColor);
         lockPasswordInput.setText("");
@@ -209,7 +210,8 @@ public class LockScreenFragment extends Fragment {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? getString(R.string.succeed) : show;
             }
-            sendButton.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
+            int color = ContextCompat.getColor(activity, succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg);
+            sendButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
             Toast.makeText(activity, show, Toast.LENGTH_SHORT).show();
         });

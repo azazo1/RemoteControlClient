@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSON;
@@ -81,7 +82,7 @@ public class ClipboardFragment extends Fragment {
     private void initView() {
         progressBar.setVisibility(View.INVISIBLE);
         sendButton.setOnClickListener(sendListener);
-        originButtonColor = activity.getColor(R.color.generic_sending_button_bg);
+        originButtonColor = ContextCompat.getColor(activity, R.color.generic_sending_button_bg);
         sendButton.setBackgroundColor(originButtonColor);
     }
 
@@ -158,7 +159,8 @@ public class ClipboardFragment extends Fragment {
                 }
 
             }
-            sendButton.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
+            int color = ContextCompat.getColor(activity, succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg);
+            sendButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originButtonColor), 3000);
         });
     }

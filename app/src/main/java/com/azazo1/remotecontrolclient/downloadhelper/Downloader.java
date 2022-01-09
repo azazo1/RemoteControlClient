@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Downloader {
@@ -98,11 +99,9 @@ public class Downloader {
                 return result;
             } else if (state == 1) {
                 return result;
-            } else {
-                downloadPartUntilSuccess(path, part);
             }
         }
-        return downloadPartUntilSuccess(path, part);
+        return downloadPartUntilSuccess(path, part); // other failed session.
     }
 
     /**

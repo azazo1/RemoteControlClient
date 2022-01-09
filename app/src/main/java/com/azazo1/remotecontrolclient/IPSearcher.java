@@ -6,16 +6,13 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.Vector;
 
 public class IPSearcher {
