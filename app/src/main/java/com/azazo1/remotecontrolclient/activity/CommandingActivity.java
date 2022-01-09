@@ -150,6 +150,8 @@ public class CommandingActivity extends AppCompatActivity {
                 Global.client = new ClientSocket();
                 Global.client.connect(new InetSocketAddress(ip, port));
             } catch (IOException ignore) {
+            } catch (TimeoutException e) {
+                e.printStackTrace();
             }
             connectingRunning.set(false);
         });
