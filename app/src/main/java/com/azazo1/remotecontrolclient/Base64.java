@@ -240,7 +240,21 @@ public class Base64 {
         static final Encoder RFC4648 = new Encoder(false, null, -1, true);
         static final Encoder RFC4648_URLSAFE = new Encoder(true, null, -1, true);
         static final Encoder RFC2045 = new Encoder(false, CRLF, MIMELINEMAX, true);
-
+        public static int addExact(int x, int y) {
+            int r = x + y;
+            // HD 2-12 Overflow iff both arguments have the opposite sign of the result
+            if (((x ^ r) & (y ^ r)) < 0) {
+                throw new ArithmeticException("integer overflow");
+            }
+            return r;
+        }
+        public static int multiplyExact(int x, int y) {
+            long r = (long)x * (long)y;
+            if ((int)r != r) {
+                throw new ArithmeticException("integer overflow");
+            }
+            return (int)r;
+        }
         /**
          * Calculates the length of the encoded output bytes.
          *
@@ -255,13 +269,13 @@ public class Base64 {
             int len = 0;
             try {
                 if (doPadding) {
-                    len = Math.multiplyExact(4, (Math.addExact(srclen, 2) / 3));
+                    len = multiplyExact(4, (addExact(srclen, 2) / 3));
                 } else {
                     int n = srclen % 3;
-                    len = Math.addExact(Math.multiplyExact(4, (srclen / 3)), (n == 0 ? 0 : n + 1));
+                    len = addExact(multiplyExact(4, (srclen / 3)), (n == 0 ? 0 : n + 1));
                 }
                 if (linemax > 0) {                             // line separators
-                    len = Math.addExact(len, (len - 1) / linemax * newline.length);
+                    len = addExact(len, (len - 1) / linemax * newline.length);
                 }
             } catch (ArithmeticException ex) {
                 if (throwOOME) {

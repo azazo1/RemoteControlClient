@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSON;
@@ -21,6 +22,7 @@ import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -70,7 +72,7 @@ public class TestFragment extends Fragment {
     private void initView() {
         sendButton.setOnClickListener((view) -> sendCommand());
         progressBar.setVisibility(View.INVISIBLE);
-        originOutputColor = activity.getColor(R.color.generic_sending_button_bg);
+        originOutputColor = ContextCompat.getColor(activity, R.color.generic_sending_button_bg);
         testText.requestFocus();
     }
 
@@ -141,7 +143,8 @@ public class TestFragment extends Fragment {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? getString(R.string.succeed) : getString(R.string.failed);
             }
-            sendButton.setBackgroundColor(activity.getColor(succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg));
+            int color = ContextCompat.getColor(activity,succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg);
+            sendButton.setBackgroundColor(color);
             testOutput.setText(show);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
         });

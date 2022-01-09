@@ -2,6 +2,7 @@ package com.azazo1.remotecontrolclient.fragment;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.MyReporter;
 import com.azazo1.remotecontrolclient.R;
+import com.azazo1.remotecontrolclient.StringJoiner;
 import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
 import com.azazo1.remotecontrolclient.downloadhelper.Downloader;
@@ -38,8 +40,8 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.Vector;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -158,7 +160,11 @@ public class DirFragment extends Fragment {
                 EditText launchInput = layout.findViewById(R.id.launch_args_edit_text);
                 if (fileObj.type == FileObj.FileType.FILE) {
                     launchButton.setVisibility(View.VISIBLE);
+                    launchInput.setVisibility(View.VISIBLE);
                     launchButton.setOnClickListener((view) -> sendCommand(() -> startProgram(fileObj.getTotalPath(), launchInput.getText() + "")));
+                } else {
+                    launchButton.setVisibility(View.GONE);
+                    launchInput.setVisibility(View.GONE);
                 }
                 // create alert
                 new AlertDialog.Builder(activity).setTitle(getString(R.string.file_info_alert_title))
@@ -217,7 +223,8 @@ public class DirFragment extends Fragment {
     }
 
     public void downloadFile(@NonNull FileObj obj, @NonNull String storePath, @NonNull MyReporter mReporter) {
-        FileDetail fileDetail = Downloader.getFileDetail(obj.getTotalPath());
+        FileDetail fileDetail = null;
+        fileDetail = Downloader.getFileDetail(obj.getTotalPath());
         if (fileDetail != null && fileDetail.available) {
             boolean ignored = Downloader.plainDownloadFile(fileDetail, storePath, mReporter);
         } else {
@@ -490,7 +497,11 @@ public class DirFragment extends Fragment {
                                             progressStateOutput.setText(
                                                     String.format(getString(R.string.download_progress_format), progress, now, total)
                                             );
-                                            progressBar.setProgress((int) progress, true);
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                                progressBar.setProgress((int) progress, true);
+                                            } else {
+                                                progressBar.setProgress((int) progress); // 适配低版本安卓
+                                            }
                                         });
                                     } else {
                                         // successful end

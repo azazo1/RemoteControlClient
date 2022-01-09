@@ -33,8 +33,7 @@ class MBufferedReader extends BufferedReader {
         return alive;
     }
 
-    @Override
-    public String readLine() throws IOException {
+    public String mReadLine() throws IOException {
         String get;
         try {
             get = super.readLine();
@@ -91,6 +90,7 @@ public class ClientSocket {
             client.close();
         }
         client = new Socket();
+        client.setSoTimeout(Config.timeout);
     }
 
     public boolean authenticate() {
@@ -153,7 +153,7 @@ public class ClientSocket {
                 close();
                 return null;
             }
-            String line = input.readLine();
+            String line = input.mReadLine();
 //            if (line.equals("end")) { // ignore end
 //                return readLine();
 //            }

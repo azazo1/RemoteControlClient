@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -33,6 +34,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -53,6 +55,7 @@ public class CommandingActivity extends AppCompatActivity {
     public MyBackPressListener getBackPressAction() {
         return onBackPressAction;
     }
+
     public void setBackPressAction(MyBackPressListener action) {
         onBackPressAction = action;
     }
@@ -86,7 +89,8 @@ public class CommandingActivity extends AppCompatActivity {
 
     private void initActionBar() {
         setSupportActionBar(toolbar);
-        toolbar.setBackgroundColor(getColor(R.color.toolbar_commanding_bg));
+        int color = ContextCompat.getColor(this, R.color.toolbar_commanding_bg);
+        toolbar.setBackgroundColor(color);
     }
 
     private void initDrawerAndNavigation() {
