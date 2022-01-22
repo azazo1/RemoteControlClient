@@ -12,5 +12,10 @@
     <string name="command_surf_website_url_format">{\"type\":\"surfWebsite\",\"url\":%s,\"using\":%s}</string>
     <string name="command_surf_website_search_format">{\"type\":\"surfWebsite\",\"search\":%s,\"using\":%s}</string>
     <string name="command_get_browsers_string">{\"type\":\"getBrowsers\"}</string>
-    <string name="command_start_program_string">{\"type\":\"startProgram\",\"executable\":%s,\"args\":%s}</string>
+    <string name="command_start_file_format">{\"type\":\"startFile\",\"file\":%s}</string>
+    <string name="command_query_process_all_string">{\"type\":\"queryProcess\",\"all\":true}</string>
+    <string name="command_query_process_pid_format">{\"type\":\"queryProcess\",\"all\":false,\"pid\":%d}</string>
+    <string name="command_query_process_name_format">{\"type\":\"queryProcess\",\"all\":false,\"name\":%s}</string>
+    <string name="command_close_process_pid_format">{\"type\":\"closeProgram\",\"pid\":%d}</string>
+    <string name="command_close_process_name_format">{\"type\":\"closeProgram\",\"name\":%s}</string>
 </resources>

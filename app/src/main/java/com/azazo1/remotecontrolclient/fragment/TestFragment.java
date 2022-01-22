@@ -29,13 +29,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TestFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
     private CommandingActivity activity;
-    private Button sendButton;
-    private EditText testText;
-    private EditText testOutput;
+    private long sendingStartTime;
     private Thread sendingThread;
     private ProgressBar progressBar;
+    private Button sendButton;
     private int originOutputColor;
-    private long sendingStartTime;
+    private EditText testText;
+    private EditText testOutput;
 
     public TestFragment() {
         // Required empty public constructor

@@ -163,6 +163,7 @@ public class ConnectingActivity extends AppCompatActivity {
         }
         saveAddress(ip, port, password);
         handler.post(() -> {
+            Config.key = password;
             Intent intent = new Intent(ConnectingActivity.this, CommandingActivity.class);
             intent.putExtra("ip", ip);
             intent.putExtra("port", port);

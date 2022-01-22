@@ -25,6 +25,10 @@
         android:icon="@drawable/surf_website"
         android:title="@string/nav_surf_website_title" />
     <item
+        android:id="@+id/nav_process_manager"
+        android:icon="@drawable/process_manager"
+        android:title="@string/nav_process_manager_title"/>
+    <item
         android:id="@+id/nav_test"
         android:title="@string/nav_test_title" />
 

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/fragment_padding">
+
+    <Button
+        android:id="@+id/kill_process_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="4"
+        android:layout_column="1"
+        android:text="@string/kill_process_button_text" />
+
+    <EditText
+        android:id="@+id/image_name_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="0"
+        android:layout_column="1"
+        android:autofillHints=" "
+        android:ems="10"
+        android:inputType="text" />
+
+    <TextView
+        android:id="@+id/image_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="0"
+        android:layout_column="0"
+        android:text="@string/process_list_header_image_name_text" />
+
+    <TextView
+        android:id="@+id/pid_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="1"
+        android:layout_column="0"
+        android:text="@string/process_list_header_pid_text" />
+
+    <EditText
+        android:id="@+id/pid_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="1"
+        android:layout_column="1"
+        android:autofillHints=" "
+        android:ems="10"
+        android:inputType="numberDecimal" />
+
+    <TextView
+        android:id="@+id/session_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="2"
+        android:layout_column="0"
+        android:text="@string/process_list_header_session_name_text" />
+
+    <EditText
+        android:id="@+id/session_name_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="2"
+        android:layout_column="1"
+        android:autofillHints=" "
+        android:ems="10"
+        android:inputType="text" />
+
+    <TextView
+        android:id="@+id/memory_usage_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="3"
+        android:layout_column="0"
+        android:text="@string/process_list_header_memory_usage_text" />
+
+    <EditText
+        android:id="@+id/memory_usage_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="3"
+        android:layout_column="1"
+        android:autofillHints=" "
+        android:ems="10"
+        android:inputType="text" />
+</GridLayout>

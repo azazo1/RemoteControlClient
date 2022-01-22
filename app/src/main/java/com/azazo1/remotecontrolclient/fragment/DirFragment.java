@@ -41,7 +41,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -157,18 +156,15 @@ public class DirFragment extends Fragment {
                 size.setText(String.valueOf(fileObj.size));
                 // prepare launch action
                 Button launchButton = layout.findViewById(R.id.launch_button);
-                EditText launchInput = layout.findViewById(R.id.launch_args_edit_text);
                 if (fileObj.type == FileObj.FileType.FILE) {
                     launchButton.setVisibility(View.VISIBLE);
-                    launchInput.setVisibility(View.VISIBLE);
-                    launchButton.setOnClickListener((view) -> sendCommand(() -> startProgram(fileObj.getTotalPath(), launchInput.getText() + "")));
+                    launchButton.setOnClickListener((view) -> sendCommand(() -> startFile(fileObj.getTotalPath())));
                 } else {
                     launchButton.setVisibility(View.GONE);
-                    launchInput.setVisibility(View.GONE);
                 }
                 // create alert
                 new AlertDialog.Builder(activity).setTitle(getString(R.string.file_info_alert_title))
-                        .setView(layout).setIcon(image).setPositiveButton("OK", null).show();
+                        .setView(layout).setIcon(image).setPositiveButton(R.string.verify_ok, null).show();
             }
             return true;
         });
@@ -180,12 +176,9 @@ public class DirFragment extends Fragment {
         progressBar.setVisibility(View.INVISIBLE);
     }
 
-    private void startProgram(@NonNull String path, @Nullable String args) {
-        if (args == null) {
-            args = "";
-        }
-        String command = String.format(getString(R.string.command_start_program_string),
-                JSON.toJSONString(path), JSON.toJSONString(args));
+    private void startFile(@NonNull String path) {
+        String command = String.format(getString(R.string.command_start_file_format),
+                JSON.toJSONString(path));
         if (Global.client.sendCommand(command)) {
             CommandResult result = Global.client.readCommandUntilGet();
             resultAppearancePostOfLaunch(result);

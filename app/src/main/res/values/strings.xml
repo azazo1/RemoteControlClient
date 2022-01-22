@@ -94,7 +94,16 @@
     <string name="succeed">Succeed</string>
     <string name="failed">Failed</string>
     <string name="get_browsers_bool_format">Get browsers %s</string>
-    <string name="hint_for_launch_args">Launch args (can empty).</string>
     <string name="connecting_password_entry_text">Password (default if empty).</string>
     <string name="authenticate_timeout">Authenticate timeout, please retry.</string>
+    <string name="hint_for_process_search">Process\'s name or ID to search.</string>
+    <string name="process_search_button_text">Search</string>
+    <string name="process_manager_fragment_title">Process Manager</string>
+    <string name="nav_process_manager_title">Process Manager</string>
+    <string name="process_list_header_image_name_text">Image Name</string>
+    <string name="process_list_header_session_name_text">Session Name</string>
+    <string name="process_list_header_pid_text">PID</string>
+    <string name="process_list_header_memory_usage_text">Memory Usage (KB)</string>
+    <string name="kill_process_button_text">Kill</string>
+    <string name="sorting_succeed">Sorting Succeed.</string>
 </resources>

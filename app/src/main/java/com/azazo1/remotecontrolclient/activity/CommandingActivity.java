@@ -26,6 +26,7 @@ import com.azazo1.remotecontrolclient.fragment.ClipboardFragment;
 import com.azazo1.remotecontrolclient.fragment.CommandLineFragment;
 import com.azazo1.remotecontrolclient.fragment.DirFragment;
 import com.azazo1.remotecontrolclient.fragment.LockScreenFragment;
+import com.azazo1.remotecontrolclient.fragment.ProcessManagerFragment;
 import com.azazo1.remotecontrolclient.fragment.ShowTextFragment;
 import com.azazo1.remotecontrolclient.fragment.SurfWebsiteFragment;
 import com.azazo1.remotecontrolclient.fragment.TestFragment;
@@ -34,7 +35,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -150,8 +150,6 @@ public class CommandingActivity extends AppCompatActivity {
                 Global.client = new ClientSocket();
                 Global.client.connect(new InetSocketAddress(ip, port));
             } catch (IOException ignore) {
-            } catch (TimeoutException e) {
-                e.printStackTrace();
             }
             connectingRunning.set(false);
         });
@@ -215,6 +213,8 @@ public class CommandingActivity extends AppCompatActivity {
                 fragmentSelected = new LockScreenFragment();
             } else if (id == R.id.nav_surf_website) {
                 fragmentSelected = new SurfWebsiteFragment();
+            } else if (id == R.id.nav_process_manager) {
+                fragmentSelected = new ProcessManagerFragment();
             } else {
                 fragmentSelected = new CommandLineFragment();
             }
