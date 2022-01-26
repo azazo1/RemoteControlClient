@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.azazo1.remotecontrolclient.CommandResult;
+import com.azazo1.remotecontrolclient.CommandResultHandler;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
@@ -31,20 +32,64 @@ public class ClipboardFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
     private long sendingStartTime;
     private CommandingActivity activity;
-    private Button sendButton;
+    private Button clearButton;
+    private Button getButton;
+    private Button setButton;
     private EditText clipboardText;
     private Thread sendingThread;
     private ProgressBar progressBar;
-    private Spinner spinner;
-    private int originButtonColor;
-    private final View.OnClickListener sendListener = (View view) -> {
-        String action = (String) spinner.getSelectedItem();
-        String[] array = activity.getResources().getStringArray(R.array.clipboard_action_spinner_array);
-        if (action.equals(array[0]) || action.equals(array[1])) {
-            sendCommand(action, "");
-        } else if (action.equals(array[2])) {
-            sendCommand(action, clipboardText.getText() + "");
+    private int originSetButtonColor;
+    private final CommandResultHandler resultHandler_set = (CommandResult result) -> {
+        if (!sending.get()) {
+            return;
         }
+        activity.handler.post(() -> {
+            boolean succeed = false;
+            if (result != null && result.checkType(CommandResult.ResultType.INT)) {
+                succeed = result.getResultInt() == 1;
+            }
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            setButton.setBackgroundColor(color);
+            activity.handler.postDelayed(() -> setButton.setBackgroundColor(originSetButtonColor), 3000);
+            Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
+        });
+    };
+    private int originGetButtonColor;
+    private final CommandResultHandler resultHandler_get = (CommandResult result) -> {
+        if (!sending.get()) {
+            return;
+        }
+        activity.handler.post(() -> {
+            boolean succeed = false;
+            if (result != null && result.checkType(CommandResult.ResultType.JSON_OBJECT)) {
+                JSONObject obj = result.getResultJsonObject();
+                String content = obj.getString("content");
+                if (content != null) {
+                    clipboardText.setText(content);
+                    succeed = true;
+                }
+            }
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            getButton.setBackgroundColor(color);
+            activity.handler.postDelayed(() -> getButton.setBackgroundColor(originGetButtonColor), 3000);
+            Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
+        });
+    };
+    private int originClearButtonColor;
+    private final CommandResultHandler resultHandler_clear = (CommandResult result) -> {
+        if (!sending.get()) {
+            return;
+        }
+        activity.handler.post(() -> {
+            boolean succeed = false;
+            if (result != null && result.checkType(CommandResult.ResultType.INT)) {
+                succeed = result.getResultInt() == 1;
+            }
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            clearButton.setBackgroundColor(color);
+            activity.handler.postDelayed(() -> clearButton.setBackgroundColor(originClearButtonColor), 3000);
+            Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
+        });
     };
 
     public ClipboardFragment() {
@@ -71,8 +116,9 @@ public class ClipboardFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View get = inflater.inflate(R.layout.fragment_clipboard, container, false);
-        sendButton = get.findViewById(R.id.send_command_button);
-        spinner = get.findViewById(R.id.clipboard_action_spinner);
+        setButton = get.findViewById(R.id.clipboard_set_button);
+        getButton = get.findViewById(R.id.clipboard_get_button);
+        clearButton = get.findViewById(R.id.clipboard_clear_button);
         clipboardText = get.findViewById(R.id.clipboard_text);
         progressBar = get.findViewById(R.id.getting_command_result_progress_bar);
         initView();
@@ -81,16 +127,22 @@ public class ClipboardFragment extends Fragment {
 
     private void initView() {
         progressBar.setVisibility(View.INVISIBLE);
-        sendButton.setOnClickListener(sendListener);
-        originButtonColor = ContextCompat.getColor(activity, R.color.generic_sending_button_bg);
-        sendButton.setBackgroundColor(originButtonColor);
+        originSetButtonColor = ContextCompat.getColor(activity, R.color.clipboard_set_button_bg);
+        originGetButtonColor = ContextCompat.getColor(activity, R.color.clipboard_get_button_bg);
+        originClearButtonColor = ContextCompat.getColor(activity, R.color.clipboard_clear_button_bg);
+        setButton.setBackgroundColor(originSetButtonColor);
+        getButton.setBackgroundColor(originGetButtonColor);
+        clearButton.setBackgroundColor(originClearButtonColor);
+        setButton.setOnClickListener((view) -> sendCommand("set", clipboardText.getText() + "", resultHandler_set));
+        getButton.setOnClickListener((view) -> sendCommand("get", "", resultHandler_get));
+        clearButton.setOnClickListener((view) -> sendCommand("clear", "", resultHandler_clear));
     }
 
     private void resetView() {
         progressBar.setVisibility(View.INVISIBLE);
     }
 
-    public void sendCommand(String action, String content) {
+    public void sendCommand(String action, String content, CommandResultHandler handler) {
         if (sending.get()) {
             if (Tools.getTimeInMilli() - sendingStartTime > Config.waitingTimeForTermination) { // 防止连点触发
                 Snackbar s = Snackbar.make(progressBar, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
@@ -110,7 +162,7 @@ public class ClipboardFragment extends Fragment {
             String command = String.format(getString(R.string.command_clipboard_format), JSON.toJSONString(action), JSON.toJSONString(content));
             if (Global.client.sendCommand(command)) {
                 CommandResult result = Global.client.readCommandUntilGet();
-                resultAppearancePost(result);
+                handler.resultAppearancePost(result);
             }
             sending.set(false);
         });
@@ -134,34 +186,5 @@ public class ClipboardFragment extends Fragment {
                 }
             }
         }, (long) (1.0 / Config.loopingRate * 1000));
-    }
-
-    private void resultAppearancePost(CommandResult result) {
-        if (!sending.get()) {
-            return;
-        }
-        activity.handler.post(() -> {
-            boolean succeed = false;
-            if (result != null) {
-                switch (result.getType()) {
-                    case INT:
-                        succeed = result.getResultInt() == 1;
-                        break;
-                    case JSON_OBJECT:
-                        JSONObject obj = result.getResultJsonObject();
-                        String content = obj.getString("content");
-                        if (content != null) {
-                            clipboardText.setText(content);
-                            succeed = true;
-                        }
-                        break;
-                    default:
-                }
-
-            }
-            int color = ContextCompat.getColor(activity, succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg);
-            sendButton.setBackgroundColor(color);
-            activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originButtonColor), 3000);
-        });
     }
 }

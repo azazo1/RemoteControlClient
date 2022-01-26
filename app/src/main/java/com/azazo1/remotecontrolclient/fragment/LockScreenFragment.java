@@ -210,7 +210,7 @@ public class LockScreenFragment extends Fragment {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? getString(R.string.succeed) : show;
             }
-            int color = ContextCompat.getColor(activity, succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg);
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
             sendButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
             Toast.makeText(activity, show, Toast.LENGTH_SHORT).show();

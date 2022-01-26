@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -27,7 +28,6 @@ import com.azazo1.remotecontrolclient.activity.CommandingActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Vector;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,7 +41,7 @@ public class SurfWebsiteFragment extends Fragment {
     private Button sendButton;
     private EditText contentInput;
     private Spinner browserChooser;
-    private CheckBox modeToggle;
+    private ToggleButton modeToggle;
     private Thread sendingThread;
     private boolean searchMode = false; // true to "search"; false to "url"
     private ProgressBar progressBar;
@@ -220,7 +220,7 @@ public class SurfWebsiteFragment extends Fragment {
             if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
             }
-            int color = ContextCompat.getColor(activity,succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg);
+            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
             sendButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
             Toast.makeText(activity, succeed ? "succeed" : "failed", Toast.LENGTH_SHORT).show();

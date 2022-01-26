@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -216,7 +217,7 @@ public class DirFragment extends Fragment {
     }
 
     public void downloadFile(@NonNull FileObj obj, @NonNull String storePath, @NonNull MyReporter mReporter) {
-        FileDetail fileDetail = null;
+        FileDetail fileDetail;
         fileDetail = Downloader.getFileDetail(obj.getTotalPath());
         if (fileDetail != null && fileDetail.available) {
             boolean ignored = Downloader.plainDownloadFile(fileDetail, storePath, mReporter);
@@ -466,8 +467,11 @@ public class DirFragment extends Fragment {
                         downloadButton.setOnClickListener((view1) -> {
                             // ask store path
                             EditText storePathText = new EditText(activity);
-                            storePathText.setText(activity.getExternalCacheDir().toString().concat(File.separator).concat(obj.name));
-                            new AlertDialog.Builder(activity).setTitle("Store Path").setCancelable(false).setView(storePathText).setNegativeButton(R.string.verify_cancel_download, null).setCancelable(false).setPositiveButton(R.string.verify_ok, (dialog, which) -> {
+                            storePathText.setText(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString().concat(File.separator).concat(obj.name));
+                            new AlertDialog.Builder(activity).setTitle("Store Path")
+                                    .setCancelable(false).setView(storePathText)
+                                    .setNegativeButton(R.string.verify_cancel_download, null).setCancelable(false)
+                                    .setPositiveButton(R.string.verify_ok, (dialog, which) -> {
                                 // get path
                                 String storePath = "" + storePathText.getText();
                                 if (storePath.isEmpty()) {

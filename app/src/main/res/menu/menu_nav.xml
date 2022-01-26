@@ -1,35 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/nav_command_line"
-        android:icon="@drawable/command_line"
-        android:title="@string/nav_command_line_title" />
-    <item
-        android:id="@+id/nav_lock_screen"
-        android:icon="@drawable/lock_screen"
-        android:title="@string/nav_lock_screen_title" />
-    <item
-        android:id="@+id/nav_dir"
-        android:icon="@drawable/dir"
-        android:title="@string/nav_dir_title" />
-    <item
-        android:id="@+id/nav_show_text"
-        android:icon="@drawable/show_text"
-        android:title="@string/nav_show_text_title" />
-    <item
-        android:id="@+id/nav_clipboard"
-        android:icon="@drawable/clipboard"
-        android:title="@string/nav_clipboard_title" />
-    <item
-        android:id="@+id/nav_surf_website"
-        android:icon="@drawable/surf_website"
-        android:title="@string/nav_surf_website_title" />
-    <item
-        android:id="@+id/nav_process_manager"
-        android:icon="@drawable/process_manager"
-        android:title="@string/nav_process_manager_title"/>
-    <item
-        android:id="@+id/nav_test"
-        android:title="@string/nav_test_title" />
+    <item android:title="@string/basic_nav_group_title">
+        <menu>
+            <item
+                android:id="@+id/nav_command_line"
+                android:icon="@drawable/command_line"
+                android:title="@string/nav_command_line_title" />
+            <item
+                android:id="@+id/nav_test"
+                android:icon="@drawable/test"
+                android:title="@string/nav_test_title" />
+
+        </menu>
+    </item>
+
+    <item android:title="@string/function_nav_group_title">
+        <menu>
+            <item
+                android:id="@+id/nav_lock_screen"
+                android:icon="@drawable/lock_screen"
+                android:title="@string/nav_lock_screen_title" />
+            <item
+                android:id="@+id/nav_clipboard"
+                android:icon="@drawable/clipboard"
+                android:title="@string/nav_clipboard_title" />
+            <item
+                android:id="@+id/nav_show_text"
+                android:icon="@drawable/show_text"
+                android:title="@string/nav_show_text_title" />
+            <item
+                android:id="@+id/nav_surf_website"
+                android:icon="@drawable/surf_website"
+                android:title="@string/nav_surf_website_title" />
+        </menu>
+    </item>
+
+    <item android:title="@string/list_nav_group_title">
+        <menu>
+            <item
+                android:id="@+id/nav_dir"
+                android:icon="@drawable/dir"
+                android:title="@string/nav_dir_title" />
+            <item
+                android:id="@+id/nav_process_manager"
+                android:icon="@drawable/process_manager"
+                android:title="@string/nav_process_manager_title" />
+        </menu>
+    </item>
+
 
 </menu>

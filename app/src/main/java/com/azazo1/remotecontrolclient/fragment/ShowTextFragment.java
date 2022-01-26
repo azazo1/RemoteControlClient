@@ -22,7 +22,6 @@ import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -150,7 +149,7 @@ public class ShowTextFragment extends Fragment {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? getString(R.string.succeed) : show;
             }
-            int color = ContextCompat.getColor(activity,succeed ? R.color.test_output_succeed_bg : R.color.test_output_failed_bg);
+            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
             sendButton.setBackgroundColor(color);
             showTextOutput.setText(show);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);

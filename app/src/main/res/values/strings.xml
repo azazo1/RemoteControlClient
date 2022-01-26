@@ -5,7 +5,7 @@
     <string name="connecting_ip_entry_text">IP address</string>
     <string name="connecting_port_entry_text">Port</string>
     <string name="commanding_toolbar_text">Choose a command.</string>
-    <string name="noticeToComplete">Please complete all of them!</string>
+    <string name="notice_to_complete">Please complete all of them!</string>
     <string name="search_fab_text">Search local ip</string>
     <string name="searchingNoResult">Sorry, I can\'t find a local server.</string>
     <string name="no_command_fragment_notice">Please choose a command.</string>
@@ -37,9 +37,9 @@
     <string name="notice_searching_running">Searching still running, please wait.</string>
     <string name="nav_dir_title">Dir</string>
     <string name="dir_fragment_title">Dir</string>
-    <string name="authenticate_failed">Invalid session, authenticate failed. \nOr you can check your version.</string>
+    <string name="authenticate_failed">Invalid session, authenticate failed.\nYou can check your password.\nOr you can check your version.</string>
     <string name="show_text_fragment_title">ShowText</string>
-    <string name="hint_for_show_time">Show time(milli), don\'t be too long.</string>
+    <string name="hint_for_show_time">Show time(milli)</string>
     <string name="nav_show_text_title">Show Text</string>
     <string name="hint_for_show_text_input">Write some message to show</string>
     <string name="file_subtitle_format">Size:%,d B</string>
@@ -49,12 +49,6 @@
     <string name="hint_for_path_selector">Type path to explorer.</string>
     <string name="notice_invalid_path">Invalid path.</string>
     <string name="select_path_button_text"><![CDATA[->]]></string>
-    <string-array name="clipboard_action_spinner_array">
-        <!--按字母"顺"序, 在 ClipboardFragment 类中用到 (clear get set)-->
-        <item name='clear'>clear</item>
-        <item name='get'>get</item>
-        <item name='set'>set</item>
-    </string-array>
     <string name="nav_clipboard_title">Clipboard</string>
     <string name="hint_for_clipboard_text">edit(set) or result will be here(get).</string>
     <string name="clipboard_send_command_button_text">Do</string>
@@ -95,7 +89,7 @@
     <string name="failed">Failed</string>
     <string name="get_browsers_bool_format">Get browsers %s</string>
     <string name="connecting_password_entry_text">Password (default if empty).</string>
-    <string name="authenticate_timeout">Authenticate timeout, please retry.</string>
+    <string name="connecting_timeout">Connecting timeout, please retry.</string>
     <string name="hint_for_process_search">Process\'s name or ID to search.</string>
     <string name="process_search_button_text">Search</string>
     <string name="process_manager_fragment_title">Process Manager</string>
@@ -106,4 +100,11 @@
     <string name="process_list_header_memory_usage_text">Memory Usage (KB)</string>
     <string name="kill_process_button_text">Kill</string>
     <string name="sorting_succeed">Sorting Succeed.</string>
+    <string name="clipboard_clear_button_text">Clear</string>
+    <string name="clipboard_get_button_text">Get</string>
+    <string name="clipboard_set_button_text">Set</string>
+    <string name="list_nav_group_title">In List</string>
+    <string name="function_nav_group_title">Function</string>
+    <string name="basic_nav_group_title">Basic</string>
+    <string name="notice_to_correct_port">Please correct the port.</string>
 </resources>

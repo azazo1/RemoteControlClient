@@ -16,11 +16,12 @@ import java.util.List;
 import java.util.Vector;
 
 public class IPSearcher {
-    public static final int targetPort = Config.serverPort;
+    public int targetPort;
     public MyReporter reporter;
     public ThreadIPDetector tpd;
 
-    public IPSearcher(@Nullable MyReporter reporter) {
+    public IPSearcher(@Nullable MyReporter reporter, int targetPort) {
+        this.targetPort = targetPort;
         if (reporter != null) {
             this.reporter = reporter;
         } else {
@@ -36,7 +37,11 @@ public class IPSearcher {
             } else {
                 System.out.println();
             }
-        }).searchAndReport();
+        }, Config.serverPort).searchAndReport();
+    }
+
+    public void setTargetPort(int targetPort) {
+        this.targetPort = targetPort;
     }
 
     public Vector<String> searchAndReport() throws IOException {
@@ -79,7 +84,7 @@ public class IPSearcher {
         }
         IpGenerator ipGen = new IpGenerator(host, mask);
         Log.i("Search", "Get local address successfully. \nHost:" + host + ", Mask: " + mask + ". " + " \nUsing threads to find target host...");
-        tpd = new ThreadIPDetector(ipGen, reporter);
+        tpd = new ThreadIPDetector(ipGen, targetPort, reporter);
         tpd.start();
         return tpd.availableHosts;
     }
@@ -93,16 +98,18 @@ public class IPSearcher {
 }
 
 class ThreadIPDetector implements Runnable {
+    private final int targetPort;
     public IpGenerator ipGen;
     public Vector<String> availableHosts;
     public MyReporter reporter;
     private boolean alive = true;
     private boolean stopped = false;
 
-    public ThreadIPDetector(IpGenerator ipGen, MyReporter reporter) {
+    public ThreadIPDetector(IpGenerator ipGen, int port, MyReporter reporter) {
         this.ipGen = ipGen;
         this.reporter = reporter;
         availableHosts = new Vector<>();
+        this.targetPort = port;
     }
 
     public boolean isStopped() {
@@ -136,14 +143,15 @@ class ThreadIPDetector implements Runnable {
     public boolean tryAddress(String host) { // 判断地址是否有效
         try {
             InetAddress address = InetAddress.getByName(host);
-            String ip = address.getHostAddress();
-            InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, IPSearcher.targetPort);
+            String ip = address.getHostAddress(); // eg: www.baidu.com -> xxx.xxx.xxx.xxx
+            InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, targetPort);
             Socket socket = new Socket();
             socket.connect(targetAddressWithPort, Config.timeout);
             socket.close();
-            Log.e("Search", "Reached: " + address.getHostAddress());
+            Log.e("Search", "Reached: " + ip);
             return true;
-        } catch (IOException ignore) {
+        } catch (IOException e) {
+            Log.e("Search", "Failed: " + host + e.getMessage());
         }
         return false;
     }

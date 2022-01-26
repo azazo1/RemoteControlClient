@@ -57,7 +57,7 @@ public class ProcessManagerFragment extends Fragment {
             return;
         }
         activity.handler.post(() -> {
-            if (result != null && result.getType() == CommandResult.ResultType.INT) {
+            if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 int get = result.getResultInt();
                 Toast.makeText(activity, get == 1 ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
             }
@@ -71,7 +71,7 @@ public class ProcessManagerFragment extends Fragment {
             return;
         }
         activity.handler.post(() -> {
-            if (result != null && result.getType() == CommandResult.ResultType.ARRAY) {
+            if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
                 JSONArray jRootArray = result.getResultJsonArray();
                 if (jRootArray == null) {
                     return;

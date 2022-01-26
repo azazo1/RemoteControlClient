@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -51,7 +52,7 @@ public class ConnectingActivity extends AppCompatActivity {
         if (end) {
             searchingProgressBar.setVisibility(View.INVISIBLE);
         }
-    }));
+    }), Config.serverPort);
     private ProgressBar connectingProgressBar;
     private Thread searchingThread;
     private Thread connectingThread;
@@ -101,7 +102,7 @@ public class ConnectingActivity extends AppCompatActivity {
                         onAuthenticateFailed();
                     }
                 } catch (SocketTimeoutException e) {
-                    onAuthenticateTimeOut();
+                    onConnectingTimeOut();
                 } catch (IOException e) {
                     e.printStackTrace();
                     onConnectFailed(ip, portInt, e.getMessage());
@@ -111,18 +112,18 @@ public class ConnectingActivity extends AppCompatActivity {
             connectingThread.setDaemon(true);
             connectingThread.start();
         } else {
-            Toast.makeText(this, R.string.noticeToComplete, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.notice_to_complete, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void onAuthenticateTimeOut() {
+    private void onConnectingTimeOut() {
         handler.post(() -> {
             try {
                 Global.client.close();
             } catch (NullPointerException ignore) {
             }
             Global.client = null;
-            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.authenticate_timeout), Snackbar.LENGTH_SHORT);
+            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connecting_timeout), Snackbar.LENGTH_SHORT);
             s.show();
         });
     }
@@ -204,10 +205,16 @@ public class ConnectingActivity extends AppCompatActivity {
         searchingProgressBar = findViewById(R.id.searching_progress_bar);
         connectingProgressBar = findViewById(R.id.connecting_progress_bar);
         searchFAB.setOnClickListener((view) -> search());
+        portEntry.setText(String.valueOf(Config.serverPort));
         Pair<Pair<String, Integer>, String> lastUsed = readAddress();
-        ipEntry.setText(lastUsed.first.first);
-        portEntry.setText(String.valueOf(lastUsed.first.second));
-        passwordEntry.setText(lastUsed.second);
+        if (lastUsed != null) {
+            ipEntry.setText(lastUsed.first.first);
+            portEntry.setText(String.valueOf(lastUsed.first.second));
+            passwordEntry.setText(lastUsed.second);
+            if (savedInstanceState == null) {
+                connect(); // 启动应用后自动登录，退出CommandingActivity则不会
+            }
+        }
     }
 
     protected void search() {
@@ -225,16 +232,28 @@ public class ConnectingActivity extends AppCompatActivity {
             s.show();
             return;
         }
+        // 读取用户输入端口号
+        try {
+            int port = Integer.parseInt(portEntry.getText() + "");
+            if (port >= 0 && port <= 65535) {
+                searcher.setTargetPort(port);
+            } else {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException ignored) {
+            Toast.makeText(this, R.string.notice_to_correct_port, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // 显示进度条
+        searchingProgressBar.setVisibility(View.VISIBLE);
         searchingThread = new Thread(() -> { // 寻找局域网可用地址
             try {
                 searchingRunning.set(true);
-                handler.post(() -> searchingProgressBar.setVisibility(View.VISIBLE));
                 Vector<String> result = searcher.searchAndReport();
                 Log.e("Search", "Result: " + result);
                 handler.post(() -> {
                     if (!result.isEmpty()) {
                         ipEntry.setText(result.elementAt(0));
-                        portEntry.setText(String.valueOf(Config.serverPort));
                     } else {
                         Toast.makeText(ConnectingActivity.this, R.string.searchingNoResult, Toast.LENGTH_SHORT).show();
                     }
@@ -274,8 +293,9 @@ public class ConnectingActivity extends AppCompatActivity {
     }
 
     /**
-     * 读取最近使用的IP地址与密码
+     * 读取最近使用的IP地址与密码 读取内容可能为null
      */
+    @Nullable
     private Pair<Pair<String, Integer>, String> readAddress() {
         File cache = getExternalCacheDir();
         File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
@@ -295,6 +315,7 @@ public class ConnectingActivity extends AppCompatActivity {
             }
         } catch (IOException | NumberFormatException e) {
             e.printStackTrace();
+            return null;
         }
         return new Pair<>(new Pair<>(ip, port), password);
     }

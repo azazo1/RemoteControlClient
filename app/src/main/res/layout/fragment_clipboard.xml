@@ -7,12 +7,6 @@
     android:padding="@dimen/fragment_padding"
     tools:context=".fragment.ClipboardFragment">
 
-    <Spinner
-        android:id="@+id/clipboard_action_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:entries="@array/clipboard_action_spinner_array" />
-
     <EditText
         android:id="@+id/clipboard_text"
         android:layout_width="match_parent"
@@ -23,13 +17,42 @@
         android:hint="@string/hint_for_clipboard_text"
         android:inputType="textMultiLine" />
 
-    <Button
-        android:id="@+id/send_command_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="20dp"
-        android:text="@string/clipboard_send_command_button_text" />
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <Button
+            android:id="@+id/clipboard_clear_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_columnWeight="1"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:text="@string/clipboard_clear_button_text" />
+
+        <Button
+            android:id="@+id/clipboard_get_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_columnWeight="1"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:text="@string/clipboard_get_button_text" />
+
+        <Button
+            android:id="@+id/clipboard_set_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_columnWeight="1"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:text="@string/clipboard_set_button_text" />
+
+    </GridLayout>
 
     <ProgressBar
         android:id="@+id/getting_command_result_progress_bar"

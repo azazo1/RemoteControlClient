@@ -50,7 +50,7 @@ public class CommandingActivity extends AppCompatActivity {
     protected DrawerLayout drawer;
     protected NavigationView navigation;
     protected Button chooseCommandButton;
-    protected MyBackPressListener onBackPressAction;
+    protected MyBackPressListener onBackPressAction = () -> false;
 
     public MyBackPressListener getBackPressAction() {
         return onBackPressAction;
@@ -105,6 +105,7 @@ public class CommandingActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigation.setNavigationItemSelectedListener(new NavSelected());
+        chooseCommandButton.performClick(); // 自动打开抽屉
     }
 
     private void initFragment() {
