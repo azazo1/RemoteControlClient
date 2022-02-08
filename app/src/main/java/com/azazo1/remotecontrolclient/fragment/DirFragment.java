@@ -396,7 +396,7 @@ public class DirFragment extends Fragment {
                 strings[strings.length - 1] = "";
                 return join("/", strings);
             } else if (path.isEmpty() && !name.isEmpty()) {
-                return name;
+                return name.equals("..") ? "" : name;
             } else if (path.isEmpty()) {
                 return "";
             }
@@ -445,7 +445,7 @@ public class DirFragment extends Fragment {
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             LayoutInflater inflater = activity.getLayoutInflater();
             View view = inflater.inflate(R.layout.view_list_dir, parent, false);
-            if (convertView != null) {
+            if (true /*convertView != null （有时 convertView 为 null， 不理解）*/) {
                 FileObj obj = fileObjs.get(position);
                 ImageView icon = view.findViewById(R.id.file_icon_view);
                 TextView title = view.findViewById(R.id.file_title_view);
@@ -472,48 +472,48 @@ public class DirFragment extends Fragment {
                                     .setCancelable(false).setView(storePathText)
                                     .setNegativeButton(R.string.verify_cancel_download, null).setCancelable(false)
                                     .setPositiveButton(R.string.verify_ok, (dialog, which) -> {
-                                // get path
-                                String storePath = "" + storePathText.getText();
-                                if (storePath.isEmpty()) {
-                                    Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                // create layout
-                                ViewGroup layout = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.alert_downloading, dirShower, false);
-                                ProgressBar progressBar = layout.findViewById(R.id.download_progress_bar);
-                                TextView progressStateOutput = layout.findViewById(R.id.download_text_view);
-                                // define reporter
-                                MyReporter mReporter = (now, total, end) -> {
-                                    if (now == total && total == -1 && end) {
-                                        // failed
-                                        activity.handler.post(() -> progressStateOutput.setText(R.string.download_failed));
-                                    } else if (!end) {
-                                        // report process
-                                        activity.handler.post(() -> {
-                                            double progress = now * 100.0 / total;
-                                            progressStateOutput.setText(
-                                                    String.format(getString(R.string.download_progress_format), progress, now, total)
-                                            );
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                                progressBar.setProgress((int) progress, true);
+                                        // get path
+                                        String storePath = "" + storePathText.getText();
+                                        if (storePath.isEmpty()) {
+                                            Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                        // create layout
+                                        ViewGroup layout = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.alert_downloading, dirShower, false);
+                                        ProgressBar progressBar = layout.findViewById(R.id.download_progress_bar);
+                                        TextView progressStateOutput = layout.findViewById(R.id.download_text_view);
+                                        // define reporter
+                                        MyReporter mReporter = (now, total, end) -> {
+                                            if (now == total && total == -1 && end) {
+                                                // failed
+                                                activity.handler.post(() -> progressStateOutput.setText(R.string.download_failed));
+                                            } else if (!end) {
+                                                // report process
+                                                activity.handler.post(() -> {
+                                                    double progress = now * 100.0 / total;
+                                                    progressStateOutput.setText(
+                                                            String.format(getString(R.string.download_progress_format), progress, now, total)
+                                                    );
+                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                                        progressBar.setProgress((int) progress, true);
+                                                    } else {
+                                                        progressBar.setProgress((int) progress); // 适配低版本安卓
+                                                    }
+                                                });
                                             } else {
-                                                progressBar.setProgress((int) progress); // 适配低版本安卓
+                                                // successful end
+                                                activity.handler.post(() -> progressStateOutput.setText(
+                                                        getString(R.string.download_successfully)
+                                                ));
                                             }
-                                        });
-                                    } else {
-                                        // successful end
-                                        activity.handler.post(() -> progressStateOutput.setText(
-                                                getString(R.string.download_successfully)
-                                        ));
-                                    }
-                                };
-                                // download thread create
-                                sendCommand(obj, storePath, mReporter);
-                                // show downloading alert
-                                new AlertDialog.Builder(activity).setTitle(R.string.alert_downloading_title)
-                                        .setView(layout).setNegativeButton(R.string.verify_terminate_or_ok, (dialog1, which1) -> Downloader.stopDownloading())
-                                        .setCancelable(false).show();
-                            }).show();
+                                        };
+                                        // download thread create
+                                        sendCommand(obj, storePath, mReporter);
+                                        // show downloading alert
+                                        new AlertDialog.Builder(activity).setTitle(R.string.alert_downloading_title)
+                                                .setView(layout).setNegativeButton(R.string.verify_terminate_or_ok, (dialog1, which1) -> Downloader.stopDownloading())
+                                                .setCancelable(false).show();
+                                    }).show();
                         });
                         break;
                     }

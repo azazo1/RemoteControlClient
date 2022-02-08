@@ -1,18 +1,27 @@
 package com.azazo1.remotecontrolclient.activity;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.azazo1.remotecontrolclient.ClientSocket;
 import com.azazo1.remotecontrolclient.Config;
@@ -30,6 +39,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+import java.util.Locale;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +49,7 @@ public class ConnectingActivity extends AppCompatActivity {
     private static final String cacheName = "IpCache";
     private final AtomicBoolean connectingRunning = new AtomicBoolean(false);
     private final AtomicBoolean searchingRunning = new AtomicBoolean(false);
+    private final int reqCode = 1;
     protected Toolbar toolbar;
     protected FloatingActionButton connectingFAB;
     protected FloatingActionButton searchFAB;
@@ -123,8 +134,17 @@ public class ConnectingActivity extends AppCompatActivity {
             } catch (NullPointerException ignore) {
             }
             Global.client = null;
-            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connecting_timeout), Snackbar.LENGTH_SHORT);
-            s.show();
+//            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connecting_timeout), Snackbar.LENGTH_SHORT);
+//            s.show();
+            TextView infoOut = new TextView(this);
+            LinearLayout linearLayout = new LinearLayout(this);
+            linearLayout.setPadding(20, 20, 20, 20);
+            linearLayout.addView(infoOut);
+            infoOut.setText(getString(R.string.connecting_timeout));
+            new AlertDialog.Builder(this).setTitle(R.string.connecting_timeout_title)
+                    .setPositiveButton(R.string.verify_ok, null)
+                    .setView(linearLayout)
+                    .show();
         });
     }
 
@@ -153,8 +173,17 @@ public class ConnectingActivity extends AppCompatActivity {
             } catch (NullPointerException ignore) {
             }
             Global.client = null;
-            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.authenticate_failed), Snackbar.LENGTH_SHORT);
-            s.show();
+//            Snackbar s = Snackbar.make(connectingFAB, getString(R.string.authenticate_failed), Snackbar.LENGTH_SHORT);
+//            s.show();
+            TextView infoOut = new TextView(this);
+            LinearLayout linearLayout = new LinearLayout(this);
+            linearLayout.setPadding(20, 20, 20, 20);
+            linearLayout.addView(infoOut);
+            infoOut.setText(getString(R.string.authenticate_failed));
+            new AlertDialog.Builder(this).setTitle(R.string.authenticate_failed_title)
+                    .setPositiveButton(R.string.verify_ok, null)
+                    .setView(linearLayout)
+                    .show();
         });
     }
 
@@ -182,8 +211,17 @@ public class ConnectingActivity extends AppCompatActivity {
                     } catch (NullPointerException ignore) {
                     }
                     Global.client = null;
-                    Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connect_fail) + "\n" + message + "\n[" + ip + "]:" + port, Snackbar.LENGTH_LONG);
-                    s.show();
+//                    Snackbar s = Snackbar.make(connectingFAB, getString(R.string.connect_fail) + "\n" + message + "\n[" + ip + "]:" + port, Snackbar.LENGTH_LONG);
+//                    s.show();
+                    TextView infoOut = new TextView(this);
+                    LinearLayout linearLayout = new LinearLayout(this);
+                    linearLayout.setPadding(20, 20, 20, 20);
+                    linearLayout.addView(infoOut);
+                    infoOut.setText(String.format(Locale.getDefault(), "%s\n[%s]:%d", message, ip, port));
+                    new AlertDialog.Builder(this).setTitle(R.string.connect_fail)
+                            .setPositiveButton(R.string.verify_ok, null)
+                            .setView(linearLayout)
+                            .show();
                 }
         );
     }
@@ -206,16 +244,20 @@ public class ConnectingActivity extends AppCompatActivity {
         connectingProgressBar = findViewById(R.id.connecting_progress_bar);
         searchFAB.setOnClickListener((view) -> search());
         portEntry.setText(String.valueOf(Config.serverPort));
-        Pair<Pair<String, Integer>, String> lastUsed = readAddress();
-        if (lastUsed != null) {
-            ipEntry.setText(lastUsed.first.first);
-            portEntry.setText(String.valueOf(lastUsed.first.second));
-            passwordEntry.setText(lastUsed.second);
-            if (savedInstanceState == null) {
-                connect(); // 启动应用后自动登录，退出CommandingActivity则不会
+        // 请求权限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, reqCode);
             }
+            return;
+        }
+
+        if (loadAddress() != null && savedInstanceState == null) {
+            connect(); // 启动应用后自动登录，退出CommandingActivity则不会
         }
     }
+
 
     protected void search() {
         // 询问是否中断
@@ -273,7 +315,7 @@ public class ConnectingActivity extends AppCompatActivity {
      * 保存最近使用的IP地址
      */
     private void saveAddress(String ip, int port, String password) {
-        File cache = getExternalCacheDir();
+        File cache = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
         try {
             if (!cacheFile.exists()) {
@@ -297,7 +339,7 @@ public class ConnectingActivity extends AppCompatActivity {
      */
     @Nullable
     private Pair<Pair<String, Integer>, String> readAddress() {
-        File cache = getExternalCacheDir();
+        File cache = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
         String ip = null;
         String password = null;
@@ -318,5 +360,32 @@ public class ConnectingActivity extends AppCompatActivity {
             return null;
         }
         return new Pair<>(new Pair<>(ip, port), password);
+    }
+
+    /**
+     * 读取并将 address 加载到页面
+     */
+    @Nullable
+    private Pair<Pair<String, Integer>, String> loadAddress() {
+        Pair<Pair<String, Integer>, String> lastUsed = readAddress();
+        if (lastUsed != null) {
+            ipEntry.setText(lastUsed.first.first);
+            portEntry.setText(String.valueOf(lastUsed.first.second));
+            passwordEntry.setText(lastUsed.second);
+        }
+        return lastUsed;
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == reqCode) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                loadAddress();
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, reqCode);
+            }
+        }
     }
 }

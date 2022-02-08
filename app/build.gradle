@@ -3,14 +3,14 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdk 31
 
     defaultConfig {
         applicationId "com.azazo1.remotecontrolclient"
         minSdkVersion 22
-        targetSdkVersion 30
-        versionCode 20220126
-        versionName "1.0.20220126"
+        targetSdkVersion 31
+        versionCode 20220208
+        versionName "1.0.20220208"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -30,7 +30,7 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation files('libs/fastjson-1.2.76.jar')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

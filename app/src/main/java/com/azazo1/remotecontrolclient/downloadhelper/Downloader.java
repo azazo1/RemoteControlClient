@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Downloader {
@@ -126,6 +125,8 @@ public class Downloader {
                 if (reporter != null) {
                     reporter.report(-1, -1, true);
                 }
+                // delete file
+                boolean deleted = storeFile.delete();
                 return false;
             }
             // download part

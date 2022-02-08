@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class IPSearcher {
     public int targetPort;
@@ -47,7 +48,7 @@ public class IPSearcher {
     public Vector<String> searchAndReport() throws IOException {
         Vector<String> result;
         result = searchForIP(); // search ip try
-        if (result == null || tpd == null || tpd.isStopped()) {
+        if (result == null || tpd == null || tpd.isStopped() || Thread.currentThread().isInterrupted()) {
             reporter.report(0, 0, true); // this means being stopped or invalid web
             return new Vector<>();
         }
@@ -99,11 +100,11 @@ public class IPSearcher {
 
 class ThreadIPDetector implements Runnable {
     private final int targetPort;
+    private final AtomicBoolean alive = new AtomicBoolean(true);
+    private final AtomicBoolean stopped = new AtomicBoolean(false);
     public IpGenerator ipGen;
     public Vector<String> availableHosts;
     public MyReporter reporter;
-    private boolean alive = true;
-    private boolean stopped = false;
 
     public ThreadIPDetector(IpGenerator ipGen, int port, MyReporter reporter) {
         this.ipGen = ipGen;
@@ -113,7 +114,7 @@ class ThreadIPDetector implements Runnable {
     }
 
     public boolean isStopped() {
-        return stopped;
+        return stopped.get();
     }
 
     public synchronized String next() {
@@ -133,7 +134,7 @@ class ThreadIPDetector implements Runnable {
     @Override
     public void run() {
         String host;
-        while ((host = next()) != null && alive) {
+        while ((host = next()) != null && alive.get()) {
             if (tryAddress(host)) {
                 addHost(host);
             }
@@ -157,7 +158,7 @@ class ThreadIPDetector implements Runnable {
     }
 
     public void start() {
-        if (!alive) {
+        if (!alive.get()) {
             throw new RuntimeException("Already Closed!");
         }
         Thread[] threads = new Thread[Config.ipSearchingThread];
@@ -176,12 +177,12 @@ class ThreadIPDetector implements Runnable {
             }
         }
         Log.i("Search", "Joining Over.");
-        alive = false;
+        alive.set(false);
     }
 
     public void stop() {
-        alive = false;
-        stopped = true;
+        alive.set(false);
+        stopped.set(true);
     }
 }
 

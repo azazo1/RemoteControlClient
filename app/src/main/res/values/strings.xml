@@ -107,4 +107,7 @@
     <string name="function_nav_group_title">Function</string>
     <string name="basic_nav_group_title">Basic</string>
     <string name="notice_to_correct_port">Please correct the port.</string>
+    <string name="authenticate_failed_title">Authenticate Failed</string>
+    <string name="connecting_timeout_title">Connect Timeout</string>
+    <string name="permission_cause_cache">To save the information we need permission.</string>
 </resources>
