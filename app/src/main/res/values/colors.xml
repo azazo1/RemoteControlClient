@@ -7,8 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="failed_button_bg">#FFF44336</color>
-    <color name="succeed_button_bg">#FF4CAF50</color>
+    <color name="failed">#FFF44336</color>
+    <color name="succeed">#FF4CAF50</color>
     <color name="nav_header_text_color">#4ACCED</color>
     <color name="nav_header_text_color_sub">#8F4ACCED</color>
     <color name="toolbar_bg">#FF03DAA5</color>

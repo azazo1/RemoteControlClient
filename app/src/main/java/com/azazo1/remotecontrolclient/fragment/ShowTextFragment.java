@@ -149,7 +149,7 @@ public class ShowTextFragment extends Fragment {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? getString(R.string.succeed) : show;
             }
-            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed : R.color.failed);
             sendButton.setBackgroundColor(color);
             showTextOutput.setText(show);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);

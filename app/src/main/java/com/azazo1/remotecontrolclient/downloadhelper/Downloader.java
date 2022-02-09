@@ -40,7 +40,7 @@ public class Downloader {
                         JSON.toJSONString(targetFile)
                 )
         );
-        if (sent) {
+        if (sent) { // Log 报告
             try {
                 @NonNull CommandResult result = Global.client.readCommandUntilGet();
                 detail = new FileDetail(result);
@@ -56,6 +56,7 @@ public class Downloader {
 
     /**
      * The result may be an incorrect one, such as the state of 0, 3 or 5 .
+     * Return null if sending failed.
      */
     @Nullable
     public static CommandResult downloadPart(String path, long part) {
@@ -85,7 +86,7 @@ public class Downloader {
     @Nullable
     public static CommandResult downloadPartUntilSuccess(String path, long part) {
         CommandResult result = downloadPart(path, part);
-        if (result == null) {
+        if (result == null) { // local problem.
             return null;
         }
         if (result.checkType(CommandResult.ResultType.JSON_OBJECT)) {
@@ -94,7 +95,7 @@ public class Downloader {
                 return downloadPartUntilSuccess(path, part);
             }
             int state = object.getInteger("state");
-            if (state == 3 || state == 5) { // file not exists || part number is not correct.
+            if (state == 3 || state == 5) { // file not exists || part number is not correct or file is too big.
                 return result;
             } else if (state == 1) {
                 return result;
@@ -105,6 +106,19 @@ public class Downloader {
 
     /**
      * Download file with single Thread.
+     * Will not delete the storeFile.
+     * <p>
+     * endCode:
+     * -1 if local problem
+     * 0 if unknown error
+     * 1 if success
+     * 2 if interrupted
+     * 3 if authenticate failed.
+     * 4 if IOException
+     * 5 if no remote file
+     * 6 if remote file is too big
+     * 7 if remote file is unavailable (unclear 5 or 6)
+     * </p>
      */
     public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, @NonNull File storeFile, @Nullable MyReporter reporter) {
         if (downloading.get()) {
@@ -113,20 +127,36 @@ public class Downloader {
         downloading.set(true);
         for (int i = 1; i <= fileDetail.parts; i++) {
             CommandResult result = Downloader.downloadPartUntilSuccess(fileDetail.fullPath(), i);
-            // check vital exception to downloading.
+            // check vital exception(local) to downloading.
             if (result == null) {
                 if (reporter != null) {
-                    reporter.report(-1, -1, true);
+                    reporter.reportEnd(-1);
                 }
                 return false;
             }
+            // 检查 state
+            // downloadPartUntilSuccess 已经排除 null 的可能
+            int state = result.getResultJsonObject().getInteger("state");
+            if (reporter != null) {
+                switch (state) {
+                    case 3:
+                        reporter.reportEnd(5);
+                        return false;
+                    case 5:
+                        reporter.reportEnd(6);
+                        return false;
+                    case 0:
+                        reporter.reportEnd(0);
+                        return false;
+                    default:
+                }
+            }
+
             // if interrupted
             if (!downloading.get()) {
                 if (reporter != null) {
-                    reporter.report(-1, -1, true);
+                    reporter.reportEnd(2);
                 }
-                // delete file
-                boolean deleted = storeFile.delete();
                 return false;
             }
             // download part
@@ -135,7 +165,7 @@ public class Downloader {
                     result
             ));
             if (reporter != null) {
-                reporter.report(i, fileDetail.parts, false);
+                reporter.report(i, fileDetail.parts);
             }
         }
         try {
@@ -146,40 +176,35 @@ public class Downloader {
             boolean compare = (fileDetail.size == length && Objects.equals(Encryptor.md5(data), fileDetail.md5));
             Log.e("plainDownloadFile", "inspect: " + compare);
             if (!compare) {
-                boolean deleted = storeFile.delete();
                 if (reporter != null) {
-                    reporter.report(-1, -1, true);
+                    reporter.reportEnd(3);
                 }
                 return false;
             } else {
                 if (reporter != null) {
-                    reporter.report(fileDetail.parts, fileDetail.parts, true);
+                    reporter.reportEnd(1);
                 }
                 return true;
             }
         } catch (FileNotFoundException e) {
             Log.e("plainDownloadFile", "inspect: no file.");
             if (reporter != null) {
-                reporter.report(-1, -1, true);
+                reporter.reportEnd(4);
             }
             return false;
         } catch (IOException e) {
             Log.e("plainDownloadFile", "inspect: read file failed.");
             if (reporter != null) {
-                reporter.report(-1, -1, true);
+                reporter.reportEnd(4);
             }
             return false;
         } finally {
-            // check if interrupted
-            if (!downloading.get()) {
-                boolean deleted = storeFile.delete();
-            }
             downloading.set(false);
         }
     }
 
     /**
-     * Same as plainDownloadFile(FileDetail, File) but no need for local store file.
+     * Same as plainDownloadFile(FileDetail, File) but no need for local store file (useDefault).
      */
     public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, @Nullable MyReporter reporter) {
         File storeFile = new File(
@@ -191,12 +216,17 @@ public class Downloader {
             e.printStackTrace();
         }
         if (storeFile.exists() && storeFile.canWrite()) {
-            return plainDownloadFile(
+            boolean result = plainDownloadFile(
                     fileDetail, storeFile, reporter
             );
+            if (!result) {
+                // delete file
+                boolean deleted = storeFile.delete();
+            }
+            return result;
         } else {
             if (reporter != null) {
-                reporter.report(-1, -1, true);
+                reporter.reportEnd(4);
             }
             Log.e("plainDownloadFile", "create store file failed.");
             return false;
@@ -216,12 +246,17 @@ public class Downloader {
             e.printStackTrace();
         }
         if (storeFile.exists() && storeFile.canWrite()) {
-            return plainDownloadFile( // download
+            boolean result = plainDownloadFile( // download
                     fileDetail, storeFile, reporter
             );
+            if (!result) {
+                // delete file
+                boolean deleted = storeFile.delete();
+            }
+            return result;
         } else {
             if (reporter != null) {
-                reporter.report(-1, -1, true);
+                reporter.reportEnd(4);
             }
             Log.e("plainDownloadFile", "Create store file failed.");
             return false;

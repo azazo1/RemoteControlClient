@@ -27,6 +27,7 @@ import com.azazo1.remotecontrolclient.ClientSocket;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.IPSearcher;
+import com.azazo1.remotecontrolclient.MyReporter;
 import com.azazo1.remotecontrolclient.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -56,14 +57,19 @@ public class ConnectingActivity extends AppCompatActivity {
     protected EditText ipEntry;
     protected EditText portEntry;
     protected ProgressBar searchingProgressBar;
-    protected Handler handler = new Handler();
-    private final IPSearcher searcher = new IPSearcher((now, total, end) -> handler.post(() -> {
-        searchingProgressBar.setMax(total);
-        searchingProgressBar.setProgress(now);
-        if (end) {
+    private final IPSearcher searcher = new IPSearcher(new MyReporter() {
+        @Override
+        public void report(int now, int total) {
+            searchingProgressBar.setMax(total);
+            searchingProgressBar.setProgress(now);
+        }
+
+        @Override
+        public void reportEnd(int code) {
             searchingProgressBar.setVisibility(View.INVISIBLE);
         }
-    }), Config.serverPort);
+    }, Config.serverPort);
+    protected Handler handler = new Handler();
     private ProgressBar connectingProgressBar;
     private Thread searchingThread;
     private Thread connectingThread;

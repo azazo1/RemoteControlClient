@@ -26,17 +26,31 @@ public class IPSearcher {
         if (reporter != null) {
             this.reporter = reporter;
         } else {
-            this.reporter = (now, total, end) -> {
+            this.reporter = new MyReporter() {
+                @Override
+                public void report(int now, int total) {
+                }
+
+                @Override
+                public void reportEnd(int code) {
+                }
             };
         }
     }
 
     public static void main(String[] args) throws IOException {
-        new IPSearcher((now, total, b) -> {
-            if (now != 0) {
-                System.out.print("\r" + (now * 1.0 / total));
-            } else {
-                System.out.println();
+        new IPSearcher(new MyReporter() {
+            @Override
+            public void report(int now, int total) {
+                if (now != 0) {
+                    System.out.print("\r" + (now * 1.0 / total));
+                } else {
+                    System.out.println();
+                }
+            }
+
+            @Override
+            public void reportEnd(int code) {
             }
         }, Config.serverPort).searchAndReport();
     }
@@ -49,10 +63,10 @@ public class IPSearcher {
         Vector<String> result;
         result = searchForIP(); // search ip try
         if (result == null || tpd == null || tpd.isStopped() || Thread.currentThread().isInterrupted()) {
-            reporter.report(0, 0, true); // this means being stopped or invalid web
+            // this means being stopped or invalid web
+            reporter.reportEnd(-1);
             return new Vector<>();
         }
-        reporter.report(1, 1, true);
         return result;
     }
 
@@ -119,7 +133,7 @@ class ThreadIPDetector implements Runnable {
 
     public synchronized String next() {
         try {
-            this.reporter.report(ipGen.cursor, ipGen.genRange, false);
+            this.reporter.report(ipGen.cursor, ipGen.genRange);
 //            System.out.println("Trying: " + ipGen.cursor + ", total: " + ipGen.genRange);
             return ipGen.next();
         } catch (NoSuchFieldException e) {

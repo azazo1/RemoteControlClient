@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -220,7 +219,7 @@ public class SurfWebsiteFragment extends Fragment {
             if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
             }
-            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed : R.color.failed);
             sendButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
             Toast.makeText(activity, succeed ? "succeed" : "failed", Toast.LENGTH_SHORT).show();

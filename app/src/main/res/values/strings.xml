@@ -110,4 +110,11 @@
     <string name="authenticate_failed_title">Authenticate Failed</string>
     <string name="connecting_timeout_title">Connect Timeout</string>
     <string name="permission_cause_cache">To save the information we need permission.</string>
+    <string name="download_communicating_problem">We can\'t send the request to server.</string>
+    <string name="download_interrupted">Download interrupted.</string>
+    <string name="download_sum_error">Bad bytes in files.</string>
+    <string name="download_io_error">Local file disappeared.</string>
+    <string name="download_no_remote_file">No remote file.</string>
+    <string name="download_remote_file_too_big">File is too large.</string>
+    <string name="download_remote_file_access_failed">We can\'t access remote file.</string>
 </resources>

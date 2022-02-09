@@ -222,7 +222,8 @@ public class DirFragment extends Fragment {
         if (fileDetail != null && fileDetail.available) {
             boolean ignored = Downloader.plainDownloadFile(fileDetail, storePath, mReporter);
         } else {
-            Log.e("download", "no remote file.");
+            Log.e("download", "no remote file or file is too big.");
+            mReporter.reportEnd(7); // 见 Downloader.plainDownloadFile 注释
         }
     }
 
@@ -240,7 +241,6 @@ public class DirFragment extends Fragment {
 
     /**
      * 担当浏览磁盘，浏览文件夹和启动程序的作用
-     * 当doStartProgram为真时，args才会起作用
      */
     public void sendCommand(Runnable runnable) {
         if (sending.get()) { // 防止频繁发送
@@ -483,12 +483,9 @@ public class DirFragment extends Fragment {
                                         ProgressBar progressBar = layout.findViewById(R.id.download_progress_bar);
                                         TextView progressStateOutput = layout.findViewById(R.id.download_text_view);
                                         // define reporter
-                                        MyReporter mReporter = (now, total, end) -> {
-                                            if (now == total && total == -1 && end) {
-                                                // failed
-                                                activity.handler.post(() -> progressStateOutput.setText(R.string.download_failed));
-                                            } else if (!end) {
-                                                // report process
+                                        MyReporter mReporter = new MyReporter() {
+                                            @Override
+                                            public void report(int now, int total) {
                                                 activity.handler.post(() -> {
                                                     double progress = now * 100.0 / total;
                                                     progressStateOutput.setText(
@@ -500,11 +497,48 @@ public class DirFragment extends Fragment {
                                                         progressBar.setProgress((int) progress); // 适配低版本安卓
                                                     }
                                                 });
-                                            } else {
-                                                // successful end
-                                                activity.handler.post(() -> progressStateOutput.setText(
-                                                        getString(R.string.download_successfully)
-                                                ));
+                                            }
+
+                                            @Override
+                                            public void reportEnd(int code) {
+                                                int stringID;
+                                                int color = getResources().getColor(R.color.failed);
+                                                switch (code) {
+                                                    case -1:
+                                                        stringID = R.string.download_communicating_problem;
+                                                        break;
+                                                    case 1:
+                                                        stringID = R.string.download_successfully;
+                                                        color = getResources().getColor(R.color.succeed);
+                                                        break;
+                                                    case 2:
+                                                        stringID = R.string.download_interrupted;
+                                                        break;
+                                                    case 3:
+                                                        stringID = R.string.download_sum_error;
+                                                        break;
+                                                    case 4:
+                                                        stringID = R.string.download_io_error;
+                                                        break;
+                                                    case 5:
+                                                        stringID = R.string.download_no_remote_file;
+                                                        break;
+                                                    case 6:
+                                                        stringID = R.string.download_remote_file_too_big;
+                                                        break;
+                                                    case 7:
+                                                        stringID = R.string.download_remote_file_access_failed;
+                                                        break;
+                                                    case 0:
+                                                    default:
+                                                        stringID = R.string.download_failed;
+                                                }
+                                                final int finalStringID = stringID;
+                                                final int finalColor = color;
+                                                activity.handler.post(() -> {
+                                                    progressStateOutput.setText(finalStringID);
+                                                    progressStateOutput.setTextColor(finalColor);
+                                                });
                                             }
                                         };
                                         // download thread create

@@ -48,7 +48,7 @@ public class ClipboardFragment extends Fragment {
             if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
             }
-            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed : R.color.failed);
             setButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> setButton.setBackgroundColor(originSetButtonColor), 3000);
             Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
@@ -69,7 +69,7 @@ public class ClipboardFragment extends Fragment {
                     succeed = true;
                 }
             }
-            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed : R.color.failed);
             getButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> getButton.setBackgroundColor(originGetButtonColor), 3000);
             Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
@@ -85,7 +85,7 @@ public class ClipboardFragment extends Fragment {
             if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
             }
-            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed : R.color.failed);
             clearButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> clearButton.setBackgroundColor(originClearButtonColor), 3000);
             Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();

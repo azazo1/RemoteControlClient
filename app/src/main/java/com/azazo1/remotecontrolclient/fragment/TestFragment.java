@@ -142,7 +142,7 @@ public class TestFragment extends Fragment {
                 succeed = result.getResultInt() == 1;
                 show = succeed ? getString(R.string.succeed) : getString(R.string.failed);
             }
-            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed_button_bg : R.color.failed_button_bg);
+            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed : R.color.failed);
             sendButton.setBackgroundColor(color);
             testOutput.setText(show);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
