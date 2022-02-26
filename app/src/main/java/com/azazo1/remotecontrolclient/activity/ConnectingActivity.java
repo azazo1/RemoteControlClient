@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectingActivity extends AppCompatActivity {
     private static final String cacheName = "IpCache";
+    protected final Handler handler = new Handler();
     private final AtomicBoolean connectingRunning = new AtomicBoolean(false);
     private final AtomicBoolean searchingRunning = new AtomicBoolean(false);
     private final int reqCode = 1;
@@ -66,10 +67,26 @@ public class ConnectingActivity extends AppCompatActivity {
 
         @Override
         public void reportEnd(int code) {
-            searchingProgressBar.setVisibility(View.INVISIBLE);
+            handler.post(() -> {
+                searchingProgressBar.setVisibility(View.INVISIBLE);
+                switch (code) {
+                    case -1: {
+                        Toast.makeText(ConnectingActivity.this, R.string.ip_search_interrupted, Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case 0: {
+                        Toast.makeText(ConnectingActivity.this, R.string.ip_search_failed, Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case 1: {
+                        Toast.makeText(ConnectingActivity.this, R.string.ip_search_succeed, Toast.LENGTH_SHORT).show();
+                    }
+                    default:
+                }
+            });
+
         }
     }, Config.serverPort);
-    protected Handler handler = new Handler();
     private ProgressBar connectingProgressBar;
     private Thread searchingThread;
     private Thread connectingThread;
@@ -237,6 +254,7 @@ public class ConnectingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connecting);
         Global.activity = this;
+        Global.connectingActivity = this;
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(Config.title);
 
@@ -302,8 +320,6 @@ public class ConnectingActivity extends AppCompatActivity {
                 handler.post(() -> {
                     if (!result.isEmpty()) {
                         ipEntry.setText(result.elementAt(0));
-                    } else {
-                        Toast.makeText(ConnectingActivity.this, R.string.searchingNoResult, Toast.LENGTH_SHORT).show();
                     }
                 });
 

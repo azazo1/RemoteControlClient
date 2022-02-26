@@ -6,10 +6,12 @@ import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -39,9 +41,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class CommandingActivity extends AppCompatActivity {
+    public final Handler handler = new Handler();
     protected final AtomicBoolean connectingRunning = new AtomicBoolean(false);
     public Fragment fragment;
-    public Handler handler = new Handler();
     protected Toolbar toolbar;
     protected String ip;
     protected int port;
@@ -65,6 +67,7 @@ public class CommandingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
         Global.activity = this;
+        Global.commandingActivity = this;
         addressNotice = findViewById(R.id.address_notice);
         Intent intent = getIntent();
         ip = intent.getStringExtra("ip");
@@ -149,7 +152,20 @@ public class CommandingActivity extends AppCompatActivity {
                     Global.client.close();
                 }
                 Global.client = new ClientSocket();
-                Global.client.connect(new InetSocketAddress(ip, port));
+                if (!Global.client.connect(new InetSocketAddress(ip, port))) {
+                    // authenticate 失败
+                    handler.post(() -> {
+                        TextView infoOut = new TextView(this);
+                        LinearLayout linearLayout = new LinearLayout(this);
+                        linearLayout.setPadding(20, 20, 20, 20);
+                        linearLayout.addView(infoOut);
+                        infoOut.setText(getString(R.string.authenticate_failed));
+                        new AlertDialog.Builder(this).setTitle(R.string.authenticate_failed_title)
+                                .setPositiveButton(R.string.verify_ok, (d, w) -> finish())
+                                .setView(linearLayout)
+                                .show();
+                    });
+                }
             } catch (IOException ignore) {
             }
             connectingRunning.set(false);

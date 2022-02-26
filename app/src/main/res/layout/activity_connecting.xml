@@ -27,7 +27,7 @@
         android:id="@+id/search_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/search_fab_text"
+        android:contentDescription="@string/ip_search_fab_text"
         android:src="@android:drawable/ic_search_category_default"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

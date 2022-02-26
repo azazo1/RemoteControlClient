@@ -51,7 +51,7 @@ public class PartsManager {
             if (storeFile.exists() && storeFile.canWrite() && checkPart(obj)) {
                 byte[] data = Encryptor.base64Decode(obj.getString("data"));
                 int start = obj.getInteger("start");
-                try (RandomAccessFile raFile = new RandomAccessFile(storeFile, "rw");) {
+                try (RandomAccessFile raFile = new RandomAccessFile(storeFile, "rw")) {
                     raFile.seek(start);
                     raFile.write(data);
                 }

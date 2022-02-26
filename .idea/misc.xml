@@ -3,7 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/alert_process_info.xml" value="0.1" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_command_line.xml" value="0.1" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_process_manager.xml" value="0.1" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/view_list_dir.xml" value="0.1" />
       </map>
     </option>
   </component>

@@ -3,6 +3,7 @@ package com.azazo1.remotecontrolclient;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
@@ -17,8 +18,8 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class IPSearcher {
+    public @NonNull final MyReporter reporter;
     public int targetPort;
-    public MyReporter reporter;
     public ThreadIPDetector tpd;
 
     public IPSearcher(@Nullable MyReporter reporter, int targetPort) {
@@ -32,7 +33,7 @@ public class IPSearcher {
                 }
 
                 @Override
-                public void reportEnd(int code) {
+                public void reportEnd(int code) { // -1为用户中断 0为失败 1为成功
                 }
             };
         }
@@ -62,11 +63,16 @@ public class IPSearcher {
     public Vector<String> searchAndReport() throws IOException {
         Vector<String> result;
         result = searchForIP(); // search ip try
-        if (result == null || tpd == null || tpd.isStopped() || Thread.currentThread().isInterrupted()) {
-            // this means being stopped or invalid web
+        if (result == null || tpd == null) {
+            // this means invalid web
+            reporter.reportEnd(0);
+            return new Vector<>();
+        } else if (tpd.isStopped() || Thread.currentThread().isInterrupted()) {
+            // this means being stopped
             reporter.reportEnd(-1);
             return new Vector<>();
         }
+        reporter.reportEnd(1);
         return result;
     }
 
@@ -113,12 +119,12 @@ public class IPSearcher {
 }
 
 class ThreadIPDetector implements Runnable {
+    public final IpGenerator ipGen;
+    public final Vector<String> availableHosts;
+    public final MyReporter reporter;
     private final int targetPort;
     private final AtomicBoolean alive = new AtomicBoolean(true);
     private final AtomicBoolean stopped = new AtomicBoolean(false);
-    public IpGenerator ipGen;
-    public Vector<String> availableHosts;
-    public MyReporter reporter;
 
     public ThreadIPDetector(IpGenerator ipGen, int port, MyReporter reporter) {
         this.ipGen = ipGen;
@@ -166,7 +172,7 @@ class ThreadIPDetector implements Runnable {
             Log.e("Search", "Reached: " + ip);
             return true;
         } catch (IOException e) {
-            Log.e("Search", "Failed: " + host + e.getMessage());
+            Log.e("Search", "Failed: " + host + " " + e.getMessage());
         }
         return false;
     }
@@ -201,10 +207,10 @@ class ThreadIPDetector implements Runnable {
 }
 
 class IpGenerator {
-    public String host;
-    public long host_parent;
-    public int mask;
-    public int genRange;
+    public final String host;
+    public final long host_parent;
+    public final int mask;
+    public final int genRange;
     public int cursor;
     public boolean End;
 

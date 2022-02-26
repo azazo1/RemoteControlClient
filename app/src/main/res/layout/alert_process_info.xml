@@ -18,8 +18,9 @@
         android:layout_height="wrap_content"
         android:layout_row="0"
         android:layout_column="1"
-        android:autofillHints=" "
+        android:autofillHints="no"
         android:ems="10"
+        android:hint="@string/process_list_header_image_name_text"
         android:inputType="text" />
 
     <TextView
@@ -46,6 +47,7 @@
         android:layout_column="1"
         android:autofillHints=" "
         android:ems="10"
+        android:hint="@string/process_list_header_pid_text"
         android:inputType="numberDecimal" />
 
     <TextView
@@ -64,6 +66,7 @@
         android:layout_column="1"
         android:autofillHints=" "
         android:ems="10"
+        android:hint="@string/process_list_header_session_name_text"
         android:inputType="text" />
 
     <TextView
@@ -80,7 +83,8 @@
         android:layout_height="wrap_content"
         android:layout_row="3"
         android:layout_column="1"
-        android:autofillHints=" "
+        android:autofillHints="no"
         android:ems="10"
+        android:hint="@string/process_list_header_memory_usage_text"
         android:inputType="text" />
 </GridLayout>

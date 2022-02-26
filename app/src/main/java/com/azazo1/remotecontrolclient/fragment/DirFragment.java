@@ -433,7 +433,7 @@ public class DirFragment extends Fragment {
     }
 
     class DirAdapter extends ArrayAdapter<FileObj> {
-        List<FileObj> fileObjs;
+        final List<FileObj> fileObjs;
 
         public DirAdapter(List<FileObj> objs) {
             super(activity, R.layout.view_list_dir, objs);

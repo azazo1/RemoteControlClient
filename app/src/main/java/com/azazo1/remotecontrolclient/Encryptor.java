@@ -6,14 +6,17 @@ import java.math.BigInteger;
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Encryptor {
     private static final Base64.Encoder base64Encoder = Base64.getEncoder();
     private static final Base64.Decoder base64Decoder = Base64.getDecoder();
     private static final MessageDigest md5Encoder = getMD5Algorithm();
+    private static final String ivParameter = "1234567890123456";
 
     private static MessageDigest getMD5Algorithm() {
         try {
@@ -25,7 +28,7 @@ public class Encryptor {
     }
 
     public static String base64Encode(byte[] data) {
-        return base64Encoder.encodeToString(data);
+        return new String(base64Encoder.encode(data), Config.charset);
     }
 
     public static byte[] base64Decode(String content) {
@@ -65,9 +68,10 @@ public class Encryptor {
         try {
             Key key = new SecretKeySpec(addTo16(thisKey.getBytes(Config.charset)), Config.algorithm);
             Cipher cipher = Cipher.getInstance(Config.algorithmAll);
-            cipher.init(Cipher.ENCRYPT_MODE, key);
+            IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());//使用CBC模式，需要一个向量iv，可增加加密算法的强度
+            cipher.init(Cipher.ENCRYPT_MODE, key, iv);
             byte[] result = cipher.doFinal(addTo16(data.getBytes(Config.charset)));
-            return new String(base64Encoder.encode(result), Config.charset);
+            return base64Encode(result);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,7 +83,8 @@ public class Encryptor {
             byte[] preparedData = base64Decode(base64Data);
             Key key = new SecretKeySpec(addTo16(thisKey.getBytes(Config.charset)), Config.algorithm);
             Cipher cipher = Cipher.getInstance(Config.algorithmAll);
-            cipher.init(Cipher.DECRYPT_MODE, key);
+            IvParameterSpec iv = new IvParameterSpec(ivParameter.getBytes());
+            cipher.init(Cipher.DECRYPT_MODE, key, iv);
             byte[] result = cipher.doFinal(addTo16(preparedData));
             String stringResult = new String(result, Config.charset);
             return stringResult.replaceAll("[\0\10]", "");
@@ -88,4 +93,5 @@ public class Encryptor {
         }
         return null;
     }
+
 }

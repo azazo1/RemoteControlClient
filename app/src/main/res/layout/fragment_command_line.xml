@@ -15,7 +15,8 @@
         android:gravity="start|top"
         android:hint="@string/hint_for_command_result"
         android:inputType="textMultiLine"
-        android:scrollHorizontally="false" />
+        android:scrollHorizontally="false"
+        android:importantForAutofill="no" />
 
     <EditText
         android:id="@+id/command_input_entry"
@@ -25,7 +26,8 @@
         android:gravity="start|top"
         android:hint="@string/hint_for_command_line_input"
         android:inputType="textMultiLine"
-        android:scrollHorizontally="false" />
+        android:scrollHorizontally="false"
+        android:importantForAutofill="no" />
 
     <Button
         android:id="@+id/send_command_button"
