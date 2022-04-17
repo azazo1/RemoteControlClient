@@ -16,6 +16,6 @@
     <string name="command_query_process_all_string">{\"type\":\"queryProcess\",\"all\":true}</string>
     <string name="command_query_process_pid_format">{\"type\":\"queryProcess\",\"all\":false,\"pid\":%d}</string>
     <string name="command_query_process_name_format">{\"type\":\"queryProcess\",\"all\":false,\"name\":%s}</string>
-    <string name="command_close_process_pid_format">{\"type\":\"closeProgram\",\"pid\":%d}</string>
-    <string name="command_close_process_name_format">{\"type\":\"closeProgram\",\"name\":%s}</string>
+    <string name="command_kill_process_pid_format">{\"type\":\"closeProgram\",\"pid\":%d}</string>
+    <string name="command_kill_process_image_name_format">{\"type\":\"closeProgram\",\"name\":%s}</string>
 </resources>

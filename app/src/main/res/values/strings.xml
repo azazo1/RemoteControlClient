@@ -96,7 +96,8 @@
     <string name="process_list_header_session_name_text">Session Name</string>
     <string name="process_list_header_pid_text">PID</string>
     <string name="process_list_header_memory_usage_text">Memory Usage (KB)</string>
-    <string name="kill_process_button_text">Kill</string>
+    <string name="kill_pid_process_button_text">Kill PID</string>
+    <string name="kill_image_name_process_button_text">Kill Image Name.</string>
     <string name="sorting_succeed">Sorting Succeed.</string>
     <string name="clipboard_clear_button_text">Clear</string>
     <string name="clipboard_get_button_text">Get</string>
@@ -119,4 +120,6 @@
     <string name="ip_search_failed">Sorry, I can\'t find any local server.</string>
     <string name="ip_search_fab_text">Search local server.</string>
     <string name="ip_search_succeed">Found server successfully.</string>
+    <string name="regex_toggle_button_on">Regex</string>
+    <string name="regex_toggle_button_off">Plain</string>
 </resources>

@@ -12,6 +12,15 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+        <ToggleButton
+            android:id="@+id/regex_toggle_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:textOff="@string/regex_toggle_button_off"
+            android:textOn="@string/regex_toggle_button_on"
+            android:textSize="@dimen/process_manager_button_font_size" />
+
         <EditText
             android:id="@+id/process_search_input"
             android:layout_width="0dp"
@@ -50,13 +59,13 @@
             android:layout_columnWeight="0.7"
             android:text="@string/process_list_header_pid_text" />
 
-        <TextView
-            android:id="@+id/session_name_header"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_column="2"
-            android:layout_columnWeight="0.75"
-            android:text="@string/process_list_header_session_name_text" />
+        <!--        <TextView-->
+        <!--            android:id="@+id/session_name_header"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            android:layout_column="2"-->
+        <!--            android:layout_columnWeight="0.75"-->
+        <!--            android:text="@string/process_list_header_session_name_text" />-->
 
         <TextView
             android:id="@+id/memory_usage_header"

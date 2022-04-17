@@ -5,12 +5,22 @@
     android:padding="@dimen/fragment_padding">
 
     <Button
-        android:id="@+id/kill_process_button"
+        android:id="@+id/kill_pid_process_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="4"
+        android:layout_column="0"
+        android:text="@string/kill_pid_process_button_text"
+        android:textSize="@dimen/process_manager_button_font_size" />
+
+    <Button
+        android:id="@+id/kill_image_name_process_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_row="4"
         android:layout_column="1"
-        android:text="@string/kill_process_button_text" />
+        android:text="@string/kill_image_name_process_button_text"
+        android:textSize="@dimen/process_manager_button_font_size" />
 
     <EditText
         android:id="@+id/image_name_holder"

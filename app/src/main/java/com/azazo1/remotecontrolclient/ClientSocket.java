@@ -1,6 +1,7 @@
 package com.azazo1.remotecontrolclient;
 
 import static com.azazo1.remotecontrolclient.Encryptor.AESBase64Encode;
+import static com.azazo1.remotecontrolclient.Encryptor.Base64AESDecode;
 import static com.azazo1.remotecontrolclient.Encryptor.base64Decode;
 import static com.azazo1.remotecontrolclient.Encryptor.base64Encode;
 
@@ -175,8 +176,8 @@ public class ClientSocket {
     CommandResult readCommand() {
         String line = readLine();
         if (line != null) {
-//            String command = Base64AESDecode(Config.key, line); todo back
-            String command = new String(base64Decode(line));
+            String command = Base64AESDecode(Config.key, line);
+//            String command = new String(base64Decode(line));
             if (command != null) {
                 waitCount.set(waitCount.intValue() - 1);
 
@@ -224,8 +225,8 @@ public class ClientSocket {
             Log.e("Command Send", "Invalid content.");
             return false;
         }
-//        String get = AESBase64Encode(Config.key, jsonString); # todo back
-        String get = base64Encode(jsonString.getBytes(Config.charset));
+        String get = AESBase64Encode(Config.key, jsonString);
+//        String get = base64Encode(jsonString.getBytes(Config.charset));
         if (get != null) {
             if (get.length() > Config.longestCommand) {
                 Log.e("Command Send", "Too long.");

@@ -5,10 +5,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,11 +47,15 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // todo "远程文件复制与移动" 功能
 public class DirFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
     private final List<FileObj> dirList = new Vector<>();
+    private final List<FileObj> filteredDirList = new Vector<>();
+    private final ItemFilterTextWatcher itemFilter = new ItemFilterTextWatcher();
     private CommandingActivity activity;
     private Thread sendingThread;
     private ProgressBar progressBar;
@@ -117,7 +124,7 @@ public class DirFragment extends Fragment {
         dirShower = get.findViewById(R.id.dir_show_list_view);
         pathSelector = get.findViewById(R.id.path_selector);
         selectButton = get.findViewById(R.id.select_path_button);
-        adapter = new DirAdapter(dirList);
+        adapter = new DirAdapter(filteredDirList);
         initList();
         initView();
         sendCommand(""); // 自动在创建时获取磁盘
@@ -127,21 +134,16 @@ public class DirFragment extends Fragment {
     private void initList() {
         dirList.clear();
         dirList.add(new FileObj(nowPath, ".."));
-        adapter.notifyDataSetChanged();
+        itemFilter.filterUpdate();
     }
 
     private void initView() {
         pathSelector.setText(nowPath);
         dirShower.setAdapter(adapter);
-        dirShower.setOnItemClickListener((listView, itemView, position, id) -> {
-            FileObj obj = dirList.get(position);
-            sendCommand(obj);
-        });
-        // Long click -> alert infomation
-        dirShower.setOnItemLongClickListener((listView, itemView, position, id) -> {
+        AdapterView.OnItemLongClickListener itemLongClick = (listView, itemView, position, id) -> {
             ViewGroup layout = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.alert_file_info, dirShower, false);
             if (layout != null) {
-                FileObj fileObj = dirList.get(position);
+                FileObj fileObj = filteredDirList.get(position);
                 // get icon
                 ImageView imageView = itemView.findViewById(R.id.file_icon_view);
                 Drawable image = null;
@@ -168,13 +170,25 @@ public class DirFragment extends Fragment {
                         .setView(layout).setIcon(image).setPositiveButton(R.string.verify_ok, null).show();
             }
             return true;
+        };
+        dirShower.setOnItemClickListener((listView, itemView, position, id) -> {
+            FileObj obj = filteredDirList.get(position);
+            if (obj.type == FileObj.FileType.FILE) {
+                // 如果是文件，单击直接显示信息
+                itemLongClick.onItemLongClick(listView, itemView, position, id);
+            } else {
+                sendCommand(obj);
+            }
         });
+        // Long click -> alert infomation
+        dirShower.setOnItemLongClickListener(itemLongClick);
         selectButton.setOnClickListener((view) -> {
             if (!(pathSelector.getText() + "").isEmpty()) {
                 sendCommand(pathSelector.getText() + "");
             }
         });
         progressBar.setVisibility(View.INVISIBLE);
+        pathSelector.addTextChangedListener(itemFilter);
     }
 
     private void startFile(@NonNull String path) {
@@ -306,7 +320,7 @@ public class DirFragment extends Fragment {
                     }
                 }
                 Collections.sort(dirList);
-                adapter.notifyDataSetChanged();
+                itemFilter.filterUpdate();
             } else {
                 Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
                 sendCommand(new FileObj(nowPath, "..")); // 防止父目录丢失->递归退出
@@ -338,7 +352,7 @@ public class DirFragment extends Fragment {
                 for (String disk : result.getResultJsonArray().toJavaList(String.class)) {
                     dirList.add(new FileObj(disk));
                 }
-                adapter.notifyDataSetChanged();
+                itemFilter.filterUpdate();
             }
         });
     }
@@ -422,8 +436,17 @@ public class DirFragment extends Fragment {
                 return -1;
             } else if (o.name.equals("..")) {
                 return 1;
+// 若要将后缀名相同的文件放在一块：
+//            } else if (type == FileType.FILE) { // 此时 o 也是FILE
+//                String mExt = name.contains(".") ? name.substring(name.lastIndexOf(".")) : "";
+//                String oExt = o.name.contains(".") ? o.name.substring(o.name.lastIndexOf(".")) : "";
+//                if (mExt.equals(oExt)) {
+//                    return name.compareToIgnoreCase(o.name);
+//                } else {
+//                    return mExt.compareToIgnoreCase(oExt);
+//                }
             } else {
-                return name.compareTo(o.name);
+                return name.compareToIgnoreCase(o.name);
             }
         }
 
@@ -443,9 +466,16 @@ public class DirFragment extends Fragment {
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            LayoutInflater inflater = activity.getLayoutInflater();
-            View view = inflater.inflate(R.layout.view_list_dir, parent, false);
-            if (true /*convertView != null （有时 convertView 为 null， 不理解）*/) {
+            View view;
+            // 利用 convertView 复用减少内存消耗
+            if (convertView == null) {
+                LayoutInflater inflater = activity.getLayoutInflater();
+                view = inflater.inflate(R.layout.view_list_dir, parent, false);
+            } else {
+                view = convertView;
+            }
+
+            if (view != null) {
                 FileObj obj = fileObjs.get(position);
                 ImageView icon = view.findViewById(R.id.file_icon_view);
                 TextView title = view.findViewById(R.id.file_title_view);
@@ -456,6 +486,7 @@ public class DirFragment extends Fragment {
                         icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.disk));
                         title.setText(obj.name);
                         subtitle.setText(getString(R.string.disk_subtitle_format));
+                        downloadButton.setVisibility(View.INVISIBLE);
                         break;
                     }
                     case FILE: {
@@ -555,12 +586,59 @@ public class DirFragment extends Fragment {
                         icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.folder));
                         title.setText(obj.name);
                         subtitle.setText(String.format(getString(R.string.folder_subtitle_format)));
+                        downloadButton.setVisibility(View.INVISIBLE);
                         break;
                     }
                     default:
                 }
+                return view;
             }
-            return view;
+            return super.getView(position, null, parent);
+        }
+    }
+
+    public class ItemFilterTextWatcher implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            filterUpdate();
+        }
+
+        /**
+         * 通过输入框过滤 dirList 中的元素到 filteredDirList 中
+         */
+        public void filterUpdate() {
+            String input = (pathSelector.getText() + "").replaceAll("\\\\", "/");
+            // 找到输入框中最后一层文件名（没被 "/" 或 "\" 包围）
+            Matcher matcher = Pattern.compile("/?([^/]+)$").matcher(input);
+            String pattern = null;
+            if (matcher.find()) {
+                pattern = matcher.group(1);
+            }
+            // 找到输入框中最后一层之前的内容
+            String prefix = "";
+            if (input.contains("/")) {
+                prefix = input.substring(0, input.lastIndexOf("/") + 1);
+            }
+            filteredDirList.clear();
+            for (FileObj i : dirList) {
+                if (prefix.equalsIgnoreCase(nowPath)) {
+                    if (i.name.equals("..") || pattern == null || i.name.toLowerCase().contains(pattern.toLowerCase())) {
+                        filteredDirList.add(i);
+                    }
+                } else {
+                    filteredDirList.add(i);
+                }
+            }
+            adapter.notifyDataSetChanged();
         }
     }
 }

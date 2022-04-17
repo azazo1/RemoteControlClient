@@ -1,9 +1,10 @@
 package com.azazo1.remotecontrolclient.fragment;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,15 +40,20 @@ import java.util.Locale;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 
 public class ProcessManagerFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
     private final List<Process> processes = new Vector<>();
+    private final List<Process> filteredProcesses = new Vector<>();
+    private final FilterTextWatcher filter = new FilterTextWatcher();
     private Button searchButton;
+    private ToggleButton regexButton;
     private EditText searchInput;
     private TextView headerImageName;
-    private TextView headerSessionName;
+    //    private TextView headerSessionName;
     private TextView headerPID;
     private TextView headerMemoryUsage;
     private ListView processListView;
@@ -86,8 +93,8 @@ public class ProcessManagerFragment extends Fragment {
                             jSonArray.getInteger(3)
                     ));
                 }
-                adapter.notifyDataSetChanged();
             }
+            filter.filterUpdate();
         });
     };
 
@@ -112,7 +119,7 @@ public class ProcessManagerFragment extends Fragment {
     @NonNull
     private View.OnClickListener createSorterListener(Comparator<Process> comparator) {
         return (view) -> {
-            Collections.sort(processes, comparator);
+            Collections.sort(filteredProcesses, comparator);
             adapter.notifyDataSetChanged();
             Toast.makeText(activity, R.string.sorting_succeed, Toast.LENGTH_SHORT).show();
         };
@@ -126,26 +133,31 @@ public class ProcessManagerFragment extends Fragment {
         // 排序
         headerImageName.setOnClickListener(
                 createSorterListener((o1, o2) -> {
-                    int result = o1.imageName.compareTo(o2.imageName);
-                    if (result != 0) {
-                        return result;
-                    } else {
-                        return o1.sessionName.compareTo(o2.sessionName); // 二级排序
-                    }
+                    return o1.imageName.compareToIgnoreCase(o2.imageName);
+//                    if (result != 0) {
+//                        return result;
+//                    } else {
+//                        return o1.sessionName.compareTo(o2.sessionName); // 二级排序
+//                    }
                 }));
         headerPID.setOnClickListener(
                 createSorterListener((o1, o2) -> Integer.compare(o1.pid, o2.pid)));
         headerMemoryUsage.setOnClickListener(
                 createSorterListener((o1, o2) -> Integer.compare(o1.memoryUsage, o2.memoryUsage)));
-        headerSessionName.setOnClickListener(
-                createSorterListener((o1, o2) -> {
-                    int result = o1.sessionName.compareTo(o2.sessionName);
-                    if (result != 0) {
-                        return result;
-                    } else {
-                        return o1.imageName.compareTo(o2.imageName); // 二级排序
-                    }
-                }));
+//        headerSessionName.setOnClickListener(
+//                createSorterListener((o1, o2) -> {
+//                    int result = o1.sessionName.compareTo(o2.sessionName);
+//                    if (result != 0) {
+//                        return result;
+//                    } else {
+//                        return o1.imageName.compareTo(o2.imageName); // 二级排序
+//                    }
+//                }));
+        regexButton.setOnCheckedChangeListener((view, checked) -> {
+            filter.setRegex(checked);
+            filter.filterUpdate();
+        });
+        searchInput.addTextChangedListener(filter);
     }
 
     private void resetView() {
@@ -162,30 +174,37 @@ public class ProcessManagerFragment extends Fragment {
         progressBar = view.findViewById(R.id.getting_command_result_progress_bar);
         headerImageName = view.findViewById(R.id.image_name_header);
         headerPID = view.findViewById(R.id.pid_header);
-        headerSessionName = view.findViewById(R.id.session_name_header);
+//        headerSessionName = view.findViewById(R.id.session_name_header);
         headerMemoryUsage = view.findViewById(R.id.memory_usage_header);
+        regexButton = view.findViewById(R.id.regex_toggle_button);
         adapter = new ProcessManagerListAdapter();
         initView();
         return view;
     }
 
     public void killProcess(int pid) {
-        String command = String.format(getString(R.string.command_close_process_pid_format), pid);
+        String command = String.format(getString(R.string.command_kill_process_pid_format), pid);
         sendCommand(command, killResultHandler);
     }
 
-    public void queryProcess() {
-        String input = searchInput.getText() + "";
+    public void killProcess(String imageName) {
+        String command = String.format(getString(R.string.command_kill_process_image_name_format), JSON.toJSONString(imageName));
+        sendCommand(command, killResultHandler);
+    }
+
+    public void queryProcess() { // 现在默认使用全查询加上本地过滤，使用效率更高
+//        String input = searchInput.getText() + "";
         String command;
-        try { // pid搜索
-            command = String.format(getString(R.string.command_query_process_pid_format), Integer.parseInt(input));
-        } catch (NumberFormatException e) {
-            if (input.isEmpty()) { // 全查询
-                command = getString(R.string.command_query_process_all_string);
-            } else { // 按映像名称搜索
-                command = String.format(getString(R.string.command_query_process_name_format), JSON.toJSONString(input));
-            }
-        }
+//        try { // pid搜索
+//            command = String.format(getString(R.string.command_query_process_pid_format), Integer.parseInt(input));
+//        } catch (NumberFormatException e) {
+//            if (input.isEmpty()) { // 全查询
+//                command = getString(R.string.command_query_process_all_string);
+//            } else { // 按映像名称搜索
+//                command = String.format(getString(R.string.command_query_process_name_format), JSON.toJSONString(input));
+//            }
+//        }
+        command = getString(R.string.command_query_process_all_string);
         sendCommand(command, queryResultHandler);
     }
 
@@ -248,34 +267,95 @@ public class ProcessManagerFragment extends Fragment {
             this.sessionName = sessionName;
             this.memoryUsage = memoryUsage;
         }
+    }
 
+    public class FilterTextWatcher implements TextWatcher {
+        private boolean regex = false; // 正则匹配模式(true)与普通包含查询模式(false)
+
+        public FilterTextWatcher() {
+        }
+
+        public void setRegex(boolean val) {
+            regex = val;
+        }
+
+        /**
+         * 筛选 processes 的值到 filteredProcesses 中，并进行视图更新
+         */
+        public void filterUpdate() {
+            filteredProcesses.clear();
+            String pattern = "" + searchInput.getText();
+            for (Process i : processes) {
+                if (pattern.isEmpty()) {
+                    filteredProcesses.add(i);
+                    continue;
+                }
+                // 比较 sessionName
+                if (regex) {
+                    try {
+                        if (Pattern.compile(pattern).matcher(i.imageName).find()) {
+                            filteredProcesses.add(i);
+                        }
+                    } catch (PatternSyntaxException ignore) {
+                    }
+                } else {
+                    if (i.imageName.toLowerCase().contains(pattern.toLowerCase())) {
+                        filteredProcesses.add(i);
+                    }
+                }
+                // 比较 pid
+                if (("" + i.pid).contains(pattern)) {
+                    filteredProcesses.add(i);
+                }
+            }
+            adapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            filterUpdate();
+        }
     }
 
     public class ProcessManagerListAdapter extends ArrayAdapter<Process> implements AdapterView.OnItemClickListener {
 
         public ProcessManagerListAdapter() {
-            super(activity, android.R.layout.simple_list_item_1, processes); // 中间是默认的Layout
+            super(activity, android.R.layout.simple_list_item_1, filteredProcesses); // 中间是默认的Layout
         }
 
 
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            LayoutInflater inflater = activity.getLayoutInflater();
-            @SuppressLint("ViewHolder")
-            ViewGroup rootLayout = (ViewGroup) inflater.inflate(R.layout.view_list_process_query, parent, false);
-            if (convertView != null && rootLayout != null) {
+            ViewGroup rootLayout;
+            // 利用 convertView 复用减少内存消耗
+            if (convertView == null) {
+                LayoutInflater inflater = activity.getLayoutInflater();
+                rootLayout = (ViewGroup) inflater.inflate(R.layout.view_list_process_query, parent, false);
+            } else {
+                rootLayout = (ViewGroup) convertView;
+            }
+
+            if (rootLayout != null) {
                 TextView imageNameOutput = rootLayout.findViewById(R.id.image_name_output);
-                TextView sessionNameOutput = rootLayout.findViewById(R.id.session_name_output);
+//                TextView sessionNameOutput = rootLayout.findViewById(R.id.session_name_output);
                 TextView pidOutput = rootLayout.findViewById(R.id.pid_output);
                 TextView memoryOutput = rootLayout.findViewById(R.id.memory_usage_output);
-                imageNameOutput.setText(processes.get(position).imageName);
-                sessionNameOutput.setText(processes.get(position).sessionName);
-                pidOutput.setText(String.valueOf(processes.get(position).pid));
-                memoryOutput.setText(String.valueOf(processes.get(position).memoryUsage));
+                imageNameOutput.setText(filteredProcesses.get(position).imageName);
+//                sessionNameOutput.setText(filteredProcesses.get(position).sessionName);
+                pidOutput.setText(String.valueOf(filteredProcesses.get(position).pid));
+                memoryOutput.setText(String.valueOf(filteredProcesses.get(position).memoryUsage));
                 return rootLayout;
             }
-            return super.getView(position, convertView, parent);
+            return super.getView(position, null, parent);
         }
 
         /**
@@ -283,11 +363,12 @@ public class ProcessManagerFragment extends Fragment {
          */
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Process p = processes.get(position);
+            Process p = filteredProcesses.get(position);
             ViewGroup rootLayout = (ViewGroup) activity.getLayoutInflater().
                     inflate(R.layout.alert_process_info, parent, false);
             if (rootLayout != null) {
-                Button killButton = rootLayout.findViewById(R.id.kill_process_button);
+                Button killPIDButton = rootLayout.findViewById(R.id.kill_pid_process_button);
+                Button killINameButton = rootLayout.findViewById(R.id.kill_image_name_process_button);
                 EditText imageName = rootLayout.findViewById(R.id.image_name_holder);
                 EditText pid = rootLayout.findViewById(R.id.pid_holder);
                 EditText sessionName = rootLayout.findViewById(R.id.session_name_holder);
@@ -296,7 +377,8 @@ public class ProcessManagerFragment extends Fragment {
                 pid.setText(String.valueOf(p.pid));
                 sessionName.setText(p.sessionName);
                 memory.setText(String.format(Locale.getDefault(), "%,d", p.memoryUsage));
-                killButton.setOnClickListener((view1) -> killProcess(p.pid));
+                killPIDButton.setOnClickListener((view1) -> killProcess(p.pid));
+                killINameButton.setOnClickListener((view1) -> killProcess(p.imageName));
                 new AlertDialog.Builder(activity).setTitle(p.imageName).setView(rootLayout)
                         .setPositiveButton(R.string.verify_ok, null).show();
             }
