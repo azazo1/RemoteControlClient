@@ -18,6 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -207,30 +208,7 @@ public class Downloader {
      * Same as plainDownloadFile(FileDetail, File) but no need for local store file (useDefault).
      */
     public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, @Nullable MyReporter reporter) {
-        File storeFile = new File(
-                Global.activity.getExternalCacheDir().getAbsolutePath() + File.separator + fileDetail.filename
-        );
-        try {
-            boolean created = storeFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (storeFile.exists() && storeFile.canWrite()) {
-            boolean result = plainDownloadFile(
-                    fileDetail, storeFile, reporter
-            );
-            if (!result) {
-                // delete file
-                boolean deleted = storeFile.delete();
-            }
-            return result;
-        } else {
-            if (reporter != null) {
-                reporter.reportEnd(4);
-            }
-            Log.e("plainDownloadFile", "create store file failed.");
-            return false;
-        }
+        return plainDownloadFile(fileDetail, Global.activity.getExternalCacheDir().getAbsolutePath() + File.separator + fileDetail.filename, reporter);
     }
 
     /**
@@ -246,7 +224,10 @@ public class Downloader {
             e.printStackTrace();
         }
         if (storeFile.exists() && storeFile.canWrite()) {
-            boolean result = plainDownloadFile( // download
+            // clear file content
+            clearFileContent(storeFile);
+            // download
+            boolean result = plainDownloadFile(
                     fileDetail, storeFile, reporter
             );
             if (!result) {
@@ -260,6 +241,17 @@ public class Downloader {
             }
             Log.e("plainDownloadFile", "Create store file failed.");
             return false;
+        }
+    }
+
+    public static void clearFileContent(File storeFile) {
+        try {
+            FileOutputStream fo = new FileOutputStream(storeFile, false);
+            fo.flush();
+            fo.close();
+        } catch (FileNotFoundException ignore) {
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     // TODO: 2021/12/19 多线程下载

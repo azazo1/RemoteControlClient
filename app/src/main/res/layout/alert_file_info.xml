@@ -67,4 +67,13 @@
         android:layout_column="0"
         android:text="@string/launch_button_text"
         android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/download_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="3"
+        android:layout_column="1"
+        android:text="@string/download_button_text"
+        android:visibility="invisible" />
 </GridLayout>
