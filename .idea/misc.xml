@@ -3,10 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/activity_command.xml" value="0.10157041540020263" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/activity_connecting.xml" value="0.25" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/alert_file_info.xml" value="0.20885416666666667" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/alert_process_info.xml" value="0.2" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_command_line.xml" value="0.1" />
-        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_process_manager.xml" value="0.22" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_process_manager.xml" value="0.33" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/toolbar.xml" value="0.20885416666666667" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/view_list_dir.xml" value="0.1" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/view_list_process_query.xml" value="0.17074275362318841" />
       </map>

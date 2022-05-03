@@ -20,6 +20,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSON;
@@ -49,11 +50,13 @@ public class ProcessManagerFragment extends Fragment {
     private final List<Process> processes = new Vector<>();
     private final List<Process> filteredProcesses = new Vector<>();
     private final FilterTextWatcher filter = new FilterTextWatcher();
+    private final SortListenerGroup sortListeners = new SortListenerGroup();
     private Button searchButton;
+    private int originSearchButtonColor;
+    private int originHeadersBgColor;
     private ToggleButton regexButton;
     private EditText searchInput;
     private TextView headerImageName;
-    //    private TextView headerSessionName;
     private TextView headerPID;
     private TextView headerMemoryUsage;
     private ListView processListView;
@@ -78,6 +81,7 @@ public class ProcessManagerFragment extends Fragment {
             return;
         }
         activity.handler.post(() -> {
+            boolean succeed = false;
             if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
                 JSONArray jRootArray = result.getResultJsonArray();
                 if (jRootArray == null) {
@@ -93,8 +97,12 @@ public class ProcessManagerFragment extends Fragment {
                             jSonArray.getInteger(3)
                     ));
                 }
+                succeed = true;
             }
             filter.filterUpdate();
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed : R.color.failed);
+            searchButton.setBackgroundColor(color);
+            activity.handler.postDelayed(() -> searchButton.setBackgroundColor(originSearchButtonColor), 3000);
         });
     };
 
@@ -116,43 +124,24 @@ public class ProcessManagerFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    @NonNull
-    private View.OnClickListener createSorterListener(Comparator<Process> comparator) {
-        return (view) -> {
-            Collections.sort(filteredProcesses, comparator);
-            adapter.notifyDataSetChanged();
-            Toast.makeText(activity, R.string.sorting_succeed, Toast.LENGTH_SHORT).show();
-        };
-    }
 
     private void initView() {
+        originSearchButtonColor = ContextCompat.getColor(activity, R.color.generic_sending_button_bg);
+        originHeadersBgColor = ContextCompat.getColor(activity, R.color.process_headers_plain_bg);
+
+        searchButton.setBackgroundColor(originSearchButtonColor);
         searchButton.setOnClickListener((view) -> queryProcess());
         processListView.setAdapter(adapter);
         progressBar.setVisibility(View.INVISIBLE);
         processListView.setOnItemClickListener(adapter);
         // 排序
-        headerImageName.setOnClickListener(
-                createSorterListener((o1, o2) -> {
-                    return o1.imageName.compareToIgnoreCase(o2.imageName);
-//                    if (result != 0) {
-//                        return result;
-//                    } else {
-//                        return o1.sessionName.compareTo(o2.sessionName); // 二级排序
-//                    }
-                }));
-        headerPID.setOnClickListener(
-                createSorterListener((o1, o2) -> Integer.compare(o1.pid, o2.pid)));
-        headerMemoryUsage.setOnClickListener(
-                createSorterListener((o1, o2) -> Integer.compare(o1.memoryUsage, o2.memoryUsage)));
-//        headerSessionName.setOnClickListener(
-//                createSorterListener((o1, o2) -> {
-//                    int result = o1.sessionName.compareTo(o2.sessionName);
-//                    if (result != 0) {
-//                        return result;
-//                    } else {
-//                        return o1.imageName.compareTo(o2.imageName); // 二级排序
-//                    }
-//                }));
+        headerImageName.setOnClickListener(sortListeners.IMAGE_NAME);
+        headerPID.setOnClickListener(sortListeners.PID);
+        headerMemoryUsage.setOnClickListener(sortListeners.MEMORY_USAGE);
+        headerImageName.setBackgroundColor(originHeadersBgColor);
+        headerPID.setBackgroundColor(originHeadersBgColor);
+        headerMemoryUsage.setBackgroundColor(originHeadersBgColor);
+
         regexButton.setOnCheckedChangeListener((view, checked) -> {
             filter.setRegex(checked);
             filter.filterUpdate();
@@ -193,17 +182,7 @@ public class ProcessManagerFragment extends Fragment {
     }
 
     public void queryProcess() { // 现在默认使用全查询加上本地过滤，使用效率更高
-//        String input = searchInput.getText() + "";
         String command;
-//        try { // pid搜索
-//            command = String.format(getString(R.string.command_query_process_pid_format), Integer.parseInt(input));
-//        } catch (NumberFormatException e) {
-//            if (input.isEmpty()) { // 全查询
-//                command = getString(R.string.command_query_process_all_string);
-//            } else { // 按映像名称搜索
-//                command = String.format(getString(R.string.command_query_process_name_format), JSON.toJSONString(input));
-//            }
-//        }
         command = getString(R.string.command_query_process_all_string);
         sendCommand(command, queryResultHandler);
     }
@@ -269,6 +248,51 @@ public class ProcessManagerFragment extends Fragment {
         }
     }
 
+    public class SortListenerGroup {
+        View.OnClickListener currentSorter;
+        View currentView;
+        final View.OnClickListener IMAGE_NAME = createSorterListener((o1, o2) -> o1.imageName.compareToIgnoreCase(o2.imageName));
+        final View.OnClickListener PID = createSorterListener((o1, o2) -> Integer.compare(o1.pid, o2.pid));
+        final View.OnClickListener MEMORY_USAGE = createSorterListener((o1, o2) -> Integer.compare(o1.memoryUsage, o2.memoryUsage));
+
+        public SortListenerGroup() {
+            currentSorter = IMAGE_NAME;
+            currentView = null;
+        }
+
+        @NonNull
+        private View.OnClickListener createSorterListener(Comparator<Process> comparator) {
+            return new View.OnClickListener() {
+                /**
+                 * View v 在通过currentSorter调用时可为空，但在别处调用不能为空（为了实现视图高亮）
+                 */
+                @Override
+                public void onClick(View v) {
+                    if (this != currentSorter) {
+                        if (currentView != null) {
+                            currentView.setBackgroundColor(originHeadersBgColor); // 取消上一个视图高亮
+                        }
+                        currentView = v;
+                        if (currentView != null) {
+                            // 使现在视图高亮
+                            currentView.setBackgroundColor(ContextCompat.getColor(activity, R.color.process_headers_highlight_bg));
+                        }
+                        currentSorter = this; // 记住当前使用的排序方式
+                    } else {
+                        if (currentView != null) { // 高亮视图
+                            currentView.setBackgroundColor(ContextCompat.getColor(activity, R.color.process_headers_highlight_bg));
+                        } else if (v != null) { // 用有效的视图替代null并高亮
+                            currentView = v;
+                            currentView.setBackgroundColor(ContextCompat.getColor(activity, R.color.process_headers_highlight_bg));
+                        }
+                    }
+                    Collections.sort(filteredProcesses, comparator);
+                    adapter.notifyDataSetChanged();
+                }
+            };
+        }
+    }
+
     public class FilterTextWatcher implements TextWatcher {
         private boolean regex = false; // 正则匹配模式(true)与普通包含查询模式(false)
 
@@ -308,6 +332,7 @@ public class ProcessManagerFragment extends Fragment {
                     filteredProcesses.add(i);
                 }
             }
+            sortListeners.currentSorter.onClick(null); // 排序
             adapter.notifyDataSetChanged();
         }
 

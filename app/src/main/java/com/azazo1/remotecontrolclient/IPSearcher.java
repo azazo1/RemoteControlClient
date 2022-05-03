@@ -18,7 +18,8 @@ import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class IPSearcher {
-    public @NonNull final MyReporter reporter;
+    public @NonNull
+    final MyReporter reporter;
     public int targetPort;
     public ThreadIPDetector tpd;
 
@@ -165,12 +166,15 @@ class ThreadIPDetector implements Runnable {
         try {
             InetAddress address = InetAddress.getByName(host);
             String ip = address.getHostAddress(); // eg: www.baidu.com -> xxx.xxx.xxx.xxx
-            InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, targetPort);
-            Socket socket = new Socket();
-            socket.connect(targetAddressWithPort, Config.timeout);
-            socket.close();
-            Log.e("Search", "Reached: " + ip);
-            return true;
+            if (address.isReachable(Config.searchTimeout)) {
+                InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, targetPort);
+                Socket socket = new Socket();
+                socket.connect(targetAddressWithPort, Config.searchTimeout);
+                socket.close();
+                Log.e("Search", "Reached: " + ip);
+                return true;
+            }
+            return false;
         } catch (IOException e) {
             Log.e("Search", "Failed: " + host + " " + e.getMessage());
         }
@@ -181,8 +185,8 @@ class ThreadIPDetector implements Runnable {
         if (!alive.get()) {
             throw new RuntimeException("Already Closed!");
         }
-        Thread[] threads = new Thread[Config.ipSearchingThread];
-        for (int i = 0; i < Config.ipSearchingThread; i++) {
+        Thread[] threads = new Thread[Config.ipSearchingThreadNum];
+        for (int i = 0; i < Config.ipSearchingThreadNum; i++) {
             threads[i] = new Thread(this);
             threads[i].start();
         }

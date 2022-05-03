@@ -2,6 +2,7 @@ package com.azazo1.remotecontrolclient.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,8 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SurfWebsiteFragment extends Fragment {
 
@@ -63,7 +66,7 @@ public class SurfWebsiteFragment extends Fragment {
         activity.handler.post(
                 () -> activity.getToolbar().setTitle(R.string.surf_website_fragment_title)
         );
-        originOutputColor = ContextCompat.getColor(activity,R.color.generic_sending_button_bg);
+        originOutputColor = ContextCompat.getColor(activity, R.color.generic_sending_button_bg);
     }
 
     @Override
@@ -127,6 +130,10 @@ public class SurfWebsiteFragment extends Fragment {
                     if (sendingThread != null && !sendingThread.isInterrupted()) {
                         sendingThread.interrupt();
                     }
+                    if (browsers.isEmpty()) { // 提示重新刷新浏览器列表
+                        browsers.add(getString(R.string.fetch_browsers_spinner_text));
+                        adapter.notifyDataSetChanged();
+                    }
                 });
                 s.show();
             }
@@ -152,20 +159,29 @@ public class SurfWebsiteFragment extends Fragment {
     public void sendCommand() {
         String content = contentInput.getText() + "";
         String using = "";
-        try {
-            using = browsers.get(browserChooser.getSelectedItemPosition()) + "";
-        } catch (ArrayIndexOutOfBoundsException e) {
-            Toast.makeText(activity, R.string.notice_invalid_browser_chosen, Toast.LENGTH_SHORT).show();
-        }
-
         if (content.isEmpty()) {
             return;
         }
+        try {
+            using = browsers.get(browserChooser.getSelectedItemPosition()) + "";
+            if (using.equals(getString(R.string.fetch_browsers_spinner_text))) {
+                using = "";
+                throw new IllegalArgumentException();
+            }
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
+            Toast.makeText(activity, R.string.notice_invalid_browser_chosen, Toast.LENGTH_SHORT).show();
+        }
+
         String command;
+        Pattern urlPattern = Pattern.compile("[a-zA-Z]+://\\S+");
+        Matcher matcher;
         if (searchMode) {
             command = String.format(getString(R.string.command_surf_website_search_format), JSON.toJSONString(content), JSON.toJSONString(using));
+        } else if ((matcher = urlPattern.matcher(content)).find()) {
+            Log.i("m", matcher.group(0));
+            command = String.format(getString(R.string.command_surf_website_url_format), JSON.toJSONString(matcher.group(0)), JSON.toJSONString(using));
         } else {
-            command = String.format(getString(R.string.command_surf_website_url_format), JSON.toJSONString(content), JSON.toJSONString(using));
+            command = "null"; // 网址无效
         }
         sendCommand(command, false);
     }
@@ -197,7 +213,6 @@ public class SurfWebsiteFragment extends Fragment {
             if (result != null && result.checkType(CommandResult.ResultType.ARRAY)) {
                 browsers.clear();
                 browsers.addAll(result.getResultJsonArray().toJavaList(String.class));
-                adapter.notifyDataSetChanged();
                 if (browsers.isEmpty()) {
                     Snackbar s = Snackbar.make(activity.findViewById(android.R.id.content), R.string.notice_get_browsers_retry, Snackbar.LENGTH_INDEFINITE);
                     s.setAction(R.string.verify_ok, (view) -> initBrowsers());
@@ -206,6 +221,10 @@ public class SurfWebsiteFragment extends Fragment {
                     succeed = true;
                 }
             }
+            if (browsers.isEmpty()) {
+                browsers.add(getString(R.string.fetch_browsers_spinner_text));
+            }
+            adapter.notifyDataSetChanged();
             Toast.makeText(activity, String.format(getString(R.string.get_browsers_bool_format), (succeed ? getString(R.string.succeed) : getString(R.string.failed))), Toast.LENGTH_SHORT).show();
         });
     }
@@ -219,10 +238,9 @@ public class SurfWebsiteFragment extends Fragment {
             if (result != null && result.checkType(CommandResult.ResultType.INT)) {
                 succeed = result.getResultInt() == 1;
             }
-            int color = ContextCompat.getColor(activity,succeed ? R.color.succeed : R.color.failed);
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed : R.color.failed);
             sendButton.setBackgroundColor(color);
             activity.handler.postDelayed(() -> sendButton.setBackgroundColor(originOutputColor), 3000);
-            Toast.makeText(activity, succeed ? "succeed" : "failed", Toast.LENGTH_SHORT).show();
         });
     }
 

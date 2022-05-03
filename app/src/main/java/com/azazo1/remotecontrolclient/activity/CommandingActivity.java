@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -156,13 +155,11 @@ public class CommandingActivity extends AppCompatActivity {
                     // authenticate 失败
                     handler.post(() -> {
                         TextView infoOut = new TextView(this);
-                        LinearLayout linearLayout = new LinearLayout(this);
-                        linearLayout.setPadding(20, 20, 20, 20);
-                        linearLayout.addView(infoOut);
+                        infoOut.setPadding(20, 20, 20, 20);
                         infoOut.setText(getString(R.string.authenticate_failed));
                         new AlertDialog.Builder(this).setTitle(R.string.authenticate_failed_title)
                                 .setPositiveButton(R.string.verify_ok, (d, w) -> finish())
-                                .setView(linearLayout)
+                                .setView(infoOut)
                                 .show();
                     });
                 }

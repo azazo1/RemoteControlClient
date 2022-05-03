@@ -15,9 +15,12 @@
     <color name="toolbar_commanding_bg">#2196F3</color>
     <color name="progress_bar_commanding_color_b">#7DA6B8</color>
     <color name="progress_bar_commanding_color_f">#00BCD4</color>
+    <color name="progress_bar_connecting_text_color">#000000</color>
     <color name="lock_screen_bottom_selector_bg">#FF2196F3</color>
     <color name="generic_sending_button_bg">#FF673AB7</color>
     <color name="clipboard_get_button_bg">#FB6AA9</color>
     <color name="clipboard_set_button_bg">#5C6BC0</color>
     <color name="clipboard_clear_button_bg">#FFCA28</color>
+    <color name="process_headers_highlight_bg">#652196F3</color>
+    <color name="process_headers_plain_bg">#1EACACAC</color>
 </resources>

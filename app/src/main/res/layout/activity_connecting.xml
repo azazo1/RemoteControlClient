@@ -79,6 +79,18 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintVertical_bias="0.60" />
 
+    <TextView
+        android:id="@+id/searching_state_output"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.88" />
+
     <ProgressBar
         android:id="@+id/searching_progress_bar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"

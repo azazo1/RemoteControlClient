@@ -98,7 +98,7 @@ public class DirFragment extends Fragment {
             // ask store path
             EditText storePathText = new EditText(activity);
             storePathText.setText(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString().concat(File.separator).concat(obj.name));
-            new AlertDialog.Builder(activity).setTitle("Store Path")
+            new AlertDialog.Builder(activity).setTitle(R.string.local_store_path_title)
                     .setCancelable(false).setView(storePathText)
                     .setNegativeButton(R.string.verify_cancel_download, null).setCancelable(false)
                     .setPositiveButton(R.string.verify_ok, (dialog, which) -> {
@@ -580,7 +580,7 @@ public class DirFragment extends Fragment {
                     case DISK: {
                         icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.disk));
                         title.setText(obj.name);
-                        subtitle.setText(getString(R.string.disk_subtitle_format));
+                        subtitle.setText(null);
                         downloadButton.setVisibility(View.INVISIBLE);
                         break;
                     }
@@ -596,7 +596,7 @@ public class DirFragment extends Fragment {
                     case FOLDER: {
                         icon.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.folder));
                         title.setText(obj.name);
-                        subtitle.setText(String.format(getString(R.string.folder_subtitle_format)));
+                        subtitle.setText(null);
                         downloadButton.setVisibility(View.INVISIBLE);
                         break;
                     }

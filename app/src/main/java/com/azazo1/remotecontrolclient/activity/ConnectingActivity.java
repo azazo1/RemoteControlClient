@@ -58,17 +58,27 @@ public class ConnectingActivity extends AppCompatActivity {
     protected EditText ipEntry;
     protected EditText portEntry;
     protected ProgressBar searchingProgressBar;
+    protected TextView searchingText;
     private final IPSearcher searcher = new IPSearcher(new MyReporter() {
         @Override
         public void report(int now, int total) {
-            searchingProgressBar.setMax(total);
-            searchingProgressBar.setProgress(now);
+            handler.post(() -> {
+                searchingProgressBar.setMax(total);
+                searchingProgressBar.setProgress(now);
+                // 2.5这一系数用来校准（由测试误差所得，searchTimeout修改后可能还会造成较大偏差）
+                double leftSeconds = Config.searchTimeout * ((total - now) * 0.001 / Config.ipSearchingThreadNum) * 2.5;
+                searchingText.setText(String.format(Locale.getDefault(),
+                        getString(R.string.search_left_time_format),
+                        (now * 100.0) / total, String.format(Locale.getDefault(), "%.2fs", leftSeconds), total, now)
+                );
+            });
         }
 
         @Override
         public void reportEnd(int code) {
             handler.post(() -> {
                 searchingProgressBar.setVisibility(View.INVISIBLE);
+                searchingText.setVisibility(View.INVISIBLE);
                 switch (code) {
                     case -1: {
                         Toast.makeText(ConnectingActivity.this, R.string.ip_search_interrupted, Toast.LENGTH_SHORT).show();
@@ -136,12 +146,18 @@ public class ConnectingActivity extends AppCompatActivity {
                         onAuthenticateFailed();
                     }
                 } catch (SocketTimeoutException e) {
-                    onConnectingTimeOut();
+                    if (connectingRunning.get() && connectingThread == Thread.currentThread()) { // 防止死尸弹窗
+                        onConnectingTimeOut();
+                    }
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    onConnectFailed(ip, portInt, e.getMessage());
+                    if (connectingRunning.get() && connectingThread == Thread.currentThread()) {// 防止死尸弹窗
+                        e.printStackTrace();
+                        onConnectFailed(ip, portInt, e.getMessage());
+                    }
                 }
-                connectingRunning.set(false);
+                if (connectingThread == Thread.currentThread()) {
+                    connectingRunning.set(false);
+                }
             });
             connectingThread.setDaemon(true);
             connectingThread.start();
@@ -265,15 +281,14 @@ public class ConnectingActivity extends AppCompatActivity {
         connectingFAB = findViewById(R.id.connecting_fab);
         connectingFAB.setOnClickListener((view) -> connect());
         searchingProgressBar = findViewById(R.id.searching_progress_bar);
+        searchingText = findViewById(R.id.searching_state_output);
         connectingProgressBar = findViewById(R.id.connecting_progress_bar);
         searchFAB.setOnClickListener((view) -> search());
         portEntry.setText(String.valueOf(Config.serverPort));
         // 请求权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, reqCode);
-            }
+            informRequestPermissions();
             return;
         }
 
@@ -312,6 +327,7 @@ public class ConnectingActivity extends AppCompatActivity {
         }
         // 显示进度条
         searchingProgressBar.setVisibility(View.VISIBLE);
+        searchingText.setVisibility(View.VISIBLE);
         searchingThread = new Thread(() -> { // 寻找局域网可用地址
             try {
                 searchingRunning.set(true);
@@ -408,6 +424,24 @@ public class ConnectingActivity extends AppCompatActivity {
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, reqCode);
             }
+        }
+    }
+
+    /**
+     * 告知用户权限用处并请求权限
+     */
+    public void informRequestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            TextView informLabel = new TextView(this);
+            int padding = (int) getResources().getDimension(R.dimen.fragment_padding);
+            informLabel.setText(R.string.permission_usage_inform);
+            informLabel.setPadding(padding, padding, padding, padding);
+            new AlertDialog.Builder(this).setTitle(R.string.permission_request_alert_title)
+                    .setView(informLabel).setCancelable(false)
+                    .setPositiveButton(R.string.verify_permission_request_allow, (dialog, which) ->
+                            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, reqCode))
+                    .setNegativeButton(R.string.verify_permission_request_ban, null)
+                    .show();
         }
     }
 }
