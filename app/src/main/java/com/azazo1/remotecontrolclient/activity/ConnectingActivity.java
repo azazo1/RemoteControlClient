@@ -65,8 +65,7 @@ public class ConnectingActivity extends AppCompatActivity {
             handler.post(() -> {
                 searchingProgressBar.setMax(total);
                 searchingProgressBar.setProgress(now);
-                // 2.5这一系数用来校准（由测试误差所得，searchTimeout修改后可能还会造成较大偏差）
-                double leftSeconds = Config.searchTimeout * ((total - now) * 0.001 / Config.ipSearchingThreadNum) * 2.5;
+                double leftSeconds = Config.searchTimeout * ((total - now) * 0.001 / Config.ipSearchingThreadNum);
                 searchingText.setText(String.format(Locale.getDefault(),
                         getString(R.string.search_left_time_format),
                         (now * 100.0) / total, String.format(Locale.getDefault(), "%.2fs", leftSeconds), total, now)

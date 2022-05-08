@@ -18,4 +18,6 @@
     <string name="command_query_process_name_format" translatable="false">{\"type\":\"queryProcess\",\"all\":false,\"name\":%s}</string>
     <string name="command_kill_process_pid_format" translatable="false">{\"type\":\"closeProgram\",\"pid\":%d}</string>
     <string name="command_kill_process_image_name_format" translatable="false">{\"type\":\"closeProgram\",\"name\":%s}</string>
+    <string name="command_execute_format" translatable="false">{\"type\":\"execute\",\"content\":%s}</string>
+    <string name="command_mouse_format" translatable="false">{\"type\":\"controlMouse\",\"action\":%s,\"button\":%d,\"x\":%d,\"y\":%d,\"clickDuration\":%d,\"clickInterval\":%d,\"clickTimes\":%d}</string>
 </resources>

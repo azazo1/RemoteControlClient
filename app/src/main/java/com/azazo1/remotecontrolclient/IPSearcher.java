@@ -2,6 +2,7 @@ package com.azazo1.remotecontrolclient;
 
 import android.os.Build;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -64,7 +65,7 @@ public class IPSearcher {
     public Vector<String> searchAndReport() throws IOException {
         Vector<String> result;
         result = searchForIP(); // search ip try
-        if (result == null || tpd == null) {
+        if (result == null || result.isEmpty() || tpd == null) {
             // this means invalid web
             reporter.reportEnd(0);
             return new Vector<>();
@@ -138,11 +139,10 @@ class ThreadIPDetector implements Runnable {
         return stopped.get();
     }
 
-    public synchronized String next() {
+    public synchronized Pair<Integer, String> next() {
         try {
-            this.reporter.report(ipGen.cursor, ipGen.genRange);
 //            System.out.println("Trying: " + ipGen.cursor + ", total: " + ipGen.genRange);
-            return ipGen.next();
+            return new Pair<>(ipGen.cursor, ipGen.next());
         } catch (NoSuchFieldException e) {
             return null;
         }
@@ -154,11 +154,12 @@ class ThreadIPDetector implements Runnable {
 
     @Override
     public void run() {
-        String host;
-        while ((host = next()) != null && alive.get()) {
-            if (tryAddress(host)) {
-                addHost(host);
+        Pair<Integer, String> ipHostPair;
+        while ((ipHostPair = next()) != null && alive.get()) {
+            if (tryAddress(ipHostPair.second)) {
+                addHost(ipHostPair.second);
             }
+            this.reporter.report(ipHostPair.first, ipGen.genRange);
         }
     }
 
@@ -166,17 +167,14 @@ class ThreadIPDetector implements Runnable {
         try {
             InetAddress address = InetAddress.getByName(host);
             String ip = address.getHostAddress(); // eg: www.baidu.com -> xxx.xxx.xxx.xxx
-            if (address.isReachable(Config.searchTimeout)) {
-                InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, targetPort);
-                Socket socket = new Socket();
-                socket.connect(targetAddressWithPort, Config.searchTimeout);
-                socket.close();
-                Log.e("Search", "Reached: " + ip);
-                return true;
-            }
-            return false;
+            InetSocketAddress targetAddressWithPort = new InetSocketAddress(ip, targetPort);
+            Socket socket = new Socket();
+            socket.connect(targetAddressWithPort, Config.searchTimeout);
+            socket.close();
+            Log.e("Search", "Reached: " + ip);
+            return true;
         } catch (IOException e) {
-            Log.e("Search", "Failed: " + host + " " + e.getMessage());
+            Log.i("Search", "Failed: " + host + " " + e.getMessage());
         }
         return false;
     }

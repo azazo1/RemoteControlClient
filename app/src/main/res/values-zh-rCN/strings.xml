@@ -105,7 +105,7 @@
     <string name="notice_to_correct_port">端口号无效，请修正</string>
     <string name="authenticate_failed_title">验证失败</string>
     <string name="connecting_timeout_title">连接超时</string>
-    <string name="permission_usage_inform">为了保存验证信息以供下次打开软件时快速使用，我们将要用到文件读写权限</string>
+    <string name="permission_usage_inform">为了保存验证信息以供下次打开软件时快速使用、以及下载远程文件时对外部储存的读写，我们将要用到文件读写权限</string>
     <string name="download_communicating_problem">请求发送失败</string>
     <string name="download_interrupted">下载被终止</string>
     <string name="download_sum_error">数据损坏</string>
@@ -123,4 +123,16 @@
     <string name="permission_request_alert_title">权限需求</string>
     <string name="fetch_browsers_spinner_text">长按获取浏览器列表</string>
     <string name="search_left_time_format">进度：%.2f%%，剩余时间：%s\n总共：%d，当前：%d</string>
+    <string name="nav_execute_title">执行 Python 代码</string>
+    <string name="action_bar_detach_fragment_title">关闭这个片段</string>
+    <string name="execute_button_text">执行</string>
+    <string name="hint_for_execute_input">输入 Python 代码</string>
+    <string name="hint_for_execute_output">执行输出将在这里显示</string>
+    <string name="execute_fragment_title">执行 Python 代码</string>
+    <string name="execute_remote_permission_required">我们没有权限在远程机器上执行 Python 代码</string>
+    <string name="mouse_left_button_text">左键</string>
+    <string name="mouse_middle_button_text">中键/滚轮</string>
+    <string name="mouse_right_button_text">右键</string>
+    <string name="mouse_fragment_title">鼠标</string>
+    <string name="nav_mouse_title">鼠标</string>
 </resources>

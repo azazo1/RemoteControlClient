@@ -168,6 +168,7 @@ public class ProcessManagerFragment extends Fragment {
         regexButton = view.findViewById(R.id.regex_toggle_button);
         adapter = new ProcessManagerListAdapter();
         initView();
+        queryProcess();
         return view;
     }
 

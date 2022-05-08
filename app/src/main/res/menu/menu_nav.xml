@@ -7,10 +7,13 @@
                 android:icon="@drawable/command_line"
                 android:title="@string/nav_command_line_title" />
             <item
+                android:id="@+id/nav_execute"
+                android:icon="@drawable/execute"
+                android:title="@string/nav_execute_title" />
+            <item
                 android:id="@+id/nav_test"
                 android:icon="@drawable/test"
                 android:title="@string/nav_test_title" />
-
         </menu>
     </item>
 
@@ -32,6 +35,10 @@
                 android:id="@+id/nav_surf_website"
                 android:icon="@drawable/surf_website"
                 android:title="@string/nav_surf_website_title" />
+            <item
+                android:id="@+id/nav_mouse"
+                android:icon="@drawable/mouse"
+                android:title="@string/nav_mouse_title" />
         </menu>
     </item>
 

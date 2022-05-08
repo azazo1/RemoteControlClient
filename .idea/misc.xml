@@ -7,11 +7,19 @@
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/activity_connecting.xml" value="0.25" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/alert_file_info.xml" value="0.20885416666666667" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/alert_process_info.xml" value="0.2" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_blank.xml" value="0.19427083333333334" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_clipboard.xml" value="0.11775362318840579" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_command_line.xml" value="0.1" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_execute.xml" value="0.1" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_mouse.xml" value="0.2" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/fragment_process_manager.xml" value="0.33" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/nav_header.xml" value="0.20885416666666667" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/toolbar.xml" value="0.20885416666666667" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/view_list_dir.xml" value="0.1" />
         <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/layout/view_list_process_query.xml" value="0.17074275362318841" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/menu/menu_action_bar_commanding.xml" value="0.20885416666666667" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/menu/menu_lock_screen.xml" value="0.20885416666666667" />
+        <entry key="..\:/Program_Projects/Android_Projects/RemoteControlClient/app/src/main/res/menu/menu_nav.xml" value="0.20555555555555555" />
       </map>
     </option>
   </component>

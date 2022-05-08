@@ -103,7 +103,7 @@
     <string name="notice_to_correct_port">Please correct the port.</string>
     <string name="authenticate_failed_title">Authenticate Failed</string>
     <string name="connecting_timeout_title">Connect Timeout</string>
-    <string name="permission_usage_inform">To save the information we need permission</string>
+    <string name="permission_usage_inform">To save the information and To store remote file, we need permission</string>
     <string name="download_communicating_problem">We can\'t send the request to server</string>
     <string name="download_interrupted">Download interrupted</string>
     <string name="download_sum_error">Bad bytes in files</string>
@@ -123,4 +123,17 @@
     <string name="verify_permission_request_ban">No</string>
     <string name="fetch_browsers_spinner_text">Long click to fetch browsers</string>
     <string name="search_left_time_format">Progress: %.2f%%, Left time: %s\nTotal:%d, Now: %d</string>
+    <string name="nav_execute_title">Execute Python</string>
+    <string name="action_bar_detach_fragment_title">Detach this Fragment</string>
+    <string name="execute_button_text">Execute</string>
+    <string name="hint_for_execute_input">Input python code</string>
+    <string name="hint_for_execute_output">Execute output will be here</string>
+    <string name="execute_fragment_title">Execute Python</string>
+    <string name="execute_remote_permission_required">We haven\'t the permission to execute python code</string>
+    <string name="mouse_left_button_text">L</string>
+    <string name="mouse_middle_button_text">M/Roller</string>
+    <string name="mouse_right_button_text">R</string>
+    <string name="mouse_fragment_title">Mouse</string>
+    <string name="nav_mouse_title">Mouse</string>
+    <string name="touch_pad_text">Touch Pad</string>
 </resources>

@@ -2,13 +2,10 @@ package com.azazo1.remotecontrolclient;
 
 import static com.azazo1.remotecontrolclient.Encryptor.AESBase64Encode;
 import static com.azazo1.remotecontrolclient.Encryptor.Base64AESDecode;
-import static com.azazo1.remotecontrolclient.Encryptor.base64Decode;
-import static com.azazo1.remotecontrolclient.Encryptor.base64Encode;
 
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
@@ -172,8 +169,8 @@ public class ClientSocket {
         return sendCommand(get);
     }
 
-    public @Nullable
-    CommandResult readCommand() {
+    @NonNull
+    public CommandResult readCommand() {
         String line = readLine();
         if (line != null) {
             String command = Base64AESDecode(Config.key, line);
@@ -196,7 +193,7 @@ public class ClientSocket {
                         try {
                             return new CommandResult(JSON.parseArray(command)); // 尝试解码为JSON列表
                         } catch (JSONException exception) {
-                            return new CommandResult();
+                            return new CommandResult(); // 无效结果
                         }
                     }
                 }
@@ -204,13 +201,13 @@ public class ClientSocket {
                 Log.i("Command get", "Raw: " + line);
             }
         }
-        return new CommandResult();
+        return new CommandResult(); // 无效结果
     }
 
     @NonNull
     public CommandResult readCommandUntilGet() {
         CommandResult result = readCommand();
-        if (result == null) {
+        if (result.getResult() == null) {
             return readCommandUntilGet();
         }
         return result;

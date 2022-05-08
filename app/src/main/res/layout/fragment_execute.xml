@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/fragment_padding"
+    tools:context=".fragment.ExecuteFragment">
+
+    <EditText
+        android:id="@+id/execute_output_entry"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:gravity="start|top"
+        android:hint="@string/hint_for_execute_output"
+        android:inputType="textMultiLine"
+        android:scrollHorizontally="false"
+        android:autofillHints="" />
+
+
+    <EditText
+        android:id="@+id/execute_input_entry"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:gravity="start|top"
+        android:hint="@string/hint_for_execute_input"
+        android:inputType="textMultiLine"
+        android:scrollHorizontally="false"
+        android:autofillHints="" />
+
+    <Button
+        android:id="@+id/send_command_button"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="30dp"
+        android:text="@string/execute_button_text" />
+
+
+    <ProgressBar
+        android:id="@+id/getting_command_result_progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:max="100"
+        android:visibility="invisible" />
+
+</LinearLayout>

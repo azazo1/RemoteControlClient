@@ -23,4 +23,5 @@
     <color name="clipboard_clear_button_bg">#FFCA28</color>
     <color name="process_headers_highlight_bg">#652196F3</color>
     <color name="process_headers_plain_bg">#1EACACAC</color>
+    <color name="mouse_touch_pad_bg">#1EACACAC</color>
 </resources>

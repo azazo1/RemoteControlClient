@@ -3,6 +3,7 @@ package com.azazo1.remotecontrolclient.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -23,10 +24,13 @@ import com.azazo1.remotecontrolclient.ClientSocket;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
+import com.azazo1.remotecontrolclient.fragment.BlankFragment;
 import com.azazo1.remotecontrolclient.fragment.ClipboardFragment;
 import com.azazo1.remotecontrolclient.fragment.CommandLineFragment;
 import com.azazo1.remotecontrolclient.fragment.DirFragment;
+import com.azazo1.remotecontrolclient.fragment.ExecuteFragment;
 import com.azazo1.remotecontrolclient.fragment.LockScreenFragment;
+import com.azazo1.remotecontrolclient.fragment.MouseFragment;
 import com.azazo1.remotecontrolclient.fragment.ProcessManagerFragment;
 import com.azazo1.remotecontrolclient.fragment.ShowTextFragment;
 import com.azazo1.remotecontrolclient.fragment.SurfWebsiteFragment;
@@ -36,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -43,6 +48,8 @@ public class CommandingActivity extends AppCompatActivity {
     public final Handler handler = new Handler();
     protected final AtomicBoolean connectingRunning = new AtomicBoolean(false);
     public Fragment fragment;
+    public int lastID = -1; // 上次选择的 Fragment
+    public MenuItem lastItem; // 上次选择的 Fragment
     protected Toolbar toolbar;
     protected String ip;
     protected int port;
@@ -111,7 +118,7 @@ public class CommandingActivity extends AppCompatActivity {
     }
 
     private void initFragment() {
-//        changeFragment(new BlankFragment());
+        changeFragment(null);
     }
 
     protected void backgroundCheckClient() {
@@ -138,6 +145,25 @@ public class CommandingActivity extends AppCompatActivity {
 
     public Toolbar getToolbar() {
         return toolbar;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_toolbar_commanding, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.toolbar_detach_fragment) {
+            if (fragment != null) {
+                detachFragment();
+            } else {
+                finish();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     protected void reconnect() {
@@ -183,15 +209,31 @@ public class CommandingActivity extends AppCompatActivity {
         }
     }
 
-    private void changeFragment(Fragment fragmentChange) {
+    public void changeFragment(Fragment fragmentChange) {
+        final Fragment finalFragmentChange = fragmentChange;
+        handler.post(() -> {
+            if (finalFragmentChange != null) {
+                chooseCommandButton.setVisibility(View.INVISIBLE);
+            } else {
+                chooseCommandButton.setVisibility(View.VISIBLE);
+            }
+        });
+        if (fragmentChange == null) {
+            fragmentChange = new BlankFragment();
+        }
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_holder, fragmentChange);
         ft.commit();
-        handler.post(() -> {
-            if (fragment != null) {
-                chooseCommandButton.setVisibility(View.INVISIBLE);
-            }
-        });
+    }
+
+    public void detachFragment() {
+        if (fragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.detach(fragment);
+            ft.commit();
+        }
+        lastItem.setChecked(false);
+        changeFragment(null);
     }
 
     public interface MyBackPressListener {
@@ -200,44 +242,56 @@ public class CommandingActivity extends AppCompatActivity {
     }
 
     class NavSelected implements NavigationView.OnNavigationItemSelectedListener {
-        public int lastID = -1;
-        public MenuItem lastItem;
+        protected HashMap<Integer, Fragment> fragments = new HashMap<>();
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             // 添加命令操作： 1.修改menu 2.在下面添加 elif 分支创建 fragment
             Fragment fragmentSelected;
             int id = item.getItemId();
-
-            // choose fragment
-            if (id == lastID) {
-                item.setChecked(true);
-                return true;
-            } else if (id == R.id.nav_test) {
-                fragmentSelected = new TestFragment();
-            } else if (id == R.id.nav_command_line) {
-                fragmentSelected = new CommandLineFragment();
-            } else if (id == R.id.nav_dir) {
-                fragmentSelected = new DirFragment();
-            } else if (id == R.id.nav_show_text) {
-                fragmentSelected = new ShowTextFragment();
-            } else if (id == R.id.nav_clipboard) {
-                fragmentSelected = new ClipboardFragment();
-            } else if (id == R.id.nav_lock_screen) {
-                fragmentSelected = new LockScreenFragment();
-            } else if (id == R.id.nav_surf_website) {
-                fragmentSelected = new SurfWebsiteFragment();
-            } else if (id == R.id.nav_process_manager) {
-                fragmentSelected = new ProcessManagerFragment();
-            } else {
-                fragmentSelected = new CommandLineFragment();
+            // 先检测有没有创建过该 ID 对应的 Fragment，且判断是否还有效（没销毁）
+            if ((fragmentSelected = fragments.get(id)) != null) {
+                if (fragmentSelected.isDetached()) {
+                    fragmentSelected = null;
+                }
             }
+            // 重建 fragment
+            if (fragmentSelected == null) {
+                if (id == R.id.nav_test) {
+                    fragmentSelected = new TestFragment();
+                } else if (id == R.id.nav_command_line) {
+                    fragmentSelected = new CommandLineFragment();
+                } else if (id == R.id.nav_dir) {
+                    fragmentSelected = new DirFragment();
+                } else if (id == R.id.nav_show_text) {
+                    fragmentSelected = new ShowTextFragment();
+                } else if (id == R.id.nav_clipboard) {
+                    fragmentSelected = new ClipboardFragment();
+                } else if (id == R.id.nav_lock_screen) {
+                    fragmentSelected = new LockScreenFragment();
+                } else if (id == R.id.nav_surf_website) {
+                    fragmentSelected = new SurfWebsiteFragment();
+                } else if (id == R.id.nav_process_manager) {
+                    fragmentSelected = new ProcessManagerFragment();
+                } else if (id == R.id.nav_execute) {
+                    fragmentSelected = new ExecuteFragment();
+                } else if (id == R.id.nav_mouse) {
+                    fragmentSelected = new MouseFragment();
+                }
+            }
+            // 保存创建的 Fragment
+            if (fragmentSelected != null) {
+                fragments.put(id, fragmentSelected);
+            }
+
 
             // update checked
             if (lastItem != null) {
                 lastItem.setChecked(false);
             }
-            item.setChecked(true);
+            if (fragmentSelected != null) {
+                item.setChecked(true);
+            }
 
             // update last
             lastItem = item;
