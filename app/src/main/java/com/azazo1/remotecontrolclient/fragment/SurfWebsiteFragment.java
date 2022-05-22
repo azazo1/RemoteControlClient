@@ -43,10 +43,9 @@ public class SurfWebsiteFragment extends Fragment {
     private Button sendButton;
     private EditText contentInput;
     private Spinner browserChooser;
-    private ToggleButton modeToggle;
-    private Thread sendingThread;
-    private boolean searchMode = false; // true to "search"; false to "url"
+    private ToggleButton modeToggle; //searchMode: checked to "search"; unchecked to "url"
     private ProgressBar progressBar;
+    private Thread sendingThread;
     private long sendingStartTime;
 
     public SurfWebsiteFragment() {
@@ -91,14 +90,10 @@ public class SurfWebsiteFragment extends Fragment {
 
 
     private void initView() {
-        modeToggle.setOnClickListener((view) -> {
-            searchMode = !searchMode;
-            modeToggle.setChecked(searchMode);
-            if (searchMode) {
-                modeToggle.setText(R.string.surf_website_mode_toggle_search_text);
+        modeToggle.setOnCheckedChangeListener((view, checked) -> {
+            if (checked) {
                 contentInput.setHint(R.string.hint_for_surf_website_search);
             } else {
-                modeToggle.setText(R.string.surf_website_mode_toggle_url_text);
                 contentInput.setHint(R.string.hint_for_surf_website_url);
             }
         });
@@ -108,8 +103,7 @@ public class SurfWebsiteFragment extends Fragment {
             initBrowsers();
             return true;
         });
-        searchMode = !searchMode; // 防止改变了初始searchMode
-        modeToggle.callOnClick();
+        modeToggle.performClick();
         sendButton.setOnClickListener((view) -> sendCommand());
         sendButton.setBackgroundColor(originOutputColor);
         progressBar.setVisibility(View.INVISIBLE);
@@ -124,7 +118,7 @@ public class SurfWebsiteFragment extends Fragment {
     public void sendCommand(String command, boolean isGetBrowsers) {
         if (sending.get()) {
             if (Tools.getTimeInMilli() - sendingStartTime > Config.waitingTimeForTermination) { // 防止连点触发
-                Snackbar s = Snackbar.make(progressBar, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
+                Snackbar s = Snackbar.make(sendButton, R.string.notice_still_sending, Snackbar.LENGTH_SHORT);
                 s.setAction(R.string.verify_terminate, (view1) -> {
                     sending.set(false);
                     if (sendingThread != null && !sendingThread.isInterrupted()) {
@@ -143,7 +137,7 @@ public class SurfWebsiteFragment extends Fragment {
             sending.set(true);
             whileSending();
             if (Global.client.sendCommand(command)) {
-                CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 if (isGetBrowsers) {
                     resultAppearancePostOnBrowsers(result);
                 } else {
@@ -175,7 +169,7 @@ public class SurfWebsiteFragment extends Fragment {
         String command;
         Pattern urlPattern = Pattern.compile("[a-zA-Z]+://\\S+");
         Matcher matcher;
-        if (searchMode) {
+        if (modeToggle.isChecked()) { //searchMode: checked to "search"; unchecked to "url"
             command = String.format(getString(R.string.command_surf_website_search_format), JSON.toJSONString(content), JSON.toJSONString(using));
         } else if ((matcher = urlPattern.matcher(content)).find()) {
             Log.i("m", matcher.group(0));

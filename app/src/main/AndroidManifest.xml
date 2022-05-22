@@ -12,8 +12,15 @@
         android:roundIcon="@drawable/remote_control"
         android:supportsRtl="true"
         android:theme="@style/Theme.RemoteControlClient">
-        <!--                android:icon="@mipmap/ic_launcher"-->
-        <!--        android:roundIcon="@mipmap/ic_launcher_round"-->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.azazo1.remotecontrolclient.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
         <activity
             android:name=".activity.CommandingActivity"
             android:screenOrientation="portrait" />

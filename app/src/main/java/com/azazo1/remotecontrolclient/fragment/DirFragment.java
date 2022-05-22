@@ -289,7 +289,7 @@ public class DirFragment extends Fragment {
         String command = String.format(getString(R.string.command_start_file_format),
                 JSON.toJSONString(path));
         if (Global.client.sendCommand(command)) {
-            CommandResult result = Global.client.readCommandUntilGet();
+            CommandResult result = Global.client.readCommand();
             resultAppearancePostOfLaunch(result);
         }
     }
@@ -297,7 +297,7 @@ public class DirFragment extends Fragment {
     private void fetchDisks() {
         String command = getString(R.string.command_get_disks_string);
         if (Global.client.sendCommand(command)) {
-            CommandResult result = Global.client.readCommandUntilGet();
+            CommandResult result = Global.client.readCommand();
             resultAppearancePostOfDisks(result);
         }
     }
@@ -305,7 +305,7 @@ public class DirFragment extends Fragment {
     public void explorePath(String path) {
         String command = String.format(getString(R.string.command_dir_format), JSON.toJSONString(path));
         if (Global.client.sendCommand(command)) {
-            CommandResult result = Global.client.readCommandUntilGet();
+            CommandResult result = Global.client.readCommand();
             resultAppearancePost(result, path);
         }
     }

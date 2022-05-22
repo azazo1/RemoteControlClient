@@ -11,7 +11,8 @@
         android:id="@+id/surf_website_mode_toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/surf_website_mode_toggle_default_text" />
+        android:textOff="@string/surf_website_mode_toggle_url_text"
+        android:textOn="@string/surf_website_mode_toggle_search_text" />
 
     <Spinner
         android:id="@+id/browser_chooser"

@@ -94,7 +94,7 @@ public class ExecuteFragment extends Fragment {
                     String.format(Locale.getDefault(),
                             getString(R.string.command_execute_format), JSON.toJSONString(executeContent))
             )) {
-                CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);
             }
             sending.set(false);

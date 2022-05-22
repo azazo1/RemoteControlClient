@@ -171,7 +171,7 @@ public class LockScreenFragment extends Fragment {
             sending.set(true);
             whileSending();
             if (Global.client.sendCommand(finalCommand)) {
-                CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);
             }
             sending.set(false);

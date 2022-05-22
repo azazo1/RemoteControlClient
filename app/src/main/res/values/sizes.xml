@@ -2,4 +2,5 @@
 <resources>
     <dimen name="fragment_padding">15dp</dimen>
     <dimen name="process_manager_button_font_size">9sp</dimen>
+    <dimen name="mouse_buttons_bottom_margin">60dp</dimen>
 </resources>

@@ -36,6 +36,10 @@
                 android:icon="@drawable/surf_website"
                 android:title="@string/nav_surf_website_title" />
             <item
+                android:id="@+id/nav_capture"
+                android:icon="@drawable/capture"
+                android:title="@string/nav_capture_title" />
+            <item
                 android:id="@+id/nav_mouse"
                 android:icon="@drawable/mouse"
                 android:title="@string/nav_mouse_title" />

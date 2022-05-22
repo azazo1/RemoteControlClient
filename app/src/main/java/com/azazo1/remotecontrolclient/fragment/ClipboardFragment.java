@@ -107,11 +107,6 @@ public class ClipboardFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -161,7 +156,7 @@ public class ClipboardFragment extends Fragment {
             whileSending();
             String command = String.format(getString(R.string.command_clipboard_format), JSON.toJSONString(action), JSON.toJSONString(content));
             if (Global.client.sendCommand(command)) {
-                CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 handler.resultAppearancePost(result);
             }
             sending.set(false);

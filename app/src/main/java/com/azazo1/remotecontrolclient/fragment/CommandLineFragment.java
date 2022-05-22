@@ -91,7 +91,7 @@ public class CommandLineFragment extends Fragment {
             whileSending();
             String commandFinal = (command).replace('\n', ' ');
             if (Global.client.sendCommand(commandFinal)) {
-                CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);
             }
             sending.set(false);
