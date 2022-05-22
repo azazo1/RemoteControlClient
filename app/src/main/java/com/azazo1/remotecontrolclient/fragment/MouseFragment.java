@@ -10,14 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSON;
-import com.azazo1.remotecontrolclient.CommandResult;
-import com.azazo1.remotecontrolclient.CommandResultHandler;
 import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
@@ -28,15 +27,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 下部鼠标按键:<br>
- * 中间行:短按可实现单击, 长按可模拟鼠标按住不放, 若按键为中键, 滑动可模拟鼠标滚轮(水平和垂直)<br>
+ * 下部鼠标按键: 短按可实现单击, 长按可模拟鼠标按住不放, 若按键为中键, 滑动可模拟鼠标滚轮(水平和垂直)<br>
  * <br>
- * 中间操控板:
- * todo
+ * 中间操控板: 滑动模式, 摇杆模式
+ * todo 摇杆模式
  */
 public class MouseFragment extends Fragment {
     private final AtomicBoolean sending = new AtomicBoolean(false);
-    private final long minMovingInterval_ms = 150; // 滑动事件最小时间间隔 (ms)
+    private final long minMovingInterval_ms = 120; // 滑动事件最小时间间隔 (ms)
     private long sendingStartTime;
     private CommandingActivity activity;
     private ProgressBar progressBar;
@@ -91,7 +89,15 @@ public class MouseFragment extends Fragment {
         /* Button view tag: 按下的按钮(int), 中键为上一次的手指坐标(为了计算位移)(Pair<int,int>)*/
         progressBar = get.findViewById(R.id.getting_command_result_progress_bar);
         initView();
+        noticeIssue();
         return get;
+    }
+
+    /**
+     * 提示用户不要在使用鼠标时使用其他功能
+     */
+    private void noticeIssue() {
+        Toast.makeText(activity, R.string.mouse_issue_toast, Toast.LENGTH_SHORT).show();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -122,12 +128,12 @@ public class MouseFragment extends Fragment {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
                 sendCommand(MouseAction.PRESS.getVal(), button, 0, 0,
-                        0, 0, 0, null);
+                        0, 0, 0);
                 break;
             }
             case MotionEvent.ACTION_UP: {
                 sendCommand(MouseAction.RELEASE.getVal(), button, 0, 0,
-                        0, 0, 0, null);
+                        0, 0, 0);
                 break;
             }
         }
@@ -144,13 +150,13 @@ public class MouseFragment extends Fragment {
      * 鼠标中间的按下释放和滚动
      */
     public boolean mouseButtonMTouch(View view, @NonNull MotionEvent event) {
-        int threshold = 5; // 滑动判断阈值
+        int threshold = 2; // 滑动判断阈值
         int pressWait_ms = 100; // 按下中键后等待该时间判断是否滑动
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 int[] pos = (int[]) view.getTag();
-                int deltaX = (int) (pos[0] - event.getX());
-                int deltaY = (int) (event.getY() - pos[1]);
+                int deltaX = (int) (pos[0] - event.getRawX());
+                int deltaY = (int) (event.getRawY() - pos[1]);
                 long nowTime = Tools.getTimeInMilli();
                 if (!midButtonMoving && !midButtonPressed && (Math.abs(deltaX) >= threshold || Math.abs(deltaY) >= threshold)) {
                     // 用户在被判断为 按下 前进行 滑动
@@ -158,14 +164,14 @@ public class MouseFragment extends Fragment {
                 }
                 if (midButtonMoving && !midButtonPressed && (nowTime - lastMidButtonMovingTime > minMovingInterval_ms)) {
                     sendCommand(MouseAction.SCROLL.getVal(), 0, (int) (deltaX * 0.05), (int) (deltaY * 0.05),
-                            0, 0, 0, null);
-                    view.setTag(new int[]{(int) event.getX(), (int) event.getY()});
+                            0, 0, 0);
+                    view.setTag(new int[]{(int) event.getRawX(), (int) event.getRawY()});
                     lastMidButtonMovingTime = nowTime;
                 }
                 break;
             }
             case MotionEvent.ACTION_DOWN: {
-                midButtonStartPos = new Pair<>((int) event.getX(), (int) event.getY());
+                midButtonStartPos = new Pair<>((int) event.getRawX(), (int) event.getRawY());
                 view.setTag(new int[]{midButtonStartPos.first, midButtonStartPos.second});
                 midButtonMoving = false;
                 midButtonPressed = false;
@@ -175,14 +181,14 @@ public class MouseFragment extends Fragment {
                         if (midButtonReleased) { // 用户单击太短暂, 未处理好"按下", 但已经松开屏幕上的按钮
                             // 补充执行按键点击
                             sendCommand(MouseAction.CLICK.getVal(), MouseButtons.MIDDLE.getVal(), 0, 0,
-                                    30, 0, 1, null);
+                                    30, 0, 1);
                             view.setTag(new int[]{-1, -1});
                             midButtonMoving = false;
                             midButtonPressed = false;
                             midButtonStartPos = null;
                         } else {
                             sendCommand(MouseAction.PRESS.getVal(), MouseButtons.MIDDLE.getVal(), 0, 0,
-                                    0, 0, 0, null);
+                                    0, 0, 0);
                             midButtonPressed = true; // 等待一段时间后发现用户没有滑动, 则判断用户想要按下中键
                         }
                     }
@@ -192,7 +198,7 @@ public class MouseFragment extends Fragment {
             case MotionEvent.ACTION_UP: {
                 if (!midButtonMoving && midButtonPressed) {
                     sendCommand(MouseAction.RELEASE.getVal(), MouseButtons.MIDDLE.getVal(), 0, 0,
-                            0, 0, 0, null);
+                            0, 0, 0);
                 }
                 // 在用户的短暂单击, 不是"滑动", 且"按下"判定还未执行时, 两个变量都为否, 不应处理"释放"
                 if (midButtonMoving || midButtonReleased) {
@@ -215,19 +221,19 @@ public class MouseFragment extends Fragment {
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 int[] pos = (int[]) view.getTag();
-                int deltaX = (int) (event.getX() - pos[0]);
-                int deltaY = (int) (event.getY() - pos[1]);
+                int deltaX = (int) (event.getRawX() - pos[0]);
+                int deltaY = (int) (event.getRawY() - pos[1]);
                 long nowTime = Tools.getTimeInMilli();
                 if (nowTime - lastMouseMovingTime > minMovingInterval_ms) {
                     sendCommand(MouseAction.MOVE_BY.getVal(), 0, deltaX, deltaY,
-                            0, 0, 0, null);
-                    view.setTag(new int[]{(int) event.getX(), (int) event.getY()});
+                            0, 0, 0);
+                    view.setTag(new int[]{(int) event.getRawX(), (int) event.getRawY()});
                     lastMouseMovingTime = nowTime;
                 }
                 break;
             }
             case MotionEvent.ACTION_DOWN: {
-                mouseStartPos = new Pair<>((int) event.getX(), (int) event.getY());
+                mouseStartPos = new Pair<>((int) event.getRawX(), (int) event.getRawY());
                 view.setTag(new int[]{mouseStartPos.first, mouseStartPos.second});
                 break;
             }
@@ -245,23 +251,18 @@ public class MouseFragment extends Fragment {
      * 不用考虑防连点
      */
     public void sendCommand(String action, int button, int x, int y,
-                            int clickDuration, int clickInterval, int clickTimes,
-                            CommandResultHandler handler) {
-        sendingThread = new Thread(() -> {
-            sending.set(true);
-            whileSending();
-            if (Global.client.sendCommand(String.format(getString(R.string.command_mouse_format),
-                    JSON.toJSONString(action), button, x, y, clickDuration, clickInterval, clickTimes
-            ))) {
-                CommandResult result = Global.client.readCommand(); // 把命令执行返回值消耗掉
-                if (handler != null) {
-                    handler.resultAppearancePost(result);
-                }
-            }
-            sending.set(false);
-        });
-        sendingThread.setDaemon(true);
-        sendingThread.start();
+                            int clickDuration, int clickInterval, int clickTimes) {
+        if (!sending.get()) {
+            sendingThread = new Thread(() -> {
+                sending.set(true);
+                whileSending();
+                Global.client.sendCommand(String.format(getString(R.string.command_mouse_format),
+                        JSON.toJSONString(action), button, x, y, clickDuration, clickInterval, clickTimes));
+                sending.set(false);
+            });
+            sendingThread.setDaemon(true);
+            sendingThread.start();
+        }
     }
 
     private void whileSending() {
@@ -280,6 +281,12 @@ public class MouseFragment extends Fragment {
                 }
             }
         }, (long) (1.0 / Config.loopingRate * 1000));
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        ((CommandingActivity) activity).reconnect(); // 消耗鼠标产生的返回值
     }
 
     /**

@@ -1,100 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/fragment_padding">
+    android:padding="@dimen/fragment_padding"
+    android:stretchColumns="1">
 
-    <Button
-        android:id="@+id/kill_pid_process_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="4"
-        android:layout_column="0"
-        android:text="@string/kill_pid_process_button_text"
-        android:textSize="@dimen/process_manager_button_font_size" />
 
-    <Button
-        android:id="@+id/kill_image_name_process_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="4"
-        android:layout_column="1"
-        android:text="@string/kill_image_name_process_button_text"
-        android:textSize="@dimen/process_manager_button_font_size" />
+    <TableRow>
 
-    <EditText
-        android:id="@+id/image_name_holder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="0"
-        android:layout_column="1"
-        android:autofillHints="no"
-        android:ems="10"
-        android:hint="@string/process_list_header_image_name_text"
-        android:inputType="text" />
+        <TextView
+            android:id="@+id/image_name_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/process_list_header_image_name_text" />
 
-    <TextView
-        android:id="@+id/image_name_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="0"
-        android:layout_column="0"
-        android:text="@string/process_list_header_image_name_text" />
+        <EditText
+            android:id="@+id/image_name_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autofillHints=" "
+            android:ems="10"
+            android:hint="@string/process_list_header_image_name_text"
+            android:inputType="text" />
+    </TableRow>
 
-    <TextView
-        android:id="@+id/pid_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="1"
-        android:layout_column="0"
-        android:text="@string/process_list_header_pid_text" />
+    <TableRow>
 
-    <EditText
-        android:id="@+id/pid_holder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="1"
-        android:layout_column="1"
-        android:autofillHints=" "
-        android:ems="10"
-        android:hint="@string/process_list_header_pid_text"
-        android:inputType="numberDecimal" />
+        <TextView
+            android:id="@+id/pid_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/process_list_header_pid_text" />
 
-    <TextView
-        android:id="@+id/session_name_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="2"
-        android:layout_column="0"
-        android:text="@string/process_list_header_session_name_text" />
+        <EditText
+            android:id="@+id/pid_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autofillHints=" "
+            android:ems="10"
+            android:hint="@string/process_list_header_pid_text"
+            android:inputType="numberDecimal" />
+    </TableRow>
 
-    <EditText
-        android:id="@+id/session_name_holder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="2"
-        android:layout_column="1"
-        android:autofillHints=" "
-        android:ems="10"
-        android:hint="@string/process_list_header_session_name_text"
-        android:inputType="text" />
+    <TableRow>
 
-    <TextView
-        android:id="@+id/memory_usage_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="3"
-        android:layout_column="0"
-        android:text="@string/process_list_header_memory_usage_text" />
+        <TextView
+            android:id="@+id/session_name_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/process_list_header_session_name_text" />
 
-    <EditText
-        android:id="@+id/memory_usage_holder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_row="3"
-        android:layout_column="1"
-        android:autofillHints="no"
-        android:ems="10"
-        android:hint="@string/process_list_header_memory_usage_text"
-        android:inputType="text" />
-</GridLayout>
+        <EditText
+            android:id="@+id/session_name_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autofillHints=" "
+            android:ems="10"
+            android:hint="@string/process_list_header_session_name_text"
+            android:inputType="text" />
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:id="@+id/memory_usage_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/process_list_header_memory_usage_text" />
+
+        <EditText
+            android:id="@+id/memory_usage_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autofillHints=" "
+            android:ems="10"
+            android:hint="@string/process_list_header_memory_usage_text"
+            android:inputType="text" />
+    </TableRow>
+
+    <TableRow>
+
+        <Button
+            android:id="@+id/kill_pid_process_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kill_pid_process_button_text"
+            android:textSize="@dimen/process_manager_button_font_size" />
+
+        <Button
+            android:id="@+id/kill_image_name_process_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kill_image_name_process_button_text"
+            android:textSize="@dimen/process_manager_button_font_size" />
+
+    </TableRow>
+</TableLayout>

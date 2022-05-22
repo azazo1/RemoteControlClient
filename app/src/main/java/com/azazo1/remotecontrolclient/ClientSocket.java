@@ -5,8 +5,6 @@ import static com.azazo1.remotecontrolclient.Encryptor.Base64AESDecode;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -145,19 +143,31 @@ public class ClientSocket {
         sendRaw(content + "\n");
     }
 
-    public synchronized String readLine() {
+    public String readLine() {
+        return readLine(0);
+    }
+
+    /**
+     * 返回 null 如果连接出现问题, 若 timeout(ms) 为 非正数 则为默认
+     */
+    public synchronized String readLine(int timeout) {
         // it blocks
         try {
             if (!input.isAlive()) {
                 close();
                 return null;
             }
-            String line = input.mReadLine();
-//            if (line.equals("end")) { // ignore end
-//                return readLine();
-//            }
+            String line;
+            if (timeout <= 0) {
+                line = input.mReadLine();
+            } else {
+                int oriTimeout = client.getSoTimeout();
+                client.setSoTimeout(timeout);
+                line = input.mReadLine();
+                client.setSoTimeout(oriTimeout);
+            }
             return line;
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
             close();
             return null;
@@ -169,9 +179,11 @@ public class ClientSocket {
         return sendCommand(get);
     }
 
-    @NonNull
-    public CommandResult readCommand() {
-        String line = readLine();
+    /**
+     * timeout 见 readLine
+     */
+    public CommandResult readCommand(int timeout) {
+        String line = readLine(timeout);
         if (line != null) {
             String command = Base64AESDecode(Config.key, line);
 //            String command = new String(base64Decode(line));
@@ -201,16 +213,11 @@ public class ClientSocket {
                 Log.i("Command get", "Raw: " + line);
             }
         }
-        return new CommandResult(); // 无效结果
+        return null; // 连接断开
     }
 
-    @NonNull
-    public CommandResult readCommandUntilGet() {
-        CommandResult result = readCommand();
-        if (result.getResult() == null) {
-            return readCommandUntilGet();
-        }
-        return result;
+    public CommandResult readCommand() {
+        return readCommand(0);
     }
 
     public boolean sendCommand(String jsonString) {

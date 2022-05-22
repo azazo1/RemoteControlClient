@@ -104,7 +104,7 @@ public class TestFragment extends Fragment {
             whileSending();
             String command = String.format(getString(R.string.command_test_format), JSON.toJSONString(text));
             if (Global.client.sendCommand(command)) {
-                CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 resultAppearancePost(result);
             }
             sending.set(false);

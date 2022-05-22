@@ -130,10 +130,22 @@
     <string name="hint_for_execute_output">Execute output will be here</string>
     <string name="execute_fragment_title">Execute Python</string>
     <string name="execute_remote_permission_required">We haven\'t the permission to execute python code</string>
-    <string name="mouse_left_button_text">L</string>
-    <string name="mouse_middle_button_text">M/Roller</string>
-    <string name="mouse_right_button_text">R</string>
+    <string name="mouse_left_button_text">Left</string>
+    <string name="mouse_middle_button_text">Middle/Roller</string>
+    <string name="mouse_right_button_text">Right</string>
     <string name="mouse_fragment_title">Mouse</string>
     <string name="nav_mouse_title">Mouse</string>
     <string name="touch_pad_text">Touch Pad</string>
+    <string name="mouse_issue_toast">Notice: Don\'t use other commands when using the mouse</string>
+    <string name="capture_take_button_text">Capture</string>
+    <string name="capture_download_button_text">Download</string>
+    <string name="capture_image_description">The image downloaded will be here</string>
+    <string name="capture_fragment_title">Capture</string>
+    <string name="capture_mode_toggle_default_text">Mode: Null</string>
+    <string name="capture_mode_toggle_camera_text">Camera</string>
+    <string name="capture_mode_toggle_screen_text">Screen</string>
+    <string name="nav_capture_title">Capture</string>
+    <string name="capture_auto_toggle_auto_text">Auto</string>
+    <string name="capture_auto_toggle_manual_text">Manual</string>
+    <string name="open_capture_failed">Failed to call outer app</string>
 </resources>

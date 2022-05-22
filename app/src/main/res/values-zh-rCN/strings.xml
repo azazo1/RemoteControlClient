@@ -135,4 +135,6 @@
     <string name="mouse_right_button_text">右键</string>
     <string name="mouse_fragment_title">鼠标</string>
     <string name="nav_mouse_title">鼠标</string>
+    <string name="touch_pad_text">触摸板</string>
+    <string name="mouse_issue_toast">提示: 不要在使用鼠标时使用其他命令</string>
 </resources>

@@ -25,6 +25,7 @@ import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.fragment.BlankFragment;
+import com.azazo1.remotecontrolclient.fragment.CaptureFragment;
 import com.azazo1.remotecontrolclient.fragment.ClipboardFragment;
 import com.azazo1.remotecontrolclient.fragment.CommandLineFragment;
 import com.azazo1.remotecontrolclient.fragment.DirFragment;
@@ -66,6 +67,10 @@ public class CommandingActivity extends AppCompatActivity {
 
     public void setBackPressAction(MyBackPressListener action) {
         onBackPressAction = action;
+    }
+
+    public boolean isConnecting() {
+        return connectingRunning.get();
     }
 
     @Override
@@ -121,28 +126,6 @@ public class CommandingActivity extends AppCompatActivity {
         changeFragment(null);
     }
 
-    protected void backgroundCheckClient() {
-        Snackbar finishSnack = Snackbar.make(addressNotice, R.string.notice_disconnected, Snackbar.LENGTH_INDEFINITE);
-        finishSnack.setAction(R.string.verify_reconnect, (view) -> reconnect());
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!Global.client.isAvailable()) {
-                    if (!finishSnack.isShown()) {
-                        addressNotice.setText(String.format(getString(R.string.address_notice_text_holder), ip, port, getString(R.string.connect_state_disconnected)));
-                        finishSnack.show();
-                    }
-                } else {
-                    addressNotice.setText(String.format(getString(R.string.address_notice_text_holder), ip, port, getString(R.string.connect_state_connected)));
-                }
-                if (!CommandingActivity.this.isFinishing()) {
-                    handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                }
-
-            }
-        }, (long) (1.0 / Config.loopingRate * 1000));
-    }
-
     public Toolbar getToolbar() {
         return toolbar;
     }
@@ -166,7 +149,29 @@ public class CommandingActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    protected void reconnect() {
+    protected void backgroundCheckClient() {
+        Snackbar snack = Snackbar.make(addressNotice, R.string.notice_disconnected, Snackbar.LENGTH_INDEFINITE);
+        snack.setAction(R.string.verify_reconnect, (view) -> reconnect());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!Global.client.isAvailable() && !connectingRunning.get()) {// 若套接字无效且不是在重连状态
+                    if (!snack.isShown()) {
+                        addressNotice.setText(String.format(getString(R.string.address_notice_text_holder), ip, port, getString(R.string.connect_state_disconnected)));
+                        snack.show();
+                    }
+                } else {
+                    addressNotice.setText(String.format(getString(R.string.address_notice_text_holder), ip, port, getString(R.string.connect_state_connected)));
+                }
+                if (!CommandingActivity.this.isFinishing()) {
+                    handler.postDelayed(this, (long) (1000.0 / Config.loopingRate));
+                }
+
+            }
+        }, (long) (1000.0 / Config.loopingRate));
+    }
+
+    public void reconnect() {
         if (connectingRunning.get()) {
             return;
         }
@@ -277,6 +282,8 @@ public class CommandingActivity extends AppCompatActivity {
                     fragmentSelected = new ExecuteFragment();
                 } else if (id == R.id.nav_mouse) {
                     fragmentSelected = new MouseFragment();
+                } else if (id == R.id.nav_capture) {
+                    fragmentSelected = new CaptureFragment();
                 }
             }
             // 保存创建的 Fragment

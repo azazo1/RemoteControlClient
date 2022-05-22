@@ -207,7 +207,7 @@ public class ProcessManagerFragment extends Fragment {
             sending.set(true);
             whileSending();
             if (Global.client.sendCommand(command)) {
-                CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 handler.resultAppearancePost(result);
             }
             sending.set(false);

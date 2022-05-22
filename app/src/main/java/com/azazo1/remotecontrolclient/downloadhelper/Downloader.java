@@ -30,6 +30,9 @@ public class Downloader {
         downloading.set(false);
     }
 
+    /**
+     * targetFile: 远程文件路径
+     */
     @Nullable
     public static FileDetail getFileDetail(@NonNull String targetFile) {
         targetFile = targetFile.replaceAll("^[\"']", "");
@@ -43,7 +46,7 @@ public class Downloader {
         );
         if (sent) { // Log 报告
             try {
-                @NonNull CommandResult result = Global.client.readCommandUntilGet();
+                CommandResult result = Global.client.readCommand();
                 detail = new FileDetail(result);
                 if (detail.available) {
                     String detailString = detail.toString();
@@ -64,7 +67,7 @@ public class Downloader {
         String command = Global.activity.getString(R.string.command_file_transport_get_format, JSON.toJSONString(path), part);
         boolean sent = Global.client.sendCommand(command);
         if (sent) {
-            return Global.client.readCommandUntilGet();
+            return Global.client.readCommand();
         } else {
             return null;
         }
