@@ -153,4 +153,6 @@
     <string name="whether_overrride">File exists, override?</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
+    <string name="modify_version_title">Modify Version Code</string>
+    <string name="modify_version_detail">Force to modify version code, some functions may not work properly</string>
 </resources>

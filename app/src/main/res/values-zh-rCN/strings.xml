@@ -153,4 +153,6 @@
     <string name="whether_overrride">文件已存在, 是否覆盖</string>
     <string name="yes">是</string>
     <string name="no">否</string>
+    <string name="modify_version_title">修改版本号</string>
+    <string name="modify_version_detail">强行改变版本号, 某些功能可能会不正常</string>
 </resources>

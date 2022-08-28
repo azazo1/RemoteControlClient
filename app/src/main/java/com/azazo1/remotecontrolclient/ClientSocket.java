@@ -91,17 +91,17 @@ public class ClientSocket {
     }
 
     public boolean authenticate() {
-        return authenticate(Config.key);
+        return authenticate(Config.getKey());
     }
 
     public boolean authenticate(String key) {
         if (authenticated == null) {
             long stamp = Tools.getTimeInMilli();
-            String concat = Config.name + Config.version + key + stamp;
+            String concat = Config.name + Config.getVersion() + key + stamp;
             String encoded = Encryptor.md5(concat.getBytes(Config.charset));
             JSONObject obj = new JSONObject();
             obj.put("name", Config.name);
-            obj.put("version", Config.version);
+            obj.put("version", Config.getVersion());
             obj.put("stamp", stamp);
             obj.put("md5", encoded);
             sendLine(obj.toJSONString());
@@ -124,7 +124,7 @@ public class ClientSocket {
     }
 
     public boolean connect(InetSocketAddress address) throws IOException {
-        return connect(address, Config.key);
+        return connect(address, Config.getKey());
     }
 
     public boolean connect(InetSocketAddress address, String password) throws IOException {
@@ -175,7 +175,7 @@ public class ClientSocket {
     }
 
     public boolean sendCommand(JSONObject obj) {
-        String get = AESBase64Encode(Config.key, obj.toJSONString());
+        String get = AESBase64Encode(Config.getKey(), obj.toJSONString());
         return sendCommand(get);
     }
 
@@ -185,7 +185,7 @@ public class ClientSocket {
     public CommandResult readCommand(int timeout) {
         String line = readLine(timeout);
         if (line != null) {
-            String command = Base64AESDecode(Config.key, line);
+            String command = Base64AESDecode(Config.getKey(), line);
 //            String command = new String(base64Decode(line));
             if (command != null) {
                 waitCount.set(waitCount.intValue() - 1);
@@ -229,7 +229,7 @@ public class ClientSocket {
             Log.e("Command Send", "Invalid content.");
             return false;
         }
-        String get = AESBase64Encode(Config.key, jsonString);
+        String get = AESBase64Encode(Config.getKey(), jsonString);
 //        String get = base64Encode(jsonString.getBytes(Config.charset));
         if (get != null) {
             if (get.length() > Config.longestCommand) {

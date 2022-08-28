@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -125,7 +126,7 @@ public class ConnectingActivity extends AppCompatActivity {
         String port = portEntry.getText().toString();
         String password = passwordEntry.getText().toString();
         if (password.isEmpty()) {
-            password = Config.key;
+            password = Config.getKey(null); // 获取默认密钥
         }
         if (!ip.isEmpty() && !port.isEmpty()) {
             int portInt = Integer.parseInt(port);
@@ -231,7 +232,7 @@ public class ConnectingActivity extends AppCompatActivity {
         }
         saveAddress(ip, port, password);
         handler.post(() -> {
-            Config.key = password;
+            Config.setKey(password);
             Intent intent = new Intent(ConnectingActivity.this, CommandingActivity.class);
             intent.putExtra("ip", ip);
             intent.putExtra("port", port);
@@ -271,7 +272,29 @@ public class ConnectingActivity extends AppCompatActivity {
         Global.activity = this;
         Global.connectingActivity = this;
         toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(Config.title);
+        toolbar.setTitle(Config.name + " " + Config.getVersion());
+        toolbar.setOnLongClickListener((v) -> { // 长按修改版本号
+            LinearLayout layout = new LinearLayout(this);
+            TextView detail = new TextView(this);
+            EditText versionCodeInput = new EditText(this);
+
+            layout.setPadding(5, 5, 5, 5);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            detail.setGravity(Gravity.CENTER);
+            detail.setText(R.string.modify_version_detail);
+            versionCodeInput.setText(Config.getVersion());
+            versionCodeInput.setGravity(Gravity.CENTER);
+            layout.addView(detail);
+            layout.addView(versionCodeInput);
+            new AlertDialog.Builder(this).setTitle(R.string.modify_version_title)
+                    .setView(layout)
+                    .setPositiveButton(R.string.yes, (dialog, which) -> {
+                        Config.modifyVersion(versionCodeInput.getText() + "");
+                        toolbar.setTitle(Config.name + " " + Config.getVersion());
+                    })
+                    .setNegativeButton(R.string.no, null).show();
+            return true;
+        });
 
         ipEntry = findViewById(R.id.ip_entry);
         portEntry = findViewById(R.id.port_entry);
