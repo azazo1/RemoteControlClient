@@ -137,4 +137,20 @@
     <string name="nav_mouse_title">鼠标</string>
     <string name="touch_pad_text">触摸板</string>
     <string name="mouse_issue_toast">提示: 不要在使用鼠标时使用其他命令</string>
+    <string name="capture_take_button_text">捕获</string>
+    <string name="capture_download_button_text">下载</string>
+    <string name="capture_image_description">此处应有图像, 长按可在其他应用打开</string>
+    <string name="capture_fragment_title">捕获</string>
+    <string name="capture_mode_toggle_default_text">模式: 无</string>
+    <string name="capture_mode_toggle_camera_text">照相机</string>
+    <string name="capture_mode_toggle_screen_text">截屏</string>
+    <string name="nav_capture_title">捕获</string>
+    <string name="capture_auto_toggle_auto_text">捕获后自动下载</string>
+    <string name="capture_auto_toggle_manual_text">捕获后手动下载</string>
+    <string name="open_capture_failed">启动外部应用失败</string>
+    <string name="delete_successfully">成功删除</string>
+    <string name="subsentence_for_deletion">, 点此删除本地文件</string>
+    <string name="whether_overrride">文件已存在, 是否覆盖</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
 </resources>

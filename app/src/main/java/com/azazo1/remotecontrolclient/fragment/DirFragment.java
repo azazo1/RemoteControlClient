@@ -93,7 +93,7 @@ public class DirFragment extends Fragment {
         return stringJoiner.toString();
     }
 
-    private final View.OnClickListener createDownloadFileListener(FileObj obj) {
+    private View.OnClickListener createDownloadFileListener(FileObj obj) {
         return (view1) -> {
             // ask store path
             EditText storePathText = new EditText(activity);
@@ -167,12 +167,30 @@ public class DirFragment extends Fragment {
                                 final int finalColor = color;
                                 activity.handler.post(() -> {
                                     progressStateOutput.setText(finalStringID);
+                                    if (code != 1) {
+                                        String suffixed = progressStateOutput.getText() + getString(R.string.subsentence_for_deletion);
+                                        progressStateOutput.setText(suffixed);
+                                        progressStateOutput.setOnClickListener((v) -> {
+                                            File storeFile = new File(storePath);
+                                            boolean ignored = storeFile.delete();
+                                            progressStateOutput.setText(R.string.delete_successfully);
+                                            progressStateOutput.setTextColor(getResources().getColor(R.color.succeed));
+                                        });
+                                    }
                                     progressStateOutput.setTextColor(finalColor);
                                 });
                             }
                         };
-                        // download thread create
-                        sendCommand(obj, storePath, mReporter);
+                        if (new File(storePath).exists()) {
+                            // 询问是否要覆盖文件
+                            new AlertDialog.Builder(activity).setTitle(R.string.whether_overrride)
+                                    .setPositiveButton(R.string.yes, (v, d) -> sendCommand(obj, storePath, mReporter))
+                                    .setNegativeButton(R.string.no, null).show();
+                            return; // 不显示 downloading alert
+                        } else {
+                            // download thread create
+                            sendCommand(obj, storePath, mReporter);
+                        }
                         // show downloading alert
                         new AlertDialog.Builder(activity).setTitle(R.string.alert_downloading_title)
                                 .setView(layout).setNegativeButton(R.string.verify_terminate_or_ok, (dialog1, which1) -> Downloader.stopDownloading())

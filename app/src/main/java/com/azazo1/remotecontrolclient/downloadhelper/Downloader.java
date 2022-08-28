@@ -233,10 +233,7 @@ public class Downloader {
             boolean result = plainDownloadFile(
                     fileDetail, storeFile, reporter
             );
-            if (!result) {
-                // delete file
-                boolean deleted = storeFile.delete();
-            }
+            // whether delete the file depends on users. (on method reportEnd(!1))
             return result;
         } else {
             if (reporter != null) {

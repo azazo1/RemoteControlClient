@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 public class Config {
     public static final Charset charset = StandardCharsets.UTF_8;  // 编码
     public static final String name = "RemoteControl"; // 项目名称
-    public static final String version = "1.0.20220522"; // 版本号
+    public static final String version = "1.0.20220829"; // 版本号
     // 记得更新Module gradle文件中的版本号
     public static final String title = name + " " + version;
     public static final int loopingRate = 60; // 每秒循环进行次数

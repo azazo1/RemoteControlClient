@@ -139,7 +139,7 @@
     <string name="mouse_issue_toast">Notice: Don\'t use other commands when using the mouse</string>
     <string name="capture_take_button_text">Capture</string>
     <string name="capture_download_button_text">Download</string>
-    <string name="capture_image_description">The image downloaded will be here</string>
+    <string name="capture_image_description">The image downloaded will be here, long click to open in other apps</string>
     <string name="capture_fragment_title">Capture</string>
     <string name="capture_mode_toggle_default_text">Mode: Null</string>
     <string name="capture_mode_toggle_camera_text">Camera</string>
@@ -148,4 +148,9 @@
     <string name="capture_auto_toggle_auto_text">Auto</string>
     <string name="capture_auto_toggle_manual_text">Manual</string>
     <string name="open_capture_failed">Failed to call outer app</string>
+    <string name="delete_successfully">Delete successfully</string>
+    <string name="subsentence_for_deletion">, click here to delete local file</string>
+    <string name="whether_overrride">File exists, override?</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
 </resources>
