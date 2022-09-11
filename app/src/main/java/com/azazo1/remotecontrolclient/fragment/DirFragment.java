@@ -16,8 +16,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,111 +95,6 @@ public class DirFragment extends Fragment {
         return stringJoiner.toString();
     }
 
-    private View.OnClickListener createDownloadFileListener(FileObj obj) {
-        return (view1) -> {
-            // ask store path
-            EditText storePathText = new EditText(activity);
-            storePathText.setText(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString().concat(File.separator).concat(obj.name));
-            new AlertDialog.Builder(activity).setTitle(R.string.local_store_path_title)
-                    .setCancelable(false).setView(storePathText)
-                    .setNegativeButton(R.string.verify_cancel_download, null).setCancelable(false)
-                    .setPositiveButton(R.string.verify_ok, (dialog, which) -> {
-                        // get path
-                        String storePath = "" + storePathText.getText();
-                        if (storePath.isEmpty()) {
-                            Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        // create layout
-                        ViewGroup layout = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.alert_downloading, dirShower, false);
-                        ProgressBar progressBar = layout.findViewById(R.id.download_progress_bar);
-                        TextView progressStateOutput = layout.findViewById(R.id.download_text_view);
-                        // define reporter
-                        MyReporter mReporter = new MyReporter() {
-                            @Override
-                            public void report(int now, int total) {
-                                activity.handler.post(() -> {
-                                    double progress = now * 100.0 / total;
-                                    progressStateOutput.setText(
-                                            String.format(getString(R.string.download_progress_format), progress, now, total)
-                                    );
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                        progressBar.setProgress((int) progress, true);
-                                    } else {
-                                        progressBar.setProgress((int) progress); // 适配低版本安卓
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void reportEnd(int code) {
-                                int stringID;
-                                int color = getResources().getColor(R.color.failed);
-                                switch (code) {
-                                    case -1:
-                                        stringID = R.string.download_communicating_problem;
-                                        break;
-                                    case 1:
-                                        stringID = R.string.download_successfully;
-                                        color = getResources().getColor(R.color.succeed);
-                                        break;
-                                    case 2:
-                                        stringID = R.string.download_interrupted;
-                                        break;
-                                    case 3:
-                                        stringID = R.string.download_sum_error;
-                                        break;
-                                    case 4:
-                                        stringID = R.string.download_io_error;
-                                        break;
-                                    case 5:
-                                        stringID = R.string.download_no_remote_file;
-                                        break;
-                                    case 6:
-                                        stringID = R.string.download_remote_file_too_big;
-                                        break;
-                                    case 7:
-                                        stringID = R.string.download_remote_file_access_failed;
-                                        break;
-                                    case 0:
-                                    default:
-                                        stringID = R.string.download_failed;
-                                }
-                                final int finalStringID = stringID;
-                                final int finalColor = color;
-                                activity.handler.post(() -> {
-                                    progressStateOutput.setText(finalStringID);
-                                    if (code != 1) {
-                                        String suffixed = progressStateOutput.getText() + getString(R.string.subsentence_for_deletion);
-                                        progressStateOutput.setText(suffixed);
-                                        progressStateOutput.setOnClickListener((v) -> {
-                                            File storeFile = new File(storePath);
-                                            boolean ignored = storeFile.delete();
-                                            progressStateOutput.setText(R.string.delete_successfully);
-                                            progressStateOutput.setTextColor(getResources().getColor(R.color.succeed));
-                                        });
-                                    }
-                                    progressStateOutput.setTextColor(finalColor);
-                                });
-                            }
-                        };
-                        if (new File(storePath).exists()) {
-                            // 询问是否要覆盖文件
-                            new AlertDialog.Builder(activity).setTitle(R.string.whether_overrride)
-                                    .setPositiveButton(R.string.yes, (v, d) -> sendCommand(obj, storePath, mReporter))
-                                    .setNegativeButton(R.string.no, null).show();
-                            return; // 不显示 downloading alert
-                        } else {
-                            // download thread create
-                            sendCommand(obj, storePath, mReporter);
-                        }
-                        // show downloading alert
-                        new AlertDialog.Builder(activity).setTitle(R.string.alert_downloading_title)
-                                .setView(layout).setNegativeButton(R.string.verify_terminate_or_ok, (dialog1, which1) -> Downloader.stopDownloading())
-                                .setCancelable(false).show();
-                    }).show();
-        };
-    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -272,7 +169,7 @@ public class DirFragment extends Fragment {
                     launchButton.setVisibility(View.VISIBLE);
                     launchButton.setOnClickListener((view) -> sendCommand(() -> startFile(fileObj.getTotalPath())));
                     downloadButton.setVisibility(View.VISIBLE);
-                    downloadButton.setOnClickListener(createDownloadFileListener(fileObj));
+                    downloadButton.setOnClickListener((v) -> new DownloadInteraction().wholeInteraction(fileObj));
                 } else {
                     downloadButton.setVisibility(View.GONE);
                     launchButton.setVisibility(View.GONE);
@@ -342,14 +239,12 @@ public class DirFragment extends Fragment {
         }
     }
 
-    public void downloadFile(@NonNull FileObj obj, @NonNull String storePath, @NonNull MyReporter mReporter) {
-        FileDetail fileDetail;
-        fileDetail = Downloader.getFileDetail(obj.getTotalPath());
-        if (fileDetail != null && fileDetail.available) {
-            boolean ignored = Downloader.plainDownloadFile(fileDetail, storePath, mReporter);
+    public void downloadFile(@NonNull FileDetail fileDetail, int startPart, @NonNull String storePath, @NonNull MyReporter downloadProgressReporter) {
+        if (fileDetail.available) {
+            boolean ignored = Downloader.plainDownloadFile(fileDetail, startPart, storePath, downloadProgressReporter);
         } else {
             Log.e("download", "no remote file or file is too big.");
-            mReporter.reportEnd(7); // 见 Downloader.plainDownloadFile 注释
+            downloadProgressReporter.reportEnd(7); // 见 Downloader.plainDownloadFile 注释
         }
     }
 
@@ -361,12 +256,15 @@ public class DirFragment extends Fragment {
         sendCommand(() -> genericExplorePath(path));
     }
 
-    public void sendCommand(@NonNull FileObj obj, @NonNull String storePath, @NonNull MyReporter myReporter) {
-        sendCommand(() -> downloadFile(obj, storePath, myReporter));
+    public void sendCommand(@NonNull FileDetail fileDetail, int startPart, @NonNull String storePath, @NonNull MyReporter myReporter) {
+        sendCommand(() -> downloadFile(fileDetail, startPart, storePath, myReporter));
     }
 
     /**
-     * 担当浏览磁盘，浏览文件夹和启动程序的作用
+     * 担当子线程中浏览磁盘，浏览文件夹, 下载文件和启动程序的作用, 同时防止多个命令同时发送
+     * 此方法不会阻塞
+     *
+     * @param runnable 在子线程中执行发送命令和处理返回值
      */
     public void sendCommand(Runnable runnable) {
         if (sending.get()) { // 防止频繁发送
@@ -469,9 +367,11 @@ public class DirFragment extends Fragment {
         });
     }
 
+    /**
+     * 代表磁盘\文件\文件夹
+     */
     static class FileObj implements Comparable<FileObj> {
-        // 一个文件夹或文件
-        public final String path;
+        public final String path; // 不包括文件名
         public final String name;
         public final long size;
         public final FileType type;
@@ -568,6 +468,254 @@ public class DirFragment extends Fragment {
         }
     }
 
+    /**
+     * 执行下载界面的交互
+     */
+    private class DownloadInteraction {
+        /**
+         * 同 {@link #wholeInteraction(FileDetail)}, 但是会先获取 {@link FileDetail}
+         */
+        void wholeInteraction(@NonNull FileObj obj) {
+            sendCommand(() -> {
+                FileDetail fileDetail = Downloader.getFileDetail(obj.getTotalPath());
+                if (fileDetail == null) {
+                    Toast.makeText(activity, R.string.download_remote_file_access_failed, Toast.LENGTH_SHORT).show();
+                } else {
+                    activity.handler.post(() -> wholeInteraction(fileDetail)); // 回到主线程, 防止 sending 状态未复位造成下载文件的命令发送失败
+                }
+            });
+        }
+
+        /**
+         * 执行下载的所有操作 (对本类其他方法进行综合调用)
+         */
+        void wholeInteraction(@NonNull FileDetail fileDetail) {
+            StringBuilder storePathRst = new StringBuilder();
+            MyReporter storePathReporter = new MyReporter() {
+                @Override
+                public void report(int now, int total) {
+
+                }
+
+                @Override
+                public void reportEnd(int i) {
+                    if (i >= 1) {
+                        Boolean overwrite = null;
+                        if (i > 1) { // 文件续传模式, 在原有文件内容后添加, 因此要覆盖
+                            overwrite = true;
+                        }
+                        confirmOverwrite(storePathRst.toString(), overwrite, new MyReporter() {
+                            @Override
+                            public void report(int now, int total) {
+
+                            }
+
+                            @Override
+                            public void reportEnd(int code) {
+                                if (code == 1) {
+                                    performDownload(fileDetail, i, storePathRst.toString());
+                                }
+                            }
+                        });
+                    }
+                }
+            };
+            selectStorePath(fileDetail, storePathRst, storePathReporter);
+        }
+
+        /**
+         * 开始下载并显示下载进度条
+         */
+        void performDownload(@NonNull FileDetail fileDetail, int startPart, @NonNull String storePath) {
+            // create layout
+            ViewGroup layout = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.alert_downloading, dirShower, false);
+            ProgressBar progressBar = layout.findViewById(R.id.download_progress_bar);
+            TextView progressStateOutput = layout.findViewById(R.id.download_text_view);
+            // define reporter
+            MyReporter downloadProgressReporter = new MyReporter() {
+                @Override
+                public void report(int now, int total) {
+                    activity.handler.post(() -> {
+                        double progress = now * 100.0 / total;
+                        progressStateOutput.setText(
+                                String.format(getString(R.string.download_progress_format), progress, now, total)
+                        );
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            progressBar.setProgress((int) progress, true);
+                        } else {
+                            progressBar.setProgress((int) progress); // 适配低版本安卓
+                        }
+                    });
+                }
+
+                @Override
+                public void reportEnd(int code) {
+                    int stringID;
+                    int color = getResources().getColor(R.color.failed);
+                    switch (code) {
+                        case -1:
+                            stringID = R.string.download_communicating_problem;
+                            break;
+                        case 1:
+                            stringID = R.string.download_successfully;
+                            color = getResources().getColor(R.color.succeed);
+                            break;
+                        case 2:
+                            stringID = R.string.download_interrupted;
+                            break;
+                        case 3:
+                            stringID = R.string.download_sum_error;
+                            break;
+                        case 4:
+                            stringID = R.string.download_io_error;
+                            break;
+                        case 5:
+                            stringID = R.string.download_no_remote_file;
+                            break;
+                        case 6:
+                            stringID = R.string.download_remote_file_too_big;
+                            break;
+                        case 7:
+                            stringID = R.string.download_remote_file_access_failed;
+                            break;
+                        case 0:
+                        default:
+                            stringID = R.string.download_failed;
+                    }
+                    final int finalStringID = stringID;
+                    final int finalColor = color;
+                    activity.handler.post(() -> {
+                        progressStateOutput.setText(finalStringID);
+                        if (code != 1) {
+                            String suffixed = progressStateOutput.getText() + getString(R.string.subsentence_for_deletion);
+                            progressStateOutput.setText(suffixed);
+                            progressStateOutput.setOnClickListener((v) -> {
+                                File storeFile = new File(storePath);
+                                boolean ignored = storeFile.delete();
+                                progressStateOutput.setText(R.string.delete_successfully);
+                                progressStateOutput.setTextColor(getResources().getColor(R.color.succeed));
+                            });
+                        }
+                        progressStateOutput.setTextColor(finalColor);
+                    });
+                }
+            };
+            DirFragment.this.sendCommand(fileDetail, startPart, storePath, downloadProgressReporter);
+            // show downloading alert
+            new AlertDialog.Builder(activity).setTitle(R.string.alert_downloading_title)
+                    .setView(layout).setNegativeButton(R.string.verify_terminate_or_ok, (dialog1, which1) -> {
+                if (Downloader.isDownloading()) { // 询问是否删除文件
+                    new AlertDialog.Builder(activity).setTitle(R.string.whether_delete)
+                            .setPositiveButton(R.string.yes, (d, w) -> {
+                                boolean ignore = new File(storePath).delete();
+                            }).setNegativeButton(R.string.no, null).show();
+                }
+                Downloader.stopDownloading();
+            }).setCancelable(false).show();
+        }
+
+        /**
+         * 用于确认下载是否覆盖本地文件
+         *
+         * @param storePath 要储存文件的本地路径 (包括文件名)
+         * @param overwrite 是否覆盖原有的本地文件
+         *                  null: 未指定, 若文件已存在则询问
+         *                  false: 不覆盖, 不做任何事直接结束方法
+         *                  true: 覆盖, 不询问
+         * @param onConfirm (当用户做出判断或本方法判断出结果时时被调用), 只会调用 {@link MyReporter#reportEnd(int)}
+         *                  参数说明: 0: 不下载, 1: 确认下载
+         */
+        void confirmOverwrite(@NonNull String storePath, @Nullable Boolean overwrite, @NonNull MyReporter onConfirm) {
+            if (storePath.isEmpty()) {
+                Toast.makeText(activity, R.string.notice_invalid_path, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (new File(storePath).exists()) { // 文件存在
+                if (overwrite == null) {
+                    // 询问是否要覆盖文件
+                    new AlertDialog.Builder(activity).setTitle(R.string.whether_overwrite).
+                            setOnCancelListener(dialog -> onConfirm.reportEnd(0))
+                            .setPositiveButton(R.string.verify_ok, (d, v) ->
+                                    onConfirm.reportEnd(1)) // 显示下载界面
+                            .setNegativeButton(R.string.verify_cancel_download, (d, v) ->
+                                    onConfirm.reportEnd(0)).show();
+                } else if (overwrite) {
+                    onConfirm.reportEnd(1); // 下载
+                } else {
+                    onConfirm.reportEnd(0); // 取消下载操作
+                }
+            } else {
+                onConfirm.reportEnd(1); // 下载
+            }
+        }
+
+        /**
+         * 给用户用户提供选择下载路径
+         *
+         * @param fileDetail      要被下载的文件
+         * @param storePathResult 保存执行结果的变量, 用于在 onConfirm 中使用
+         * @param onConfirm       (用户做出决定时被调用)
+         *                        结果回调函数, {@link MyReporter#reportEnd(int)} 参数解释:
+         *                        0: 取消, x(x>=1):确认下载, 从第 x 文件分段开始下载
+         */
+        void selectStorePath(@NonNull FileDetail fileDetail, @NonNull StringBuilder storePathResult, @NonNull MyReporter onConfirm) {
+            EditText storePathText = new EditText(activity);
+            TextView startPartSelectionLabel = new TextView(activity);
+            startPartSelectionLabel.setText(String.format(getString(R.string.start_part_selection_label_format), 1));
+            // 起始 part 选择, seekBar 的 progress + 1 为 起始分段序号
+            SeekBar startPartSeekBar = new SeekBar(activity);
+            startPartSeekBar.setMax(fileDetail.parts - 1);
+            startPartSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    startPartSelectionLabel.setText(String.format(getString(R.string.start_part_selection_label_format), progress + 1));
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+            storePathText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    storePathResult.replace(0, storePathResult.length(), storePathText.getText() + "");
+                }
+            });
+            storePathText.setText(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString().concat(File.separator).concat(fileDetail.filename));
+            LinearLayout layout = new LinearLayout(activity);
+            layout.setPadding(5, 5, 5, 5);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.addView(storePathText);
+            layout.addView(startPartSelectionLabel);
+            layout.addView(startPartSeekBar);
+            new AlertDialog.Builder(activity).setTitle(R.string.local_store_path_title)
+                    .setCancelable(false).setView(layout)
+                    .setNegativeButton(R.string.verify_cancel_download, (dialog, which) -> onConfirm.reportEnd(-1)).setCancelable(false)
+                    .setPositiveButton(R.string.verify_ok, (dialog, which) -> {
+                        // 读取起始 part
+                        int startPart = startPartSeekBar.getProgress() + 1; // 大于零的整数
+                        onConfirm.reportEnd(startPart);
+                    }).show();
+        }
+    }
+
     class DirAdapter extends ArrayAdapter<FileObj> {
         final List<FileObj> fileObjs;
 
@@ -608,7 +756,7 @@ public class DirFragment extends Fragment {
                         subtitle.setText(String.format(getString(R.string.file_subtitle_format), obj.size));
                         downloadButton.setVisibility(View.VISIBLE);
                         // download action
-                        downloadButton.setOnClickListener(createDownloadFileListener(obj));
+                        downloadButton.setOnClickListener((v) -> new DownloadInteraction().wholeInteraction(obj));
                         break;
                     }
                     case FOLDER: {

@@ -1,5 +1,7 @@
 package com.azazo1.remotecontrolclient.downloadhelper;
 
+import static com.azazo1.remotecontrolclient.Global.activity;
+
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -40,7 +42,7 @@ public class Downloader {
         FileDetail detail = null;
         boolean sent = Global.client.sendCommand(
                 String.format(
-                        Global.activity.getString(R.string.command_file_detail_format),
+                        activity.getString(R.string.command_file_detail_format),
                         JSON.toJSONString(targetFile)
                 )
         );
@@ -64,7 +66,7 @@ public class Downloader {
      */
     @Nullable
     public static CommandResult downloadPart(String path, long part) {
-        String command = Global.activity.getString(R.string.command_file_transport_get_format, JSON.toJSONString(path), part);
+        String command = activity.getString(R.string.command_file_transport_get_format, JSON.toJSONString(path), part);
         boolean sent = Global.client.sendCommand(command);
         if (sent) {
             return Global.client.readCommand();
@@ -123,13 +125,15 @@ public class Downloader {
      * 6 if remote file is too big
      * 7 if remote file is unavailable (unclear 5 or 6)
      * </p>
+     *
+     * @param startPart starts from 1
      */
-    public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, @NonNull File storeFile, @Nullable MyReporter reporter) {
+    public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, int startPart, @NonNull File storeFile, @Nullable MyReporter reporter) {
         if (downloading.get()) {
             return false;
         }
         downloading.set(true);
-        for (int i = 1; i <= fileDetail.parts; i++) {
+        for (int i = startPart; i <= fileDetail.parts; i++) {
             CommandResult result = Downloader.downloadPartUntilSuccess(fileDetail.fullPath(), i);
             // check vital exception(local) to downloading.
             if (result == null) {
@@ -208,16 +212,16 @@ public class Downloader {
     }
 
     /**
-     * Same as plainDownloadFile(FileDetail, File) but no need for local store file (useDefault).
+     * Same as {@link #plainDownloadFile(FileDetail, int, File, MyReporter)} but no need for local store file (useDefault).
      */
-    public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, @Nullable MyReporter reporter) {
-        return plainDownloadFile(fileDetail, Global.activity.getExternalCacheDir().getAbsolutePath() + File.separator + fileDetail.filename, reporter);
+    public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, int startPart, @Nullable MyReporter reporter) {
+        return plainDownloadFile(fileDetail, startPart, activity.getExternalCacheDir().getAbsolutePath() + File.separator + fileDetail.filename, reporter);
     }
 
     /**
-     * Same as plainDownloadFile(FileDetail, File) but no needs for local store file, instead needs local store path.
+     * Same as {@link #plainDownloadFile(FileDetail, int, File, MyReporter)} but no needs for local store file, instead needs local store path.
      */
-    public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, @NonNull String storeFilePath, @Nullable MyReporter reporter) {
+    public static boolean plainDownloadFile(@NonNull FileDetail fileDetail, int startPart, @NonNull String storeFilePath, @Nullable MyReporter reporter) {
         File storeFile = new File(
                 storeFilePath
         );
@@ -228,10 +232,12 @@ public class Downloader {
         }
         if (storeFile.exists() && storeFile.canWrite()) {
             // clear file content
-            clearFileContent(storeFile);
+            if (startPart == 1) { // 如果不从 1 开始则可能为断点续传, 不清空原有文件
+                clearFileContent(storeFile);
+            }
             // download
             boolean result = plainDownloadFile(
-                    fileDetail, storeFile, reporter
+                    fileDetail, startPart, storeFile, reporter
             );
             // whether delete the file depends on users. (on method reportEnd(!1))
             return result;
@@ -253,6 +259,10 @@ public class Downloader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean isDownloading() {
+        return downloading.get();
     }
     // TODO: 2021/12/19 多线程下载
 }

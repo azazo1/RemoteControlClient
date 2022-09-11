@@ -150,9 +150,12 @@
     <string name="open_capture_failed">启动外部应用失败</string>
     <string name="delete_successfully">成功删除</string>
     <string name="subsentence_for_deletion">, 点此删除本地文件</string>
-    <string name="whether_overrride">文件已存在, 是否覆盖</string>
+    <string name="whether_overwrite">文件已存在, 是否覆盖</string>
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="modify_version_title">修改版本号</string>
     <string name="modify_version_detail">强行改变版本号, 某些功能可能会不正常</string>
+    <string name="invalid_part_number">无效的文件分区编号, 必须是非负整数</string>
+    <string name="start_part_selection_label_format">起始分块: %d, 下载将会从此分块开始</string>
+    <string name="whether_delete">是否删除文件?</string>
 </resources>

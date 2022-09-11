@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
@@ -384,6 +383,7 @@ public class ConnectingActivity extends AppCompatActivity {
             }
             if (cacheFile.canWrite()) {
                 PrintWriter printer = new PrintWriter(new FileOutputStream(cacheFile));
+                printer.println(Config.getVersion());
                 printer.println(ip);
                 printer.println(port);
                 printer.println(password);
@@ -395,12 +395,13 @@ public class ConnectingActivity extends AppCompatActivity {
     }
 
     /**
-     * 读取最近使用的IP地址与密码 读取内容可能为null
+     * 读取最近使用的 版本号(version)、IP地址(ip)(port)与密码(password) 读取内容可能为null
      */
     @Nullable
-    private Pair<Pair<String, Integer>, String> readAddress() {
+    private Bundle readAddress() {
         File cache = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File cacheFile = new File(cache.getAbsolutePath().concat(File.separator).concat(cacheName));
+        String version = null;
         String ip = null;
         String password = null;
         int port = Config.serverPort;
@@ -411,6 +412,7 @@ public class ConnectingActivity extends AppCompatActivity {
             }
             if (cacheFile.canRead()) {
                 BufferedReader reader = new BufferedReader(new FileReader(cacheFile));
+                version = reader.readLine();
                 ip = reader.readLine();
                 port = Integer.parseInt(reader.readLine());
                 password = reader.readLine();
@@ -419,19 +421,26 @@ public class ConnectingActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
-        return new Pair<>(new Pair<>(ip, port), password);
+        Bundle bundle = new Bundle();
+        bundle.putString("version", version);
+        bundle.putString("ip", ip);
+        bundle.putInt("port", port);
+        bundle.putString("password", password);
+        return bundle;
     }
 
     /**
      * 读取并将 address 加载到页面
      */
     @Nullable
-    private Pair<Pair<String, Integer>, String> loadAddress() {
-        Pair<Pair<String, Integer>, String> lastUsed = readAddress();
+    private Bundle loadAddress() {
+        Bundle lastUsed = readAddress();
         if (lastUsed != null) {
-            ipEntry.setText(lastUsed.first.first);
-            portEntry.setText(String.valueOf(lastUsed.first.second));
-            passwordEntry.setText(lastUsed.second);
+            ipEntry.setText(lastUsed.getString("ip"));
+            portEntry.setText(String.valueOf(lastUsed.getInt("port")));
+            passwordEntry.setText(lastUsed.getString("password"));
+            Config.modifyVersion(lastUsed.getString("version"));
+            toolbar.setTitle(Config.name + " " + Config.getVersion());
         }
         return lastUsed;
     }

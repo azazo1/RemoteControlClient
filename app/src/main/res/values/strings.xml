@@ -150,9 +150,12 @@
     <string name="open_capture_failed">Failed to call outer app</string>
     <string name="delete_successfully">Delete successfully</string>
     <string name="subsentence_for_deletion">, click here to delete local file</string>
-    <string name="whether_overrride">File exists, override?</string>
+    <string name="whether_overwrite">File exists, overwrite?</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="modify_version_title">Modify Version Code</string>
     <string name="modify_version_detail">Force to modify version code, some functions may not work properly</string>
+    <string name="invalid_part_number">Invalid part number, which must be positive int or 0</string>
+    <string name="start_part_selection_label_format">Start part: %d, download will begin at this part</string>
+    <string name="whether_delete">Whether to delete the file?</string>
 </resources>

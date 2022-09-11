@@ -203,7 +203,7 @@ public class CaptureFragment extends Fragment {
             fileDetail = Downloader.getFileDetail("temp.png");
             if (fileDetail != null && fileDetail.available) {
                 File storeFile = getStoreCaptureFile();
-                boolean ignored = Downloader.plainDownloadFile(fileDetail, storeFile, mReporter);
+                boolean ignored = Downloader.plainDownloadFile(fileDetail, 1, storeFile, mReporter);
             } else {
                 Log.e("capture_download", "no remote file or file is too big.");
                 mReporter.reportEnd(7); // 见 Downloader.plainDownloadFile 注释

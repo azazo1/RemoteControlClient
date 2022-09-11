@@ -19,7 +19,7 @@ public final class Config {
     public static final long defaultShowTextTime = 3000; // showText命令默认时间长度
     public static final int commandInfoMaxLength = 300; // 套接字接收到命令后报告内容的长度最大值(最好为双数)
     private static final String key = "as437pdjpa97fdsa5ytfjhzfwa";  // 默认密钥
-    private static final String version = "1.0.20220829"; // 版本号
+    private static final String version = "1.0.20220911"; // 版本号
     private static String changedKey = null;  // 修改后的密钥
     private static String modifiedVersion = null; // 版本号
 
