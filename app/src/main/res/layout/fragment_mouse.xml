@@ -24,8 +24,8 @@
     <TableLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/mouse_buttons_bottom_margin"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/mouse_buttons_bottom_margin">
 
         <TableRow android:layout_height="wrap_content">
 
@@ -37,11 +37,11 @@
                 tools:ignore="RtlHardcoded" />
 
             <Button
-                android:id="@+id/mouse_middle_button"
+                android:id="@+id/mouse_scroll_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/mouse_middle_button_text" />
+                android:text="@string/mouse_scroll_button_text" />
 
             <Button
                 android:id="@+id/mouse_right_button"
@@ -50,14 +50,31 @@
                 android:text="@string/mouse_right_button_text" />
         </TableRow>
 
+        <TableRow>
+
+            <androidx.legacy.widget.Space />
+
+            <Button
+                android:id="@+id/mouse_middle_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/mouse_middle_button_text" />
+        </TableRow>
     </TableLayout>
 
-    <ProgressBar
-        android:id="@+id/getting_command_result_progress_bar"
+    <TextView
+        android:id="@+id/mouse_frequency_adjustor_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/mouse_frequency_adjustor_format" />
+
+    <SeekBar
+        android:id="@+id/mouse_frequency_adjustor"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:max="100"
-        android:visibility="invisible" />
+        android:max="300" />
 </LinearLayout>

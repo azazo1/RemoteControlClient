@@ -6,8 +6,6 @@ import java.nio.charset.StandardCharsets;
 public final class Config {
     public static final Charset charset = StandardCharsets.UTF_8;  // 编码
     public static final String name = "RemoteControl"; // 项目名称
-    // 记得更新Module gradle文件中的版本号
-    public static final int loopingRate = 60; // 每秒循环进行次数
     public static final int longestCommand = 1048576;  // 最长命令长度(字节)
     public static final String algorithm = "AES"; // 加密算法
     public static final String algorithmAll = "AES/ECB/PKCS5Padding"; // 加密算法（细节）
@@ -18,10 +16,12 @@ public final class Config {
     public static final long waitingTimeForTermination = 3000; // 中断提醒时间间隔（距离按钮被点击）
     public static final long defaultShowTextTime = 3000; // showText命令默认时间长度
     public static final int commandInfoMaxLength = 300; // 套接字接收到命令后报告内容的长度最大值(最好为双数)
+    public static final int loopingRate = 60; // 每秒循环进行次数
     private static final String key = "as437pdjpa97fdsa5ytfjhzfwa";  // 默认密钥
-    private static final String version = "1.0.20220911"; // 版本号
-    private static String changedKey = null;  // 修改后的密钥
+    private static final String version = "1.0.20220924"; // 版本号
+    // 记得更新Module gradle文件中的版本号
     private static String modifiedVersion = null; // 版本号
+    private static String changedKey = null;  // 修改后的密钥
 
     public static String getVersion() {
         if (modifiedVersion != null) {

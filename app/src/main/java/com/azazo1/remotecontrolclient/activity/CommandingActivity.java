@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -145,6 +146,9 @@ public class CommandingActivity extends AppCompatActivity {
                 finish();
             }
             return true;
+        } else if (item.getItemId() == R.id.toolbar_reconnect) {
+            reconnect();
+            Toast.makeText(this, R.string.reconnecting, Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }

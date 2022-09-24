@@ -3,13 +3,13 @@ package com.azazo1.remotecontrolclient.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,14 +17,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.alibaba.fastjson.JSON;
-import com.azazo1.remotecontrolclient.Config;
 import com.azazo1.remotecontrolclient.Global;
 import com.azazo1.remotecontrolclient.R;
 import com.azazo1.remotecontrolclient.Tools;
 import com.azazo1.remotecontrolclient.activity.CommandingActivity;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 下部鼠标按键: 短按可实现单击, 长按可模拟鼠标按住不放, 若按键为中键, 滑动可模拟鼠标滚轮(水平和垂直)<br>
@@ -33,24 +29,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * todo 摇杆模式
  */
 public class MouseFragment extends Fragment {
-    private final AtomicBoolean sending = new AtomicBoolean(false);
-    private final long minMovingInterval_ms = 120; // 滑动事件最小时间间隔 (ms)
-    private long sendingStartTime;
+    private final int defaultMovingInterval_ms = 60; // 默认滑动命令发送时间间隔 (ms)
+    private int movingInterval_ms = defaultMovingInterval_ms; // 当前滑动命令发送时间间隔 (ms)
     private CommandingActivity activity;
-    private ProgressBar progressBar;
     private int originButtonColor;
     private View touchPad;
     private Thread sendingThread;
     private Button leftButton;
+    private SeekBar frequencyAdjustor;
+    private TextView frequencyAdjustorText;
     private Button middleButton;
-    private long lastMidButtonMovingTime = 0; // 上次中键滑动时间
+    private Button scrollButton;
+    private long lastMidButtonMovingTime = 0; // 上次滚轮滑动时间
     private long lastMouseMovingTime = 0; // 上次鼠标滑动时间
-    private Pair<Integer, Integer> midButtonStartPos; // 中键开始滑动时手指的位置，用于判断用户是否对中键进行滑动
-    @SuppressWarnings("FieldCanBeLocal")
-    private Pair<Integer, Integer> mouseStartPos; // 鼠标开始滑动时手指的位置
-    private volatile boolean midButtonMoving = false; // 用户是否在滑动中键
-    private volatile boolean midButtonPressed = false; // 中键是否已被按下, 若是则阻止滑动行为
-    private volatile boolean midButtonReleased = true; // 中键是否已被松开
     private Button rightButton;
 
     public MouseFragment() {
@@ -82,12 +73,15 @@ public class MouseFragment extends Fragment {
         leftButton = get.findViewById(R.id.mouse_left_button);
         middleButton = get.findViewById(R.id.mouse_middle_button);
         rightButton = get.findViewById(R.id.mouse_right_button);
+        scrollButton = get.findViewById(R.id.mouse_scroll_button);
+        frequencyAdjustor = get.findViewById(R.id.mouse_frequency_adjustor);
+        frequencyAdjustorText = get.findViewById(R.id.mouse_frequency_adjustor_text);
 
         leftButton.setTag(MouseButtons.LEFT.getVal());
         rightButton.setTag(MouseButtons.RIGHT.getVal());
-        middleButton.setTag(new int[]{-1, -1});
+        middleButton.setTag(MouseButtons.MIDDLE.getVal());
+        scrollButton.setTag(new int[]{-1, -1});
         /* Button view tag: 按下的按钮(int), 中键为上一次的手指坐标(为了计算位移)(Pair<int,int>)*/
-        progressBar = get.findViewById(R.id.getting_command_result_progress_bar);
         initView();
         noticeIssue();
         return get;
@@ -102,112 +96,82 @@ public class MouseFragment extends Fragment {
 
     @SuppressLint("ClickableViewAccessibility")
     private void initView() {
-        progressBar.setVisibility(View.INVISIBLE);
         originButtonColor = ContextCompat.getColor(activity, R.color.generic_sending_button_bg);
 
         leftButton.setBackgroundColor(originButtonColor);
         rightButton.setBackgroundColor(originButtonColor);
         middleButton.setBackgroundColor(originButtonColor);
+        scrollButton.setBackgroundColor(originButtonColor);
 
-        leftButton.setOnTouchListener(this::mouseButtonLRTouch);
-        middleButton.setOnTouchListener(this::mouseButtonMTouch);
-        rightButton.setOnTouchListener(this::mouseButtonLRTouch);
+        leftButton.setOnTouchListener(this::mouseButtonLRMTouch);
+        middleButton.setOnTouchListener(this::mouseButtonLRMTouch);
+        rightButton.setOnTouchListener(this::mouseButtonLRMTouch);
+        scrollButton.setOnTouchListener(this::mouseScrollTouch);
 
         touchPad.setOnTouchListener(this::mouseMotionTouch);
-    }
 
-    private void resetView() {
-        progressBar.setVisibility(View.INVISIBLE);
+        frequencyAdjustor.setProgress(defaultMovingInterval_ms);
+        frequencyAdjustorText.setText(String.format(getString(R.string.mouse_frequency_adjustor_format), frequencyAdjustor.getProgress()));
+        frequencyAdjustor.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                frequencyAdjustorText.setText(String.format(getString(R.string.mouse_frequency_adjustor_format), frequencyAdjustor.getProgress()));
+                movingInterval_ms = frequencyAdjustor.getProgress();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     /**
-     * 鼠标左右按键的按下和释放
+     * 鼠标左中右按键的按下和释放
      */
-    public boolean mouseButtonLRTouch(View view, MotionEvent event) {
+    public boolean mouseButtonLRMTouch(@NonNull View view, @NonNull MotionEvent event) {
         int button = (int) view.getTag();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                sendCommand(MouseAction.PRESS.getVal(), button, 0, 0,
-                        0, 0, 0);
+                sendCommandClick(MouseAction.PRESS.getVal(), button, 0, 0, 0);
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                sendCommand(MouseAction.RELEASE.getVal(), button, 0, 0,
-                        0, 0, 0);
+                sendCommandClick(MouseAction.RELEASE.getVal(), button, 0, 0, 0);
                 break;
             }
         }
         return true;
     }
-// 功能被 Touch 覆盖了
-//    public void mouseClick(View view) {
-//        int button = (int) view.getTag();
-//        sendCommand(MouseAction.CLICK.getVal(), button, 0, 0,
-//                0, 0, 0, null);
-//    }
 
     /**
-     * 鼠标中间的按下释放和滚动
+     * 鼠标滚轮的滚动
      */
-    public boolean mouseButtonMTouch(View view, @NonNull MotionEvent event) {
-        int threshold = 2; // 滑动判断阈值
-        int pressWait_ms = 100; // 按下中键后等待该时间判断是否滑动
+    public boolean mouseScrollTouch(@NonNull View view, @NonNull MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE: {
                 int[] pos = (int[]) view.getTag();
                 int deltaX = (int) (pos[0] - event.getRawX());
                 int deltaY = (int) (event.getRawY() - pos[1]);
                 long nowTime = Tools.getTimeInMilli();
-                if (!midButtonMoving && !midButtonPressed && (Math.abs(deltaX) >= threshold || Math.abs(deltaY) >= threshold)) {
-                    // 用户在被判断为 按下 前进行 滑动
-                    midButtonMoving = true;
-                }
-                if (midButtonMoving && !midButtonPressed && (nowTime - lastMidButtonMovingTime > minMovingInterval_ms)) {
-                    sendCommand(MouseAction.SCROLL.getVal(), 0, (int) (deltaX * 0.05), (int) (deltaY * 0.05),
-                            0, 0, 0);
+                if (nowTime - lastMidButtonMovingTime > movingInterval_ms) {
+                    sendCommandScroll((int) (deltaX * 0.05), (int) (deltaY * 0.05));
                     view.setTag(new int[]{(int) event.getRawX(), (int) event.getRawY()});
                     lastMidButtonMovingTime = nowTime;
                 }
                 break;
             }
             case MotionEvent.ACTION_DOWN: {
-                midButtonStartPos = new Pair<>((int) event.getRawX(), (int) event.getRawY());
-                view.setTag(new int[]{midButtonStartPos.first, midButtonStartPos.second});
-                midButtonMoving = false;
-                midButtonPressed = false;
-                midButtonReleased = false;
-                activity.handler.postDelayed(() -> {
-                    if (!midButtonMoving) {
-                        if (midButtonReleased) { // 用户单击太短暂, 未处理好"按下", 但已经松开屏幕上的按钮
-                            // 补充执行按键点击
-                            sendCommand(MouseAction.CLICK.getVal(), MouseButtons.MIDDLE.getVal(), 0, 0,
-                                    30, 0, 1);
-                            view.setTag(new int[]{-1, -1});
-                            midButtonMoving = false;
-                            midButtonPressed = false;
-                            midButtonStartPos = null;
-                        } else {
-                            sendCommand(MouseAction.PRESS.getVal(), MouseButtons.MIDDLE.getVal(), 0, 0,
-                                    0, 0, 0);
-                            midButtonPressed = true; // 等待一段时间后发现用户没有滑动, 则判断用户想要按下中键
-                        }
-                    }
-                }, pressWait_ms);
+                view.setTag(new int[]{(int) event.getRawX(), (int) event.getRawY()});
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                if (!midButtonMoving && midButtonPressed) {
-                    sendCommand(MouseAction.RELEASE.getVal(), MouseButtons.MIDDLE.getVal(), 0, 0,
-                            0, 0, 0);
-                }
-                // 在用户的短暂单击, 不是"滑动", 且"按下"判定还未执行时, 两个变量都为否, 不应处理"释放"
-                if (midButtonMoving || midButtonReleased) {
-                    view.setTag(new int[]{-1, -1});
-                    midButtonMoving = false;
-                    midButtonPressed = false;
-                    midButtonStartPos = null;
-                }
-                midButtonReleased = true;
+                view.setTag(new int[]{-1, -1});
                 break;
             }
         }
@@ -224,21 +188,18 @@ public class MouseFragment extends Fragment {
                 int deltaX = (int) (event.getRawX() - pos[0]);
                 int deltaY = (int) (event.getRawY() - pos[1]);
                 long nowTime = Tools.getTimeInMilli();
-                if (nowTime - lastMouseMovingTime > minMovingInterval_ms) {
-                    sendCommand(MouseAction.MOVE_BY.getVal(), 0, deltaX, deltaY,
-                            0, 0, 0);
+                if (nowTime - lastMouseMovingTime > movingInterval_ms) {
+                    sendCommandMotion(deltaX, deltaY);
                     view.setTag(new int[]{(int) event.getRawX(), (int) event.getRawY()});
                     lastMouseMovingTime = nowTime;
                 }
                 break;
             }
             case MotionEvent.ACTION_DOWN: {
-                mouseStartPos = new Pair<>((int) event.getRawX(), (int) event.getRawY());
-                view.setTag(new int[]{mouseStartPos.first, mouseStartPos.second});
+                view.setTag(new int[]{(int) event.getRawX(), (int) event.getRawY()});
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                mouseStartPos = null;
                 view.setTag(null);
                 break;
             }
@@ -248,39 +209,37 @@ public class MouseFragment extends Fragment {
     }
 
     /**
-     * 不用考虑防连点
+     * 不用考虑防连点, 鼠标按键按下/释放/单击
      */
-    public void sendCommand(String action, int button, int x, int y,
-                            int clickDuration, int clickInterval, int clickTimes) {
-        if (!sending.get()) {
-            sendingThread = new Thread(() -> {
-                sending.set(true);
-                whileSending();
-                Global.client.sendCommand(String.format(getString(R.string.command_mouse_format),
-                        JSON.toJSONString(action), button, x, y, clickDuration, clickInterval, clickTimes));
-                sending.set(false);
-            });
-            sendingThread.setDaemon(true);
-            sendingThread.start();
-        }
+    public void sendCommandClick(String action, int button, int clickDuration, int clickInterval, int clickTimes) {
+        sendingThread = new Thread(() -> {
+            Global.client.sendCommand(String.format(getString(R.string.command_mouse_click_format),
+                    JSON.toJSONString(action), button, clickDuration, clickInterval, clickTimes));
+        });
+        sendingThread.setDaemon(true);
+        sendingThread.start();
     }
 
-    private void whileSending() {
-        sendingStartTime = Tools.getTimeInMilli();
-        AtomicInteger progress = new AtomicInteger();
-        activity.handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (sending.get()) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    progressBar.setProgress(progress.getAndIncrement());
-                    progress.compareAndSet(100, 0);
-                    activity.handler.postDelayed(this, (long) (1.0 / Config.loopingRate * 1000));
-                } else {
-                    resetView();
-                }
-            }
-        }, (long) (1.0 / Config.loopingRate * 1000));
+    /**
+     * 鼠标滑动
+     */
+    public void sendCommandMotion(int x, int y) {
+        sendingThread = new Thread(() -> {
+            Global.client.sendCommand(String.format(getString(R.string.command_mouse_motion_format), x, y));
+        });
+        sendingThread.setDaemon(true);
+        sendingThread.start();
+    }
+
+    /**
+     * 鼠标滚轮
+     */
+    public void sendCommandScroll(int x, int y) {
+        sendingThread = new Thread(() -> {
+            Global.client.sendCommand(String.format(getString(R.string.command_mouse_scroll_format), x, y));
+        });
+        sendingThread.setDaemon(true);
+        sendingThread.start();
     }
 
     @Override

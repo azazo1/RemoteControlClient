@@ -3,7 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/toolbar_detach_fragment"
-        android:title="@string/action_bar_detach_fragment_title"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
-        app:showAsAction="always"/>
+        android:orderInCategory="2"
+        android:title="@string/action_bar_detach_fragment_title"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/toolbar_reconnect"
+        android:icon="@android:drawable/ic_popup_sync"
+        android:orderInCategory="1"
+        android:title="@string/action_bar_detach_fragment_title"
+        app:showAsAction="ifRoom" />
 </menu>

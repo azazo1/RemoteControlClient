@@ -131,7 +131,7 @@
     <string name="execute_fragment_title">执行 Python 代码</string>
     <string name="execute_remote_permission_required">我们没有权限在远程机器上执行 Python 代码</string>
     <string name="mouse_left_button_text">左键</string>
-    <string name="mouse_middle_button_text">中键/滚轮</string>
+    <string name="mouse_middle_button_text">中键</string>
     <string name="mouse_right_button_text">右键</string>
     <string name="mouse_fragment_title">鼠标</string>
     <string name="nav_mouse_title">鼠标</string>
@@ -158,4 +158,7 @@
     <string name="invalid_part_number">无效的文件分区编号, 必须是非负整数</string>
     <string name="start_part_selection_label_format">起始分块: %d, 下载将会从此分块开始</string>
     <string name="whether_delete">是否删除文件?</string>
+    <string name="mouse_scroll_button_text">滚轮</string>
+    <string name="mouse_frequency_adjustor_format">调整命令发送时间间隔: %d ms</string>
+    <string name="reconnecting">重新连接中</string>
 </resources>

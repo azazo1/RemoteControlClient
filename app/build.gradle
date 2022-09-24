@@ -9,8 +9,8 @@ android {
         applicationId "com.azazo1.remotecontrolclient"
         minSdkVersion 22
         targetSdkVersion 31
-        versionCode 20220911
-        versionName "1.0.20220911"
+        versionCode 20220924
+        versionName "1.0.20220924"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

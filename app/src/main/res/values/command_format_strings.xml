@@ -20,5 +20,8 @@
     <string name="command_kill_process_image_name_format" translatable="false">{\"type\":\"closeProgram\",\"name\":%s}</string>
     <string name="command_execute_format" translatable="false">{\"type\":\"execute\",\"content\":%s}</string>
     <string name="command_mouse_format" translatable="false">{\"type\":\"controlMouse\",\"action\":%s,\"button\":%d,\"x\":%d,\"y\":%d,\"clickDuration\":%d,\"clickInterval\":%d,\"clickTimes\":%d}</string>
+    <string name="command_mouse_scroll_format" description="鼠标滚轮" translatable="false">{\"type\":\"controlMouse\",\"action\":\"scroll\",\"x\":%d,\"y\":%d}</string>
+    <string name="command_mouse_motion_format" description="鼠标滑动" translatable="false">{\"type\":\"controlMouse\",\"action\":\"moveBy\",\"x\":%d,\"y\":%d}</string>
+    <string name="command_mouse_click_format" description="包含按键按下/释放/单击" translatable="false">{\"type\":\"controlMouse\",\"action\":%s,\"button\":%d,\"clickDuration\":%d,\"clickInterval\":%d,\"clickTimes\":%d}</string>
     <string name="command_capture_format" translatable="false">{\"type\":\"takePhoto\",\"action\":%s}</string>
 </resources>

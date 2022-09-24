@@ -131,7 +131,7 @@
     <string name="execute_fragment_title">Execute Python</string>
     <string name="execute_remote_permission_required">We haven\'t the permission to execute python code</string>
     <string name="mouse_left_button_text">Left</string>
-    <string name="mouse_middle_button_text">Middle/Roller</string>
+    <string name="mouse_middle_button_text">Middle</string>
     <string name="mouse_right_button_text">Right</string>
     <string name="mouse_fragment_title">Mouse</string>
     <string name="nav_mouse_title">Mouse</string>
@@ -158,4 +158,7 @@
     <string name="invalid_part_number">Invalid part number, which must be positive int or 0</string>
     <string name="start_part_selection_label_format">Start part: %d, download will begin at this part</string>
     <string name="whether_delete">Whether to delete the file?</string>
+    <string name="mouse_scroll_button_text">Scroll</string>
+    <string name="mouse_frequency_adjustor_format">Adjust command sending interval: %d ms</string>
+    <string name="reconnecting">Reconnecting</string>
 </resources>

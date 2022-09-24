@@ -16,7 +16,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 class MBufferedReader extends BufferedReader {
@@ -60,7 +59,6 @@ class MBufferedReader extends BufferedReader {
 }
 
 public class ClientSocket {
-    private final AtomicInteger waitCount = new AtomicInteger(0); // 用来记录发送但为接收结果的命令
     private Socket client;
     private MBufferedReader input;
     private PrintWriter output;
@@ -69,10 +67,6 @@ public class ClientSocket {
 
     public ClientSocket() throws IOException {
         init();
-    }
-
-    public int getWaitCount() {
-        return waitCount.intValue();
     }
 
     public boolean isAvailable() {
@@ -188,8 +182,6 @@ public class ClientSocket {
             String command = Base64AESDecode(Config.getKey(), line);
 //            String command = new String(base64Decode(line));
             if (command != null) {
-                waitCount.set(waitCount.intValue() - 1);
-
                 Log.i("Command get", "Decoded: " +
                         (command.length() > Config.commandInfoMaxLength ?
                                 command.substring(0, Config.commandInfoMaxLength / 2) + "..." +
@@ -237,7 +229,6 @@ public class ClientSocket {
                 return false;
             }
             sendLine(get);
-            waitCount.set(waitCount.intValue() + 1);
             Log.i("Command Send", jsonString + " sent successfully.");
             return true;
         }
