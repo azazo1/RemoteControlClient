@@ -161,4 +161,6 @@
     <string name="mouse_scroll_button_text">滚轮</string>
     <string name="mouse_frequency_adjustor_format">调整命令发送时间间隔: %d ms</string>
     <string name="reconnecting">重新连接中</string>
+    <string name="pasting_local_clipboard">正在粘贴本地剪贴板…</string>
+    <string name="posting_clipboard">正在把剪贴板内容设置到远程机器</string>
 </resources>

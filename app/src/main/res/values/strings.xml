@@ -161,4 +161,6 @@
     <string name="mouse_scroll_button_text">Scroll</string>
     <string name="mouse_frequency_adjustor_format">Adjust command sending interval: %d ms</string>
     <string name="reconnecting">Reconnecting</string>
+    <string name="pasting_local_clipboard">Pasting local clipboard…</string>
+    <string name="posting_clipboard">Posting clipboard content to remote</string>
 </resources>

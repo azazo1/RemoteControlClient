@@ -18,7 +18,7 @@ public final class Config {
     public static final int commandInfoMaxLength = 300; // 套接字接收到命令后报告内容的长度最大值(最好为双数)
     public static final int loopingRate = 60; // 每秒循环进行次数
     private static final String key = "as437pdjpa97fdsa5ytfjhzfwa";  // 默认密钥
-    private static final String version = "1.0.20220924"; // 版本号
+    private static final String version = "1.0.20230619"; // 版本号
     // 记得更新Module gradle文件中的版本号
     private static String modifiedVersion = null; // 版本号
     private static String changedKey = null;  // 修改后的密钥

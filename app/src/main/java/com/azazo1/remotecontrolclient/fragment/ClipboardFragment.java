@@ -1,7 +1,12 @@
 package com.azazo1.remotecontrolclient.fragment;
 
+import static android.content.ContentValues.TAG;
+
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,6 +80,29 @@ public class ClipboardFragment extends Fragment {
             Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
         });
     };
+    private final CommandResultHandler resultHandler_getAndCopy = (CommandResult result) -> {
+        if (!sending.get()) {
+            return;
+        }
+        activity.handler.post(() -> {
+            boolean succeed = false;
+            if (result != null && result.checkType(CommandResult.ResultType.JSON_OBJECT)) {
+                JSONObject obj = result.getResultJsonObject();
+                String content = obj.getString("content");
+                if (content != null) {
+                    clipboardText.setText(content);
+                    // 设置本机剪贴板
+                    ClipboardManager manager = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                    manager.setPrimaryClip(ClipData.newPlainText("", content));
+                    succeed = true;
+                }
+            }
+            int color = ContextCompat.getColor(activity, succeed ? R.color.succeed : R.color.failed);
+            getButton.setBackgroundColor(color);
+            activity.handler.postDelayed(() -> getButton.setBackgroundColor(originGetButtonColor), 3000);
+            Toast.makeText(activity, succeed ? R.string.succeed : R.string.failed, Toast.LENGTH_SHORT).show();
+        });
+    };
     private int originClearButtonColor;
     private final CommandResultHandler resultHandler_clear = (CommandResult result) -> {
         if (!sending.get()) {
@@ -129,7 +157,27 @@ public class ClipboardFragment extends Fragment {
         getButton.setBackgroundColor(originGetButtonColor);
         clearButton.setBackgroundColor(originClearButtonColor);
         setButton.setOnClickListener((view) -> sendCommand("set", clipboardText.getText() + "", resultHandler_set));
+        setButton.setLongClickable(true);
+        setButton.setOnLongClickListener((view -> {
+            // 获取客户端剪贴板内容，并设置 clipboardText 文本
+            ClipboardManager manager = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData data = manager.getPrimaryClip();
+            Toast.makeText(activity, R.string.pasting_local_clipboard, Toast.LENGTH_SHORT).show();
+            if (data != null) {
+                ClipData.Item dataItem = data.getItemAt(0);
+                clipboardText.setText(dataItem.getText());
+            }
+            sendCommand("set", clipboardText.getText() + "", resultHandler_set);
+            // 弹出 "剪贴板同步到目标机器中" 消息提示用户
+            Toast.makeText(activity, R.string.posting_clipboard, Toast.LENGTH_SHORT).show();
+            return true;
+        }));
         getButton.setOnClickListener((view) -> sendCommand("get", "", resultHandler_get));
+        getButton.setLongClickable(true);
+        getButton.setOnLongClickListener((view -> {
+            sendCommand("get", "", resultHandler_getAndCopy);
+            return true;
+        }));
         clearButton.setOnClickListener((view) -> sendCommand("clear", "", resultHandler_clear));
     }
 
